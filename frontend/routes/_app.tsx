@@ -2,11 +2,9 @@ import { type PageProps } from "$fresh/server.ts";
 import { createServer } from "../../liaison/liaison.ts"
 import { WithClient } from "../islands/WithClient.tsx";
 
-const server = createServer();
+export const AppServer = createServer();
 
 export default function App({ Component }: PageProps) {
-  console.log(`clients: ${server.getClients()}`);
-
   return (
     <html>
       <head>
