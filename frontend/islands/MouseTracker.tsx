@@ -20,7 +20,7 @@ export default function MouseTracker(props: MouseTrackerProps) {
     }
     const f2 = (e: TouchEvent) => {
       x = e.touches.item(0)?.clientX ?? 0;
-      y = e.touches.item(0)?.clientX ?? 0;
+      y = e.touches.item(0)?.clientY ?? 0;
     }
     globalThis.addEventListener("mousemove", f1);
     globalThis.addEventListener("touchmove", f2);
