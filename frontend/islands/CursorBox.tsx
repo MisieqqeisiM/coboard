@@ -4,17 +4,6 @@ import { useEffect, useRef } from "preact/hooks";
 import MouseTracker from "./MouseTracker.tsx";
 
 export default function CursorBox() {
-  useEffect(() => {
-    let x = 0;
-    let y = 0;
-    globalThis.addEventListener("mousemove", (e) => {
-      x = e.clientX;
-      y = e.clientY;
-    });
-    setInterval(() => {
-
-    }, 200);
-  });
   return (
     <ClientContext.Consumer>
       {client => {

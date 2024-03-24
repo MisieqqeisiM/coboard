@@ -14,19 +14,29 @@ export default function MouseTracker(props: MouseTrackerProps) {
     let y = 0;
     let lastX = 0;
     let lastY = 0;
-    globalThis.addEventListener("mousemove", (e) => {
+    const f1 = (e: MouseEvent) => {
       x = e.clientX;
       y = e.clientY;
-    });
+    }
+    const f2 = (e: TouchEvent) => {
+      x = e.touches.item(0)?.clientX ?? 0;
+      y = e.touches.item(0)?.clientX ?? 0;
+    }
+    globalThis.addEventListener("mousemove", f1);
+    globalThis.addEventListener("touchmove", f2);
     const interval = setInterval(() => {
       if(lastX == x && lastY == y)
         return;
       lastX = x;
       lastY = y;
       props.client.move(x, y);
-    }, 100);
+    }, 50);
 
-    return () => clearInterval(interval);
+    return () => {
+      globalThis.removeEventListener("mousemove", f1);
+      globalThis.removeEventListener("touchmove", f2);
+      clearInterval(interval);
+    }
   });
   return <></>;
 }
