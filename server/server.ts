@@ -6,6 +6,16 @@ export class ClientData {
   constructor(readonly id: string) {}
 }
 
+interface ServerToClientEvents {
+  userList: (users: Array<string>) => void;
+}
+
+interface ClientToServerEvents { }
+
+interface InterServerEvents { }
+
+interface SocketData { }
+
 export class Server {
   private clients: Array<string> = [];
 

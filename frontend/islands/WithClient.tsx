@@ -23,6 +23,9 @@ export function WithClient( { children }: WithClientProps ) {
       }
 
     connectClient(new class extends Client {
+      userList = (users: string[]) => {
+        console.log(users);
+      }; 
       onConnect(): void {
         setContainer({ client: this });
       }
