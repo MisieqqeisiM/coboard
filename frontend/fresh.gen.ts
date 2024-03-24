@@ -9,6 +9,8 @@ import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
 import * as $ClientList from "./islands/ClientList.tsx";
 import * as $Counter from "./islands/Counter.tsx";
+import * as $CursorBox from "./islands/CursorBox.tsx";
+import * as $MouseTracker from "./islands/MouseTracker.tsx";
 import * as $PingButton from "./islands/PingButton.tsx";
 import * as $WithClient from "./islands/WithClient.tsx";
 import { type Manifest } from "$fresh/server.ts";
@@ -24,6 +26,8 @@ const manifest = {
   islands: {
     "./islands/ClientList.tsx": $ClientList,
     "./islands/Counter.tsx": $Counter,
+    "./islands/CursorBox.tsx": $CursorBox,
+    "./islands/MouseTracker.tsx": $MouseTracker,
     "./islands/PingButton.tsx": $PingButton,
     "./islands/WithClient.tsx": $WithClient,
   },

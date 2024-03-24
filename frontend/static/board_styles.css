@@ -1,0 +1,31 @@
+.cursor {
+  position: absolute;
+  pointer-events: none;
+  left: -50px;
+  top: -15px;
+  width: 100px;
+  user-select: none;
+  transition: transform 200ms;
+}
+
+.cursor > .dot {
+  position: absolute;
+  left: 35px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: blueviolet;
+  border: 5px solid;
+  display: inline-block;
+}
+
+.cursor > .label {
+  position: relative;
+  top: 30px;
+  width:100%;
+  text-align: center;
+  word-wrap: break-word;
+  border-radius: 10px;
+  background-color: pink;
+  display: inline-block;
+}

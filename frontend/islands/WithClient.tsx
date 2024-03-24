@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { ComponentChildren } from "preact";
 import { createContext } from "preact";
 
-import { Client, connectClient } from "../../liaison/liaison.ts"
+import { Client, connectClient, User } from "../../liaison/liaison.ts"
 import { signal } from "@preact/signals";
 
 class ClientContainer {
@@ -26,13 +26,21 @@ export function WithClient( { children }: WithClientProps ) {
     
     connectClient(new class extends Client {
       onPing = (user: string) => {
-        this.users.value.set(user, (this.users.value.get(user) ?? 0) + 1);
+        const u = this.users.value.get(user)!;
+        u.pings++;
         this.users.value = new Map(this.users.value);
       }
-      userList = (users: string[]) => {
-        const newUsers = new Map<string, number>();
+      onMove = (user: string, x: number, y: number) => {
+        const u = this.users.value.get(user)!;
+        u.x = x;
+        u.y = y;
+        this.users.value = new Map(this.users.value);
+      }
+      userList = (users: User[]) => {
+        console.log(users);
+        const newUsers = new Map<string, User>();
         for(const u of users)
-          newUsers.set(u, this.users.value.get(u) ?? 0);
+          newUsers.set(u.id, u);
         this.users.value = newUsers;
       }; 
       onConnect(): void {

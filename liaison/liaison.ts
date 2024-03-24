@@ -6,41 +6,73 @@ import { Socket } from "$socketio_client/"
 import { io } from "$socketio_client/";
 import { Signal, signal } from "@preact/signals";
 
+export interface User {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  pings: number;
+}
+
+interface ServerClient {
+  user: User;
+  socket: ServerSocket<ClientToServerEvents, ServerToClientEvents, {}, User>;
+}
 
 interface ServerToClientEvents {
-  userList(users: Array<string>): void;
+  userList(users: Array<User>): void;
   onPing(user: string): void;
+  onMove(user: string, x: number, y: number): void;
 }
 
 interface ClientToServerEvents {
-  ping: () => void;
+  ping(): void;
+  move(x: number, y: number): void;
 }
 
 export function createServer(): ServerLogic {
 
   const logic = new ServerLogic();
 
-  const io = new Server<ClientToServerEvents, ServerToClientEvents, {} , {}> ({
+  const io = new Server<ClientToServerEvents, ServerToClientEvents, {} , User> ({
     cors: {
       origin: "http://localhost:8000"
     }
   });
 
-  const clients: Array<ServerSocket<ClientToServerEvents, ServerToClientEvents, {}, {}>> = [];
+  const clients: Array<ServerClient> = [];
   io.on("connection", socket => {
-    clients.push(socket);
+    const client: ServerClient =  {
+      user: {
+        id: socket.id,
+        name: socket.id,
+        x: 0,
+        y: 0,
+        pings: 0,
+      },
+      socket
+    }
+    clients.push(client);
     for(const c of clients)
-      c.emit("userList", clients.map(s => s.id));
+      c.socket.emit("userList", clients.map(c => c.user));
     
     socket.on("disconnect", () => {
-      clients.splice(clients.indexOf(socket), 1);
+      clients.splice(clients.indexOf(client), 1);
       for(const c of clients)
-        c.emit("userList", clients.map(s => s.id));
+        c.socket.emit("userList", clients.map(s => s.user));
     });
 
     socket.on("ping", () => {
+      client.user.pings++;
       for(const c of clients)
-        c.emit("onPing", socket.id);
+        c.socket.emit("onPing", socket.id);
+    });
+
+    socket.on("move", (x: number, y: number) => {
+      client.user.x = x;
+      client.user.y = y;
+      for(const c of clients)
+        c.socket.emit("onMove", socket.id, client.user.x, client.user.y);
     });
 
   });
@@ -56,14 +88,19 @@ export function createServer(): ServerLogic {
 
 
 export abstract class Client implements ServerToClientEvents {
-  abstract userList: (users: string[]) => void;
+  abstract onMove(user: string, x: number, y: number): void;
+  abstract userList(users: User[]): void;
   abstract onPing(user: string): void;
   abstract onConnect(): void;
 
-  public users: Signal<Map<string, number>> = signal(new Map());
+  public users: Signal<Map<string, User>> = signal(new Map());
 
   public ping(): void {
     this.socket?.emit("ping");
+  }
+
+  public move(x: number, y: number) {
+    this.socket?.emit("move", x, y);
   }
 
   public disconnect(): void {
@@ -83,5 +120,6 @@ export function connectClient(client: Client) {
 
   socket.on("userList", client.userList);
   socket.on("onPing", client.onPing);
+  socket.on("onMove", client.onMove);
   client.socket = socket;
 }

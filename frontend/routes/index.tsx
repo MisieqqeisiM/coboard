@@ -5,6 +5,8 @@ import { AppServer } from "./_app.tsx"
 import { ClientContext } from "../islands/WithClient.tsx"
 import ClientList from "../islands/ClientList.tsx";
 import PingButton from "../islands/PingButton.tsx";
+import { Cursor } from "../components/Cursor.tsx";
+import CursorBox from "../islands/CursorBox.tsx";
 
 type HomeProps = PageProps<
   {
@@ -28,6 +30,7 @@ export default function Home({data}: HomeProps) {
         <h1 class="text-4xl font-bold">Current users:</h1>
           <ClientList />
         <PingButton />
+        <CursorBox />
       </div>
     </div>
   );
