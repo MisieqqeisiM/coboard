@@ -1,6 +1,10 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
-import { useState } from "preact/hooks";
+import { useCallback, useState } from "preact/hooks";
 import { AppServer } from "./_app.tsx"
+
+import { ClientContext } from "../islands/WithClient.tsx"
+import ClientList from "../islands/ClientList.tsx";
+import PingButton from "../islands/PingButton.tsx";
 
 type HomeProps = PageProps<
   {
@@ -18,14 +22,12 @@ export const handler: Handlers = {
 };
 
 export default function Home({data}: HomeProps) {
-
   return (
     <div class="px-4 py-8 mx-auto bg-[#86efac]">
       <div class="max-w-screen-md mx-auto flex flex-col items-center justify-center">
         <h1 class="text-4xl font-bold">Current users:</h1>
-        <p class="my-4">
-          {data.clients.join(",")}
-        </p>
+          <ClientList />
+        <PingButton />
       </div>
     </div>
   );

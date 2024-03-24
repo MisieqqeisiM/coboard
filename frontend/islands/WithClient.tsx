@@ -3,37 +3,46 @@ import { ComponentChildren } from "preact";
 import { createContext } from "preact";
 
 import { Client, connectClient } from "../../liaison/liaison.ts"
+import { signal } from "@preact/signals";
 
 class ClientContainer {
   public client?: Client;
 }
 
-export const ClientContext = createContext<ClientContainer>(new ClientContainer());
+export const ClientContext = createContext<Client | null>(null);
 
 interface WithClientProps {
   children: ComponentChildren
 }
 
 export function WithClient( { children }: WithClientProps ) {
-  const [container, setContainer] = useState(new ClientContainer());
+  const [client, setClient] = useState<Client | null> (null);
   useEffect(() => {
-    if(container.client)
+    if(client)
       return () => {
-        container.client?.disconnect();
+        client?.disconnect();
       }
-
+    
+    
     connectClient(new class extends Client {
+      onPing = (user: string) => {
+        this.users.value.set(user, (this.users.value.get(user) ?? 0) + 1);
+        this.users.value = new Map(this.users.value);
+      }
       userList = (users: string[]) => {
-        console.log(users);
+        const newUsers = new Map<string, number>();
+        for(const u of users)
+          newUsers.set(u, this.users.value.get(u) ?? 0);
+        this.users.value = newUsers;
       }; 
       onConnect(): void {
-        setContainer({ client: this });
+        setClient(this);
       }
     });
   });
 
   return (
-    <ClientContext.Provider value={container}>
+    <ClientContext.Provider value={client}>
       { children }
     </ClientContext.Provider>
   );
