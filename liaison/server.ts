@@ -6,15 +6,11 @@ export type SocketServer = Server<ClientToServerEvents, ServerToClientEvents, {}
 export type ServerSocket = Socket<ClientToServerEvents, ServerToClientEvents, {} , {}>;
 
 export function createServer(): ServerLogic {
-  const io: SocketServer = new Server ({
-    cors: {
-      origin: "http://localhost:8000"
-    }
-  });
+  const io: SocketServer = new Server();
   const server = new ServerLogic(io);
   const handler = io.handler();
-  Deno.serve({ port: 3000 }, (req, info) => handler(req, {
-    localAddr: { transport: "tcp", hostname: "localhost", port: 3000 },
+  Deno.serve({ port: 3690 }, (req, info) => handler(req, {
+    localAddr: { transport: "tcp", hostname: "localhost", port: 3690 },
     remoteAddr: info.remoteAddr
   }));
   return server;
