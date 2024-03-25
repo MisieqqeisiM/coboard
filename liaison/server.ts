@@ -11,6 +11,13 @@ export function createServer(): ServerLogic {
   const server = new ServerLogic(io);
   const handler = io.handler();
 
+  Deno.serve({ port: 8000 }, (req, _) => {
+    const redirectURL = new URL(req.url);
+    redirectURL.protocol = 'https:'
+    redirectURL.port = '443'
+    return Response.redirect(redirectURL, 301);
+  })
+
   Deno.serve({ port:3690, cert: cert(), key: key() } as Deno.ServeTlsOptions, (req, info) => handler(req, {
     localAddr: { transport: "tcp", hostname: "localhost", port: 3690 },
     remoteAddr: info.remoteAddr
