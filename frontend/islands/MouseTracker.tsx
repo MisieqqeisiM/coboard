@@ -1,8 +1,6 @@
 
-import { Cursor } from "../components/Cursor.tsx";
-import { ClientContext } from "../islands/WithClient.tsx"
-import { useEffect, useRef } from "preact/hooks";
-import { Client } from "../../liaison/liaison.ts"
+import { useEffect } from "preact/hooks";
+import { Client } from "../../client/client.ts"
 
 interface MouseTrackerProps {
   client: Client,
@@ -29,7 +27,7 @@ export default function MouseTracker(props: MouseTrackerProps) {
         return;
       lastX = x;
       lastY = y;
-      props.client.move(x, y);
+      props.client.socket.move(x, y);
     }, 50);
 
     return () => {
@@ -37,6 +35,7 @@ export default function MouseTracker(props: MouseTrackerProps) {
       globalThis.removeEventListener("touchmove", f2);
       clearInterval(interval);
     }
+
   });
   return <></>;
 }

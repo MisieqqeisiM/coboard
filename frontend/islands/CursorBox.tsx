@@ -1,23 +1,20 @@
 import { Cursor } from "../components/Cursor.tsx";
-import { ClientContext } from "../islands/WithClient.tsx"
-import { useEffect, useRef } from "preact/hooks";
 import MouseTracker from "./MouseTracker.tsx";
+import { ClientContext } from "./WithClient.tsx";
 
 export default function CursorBox() {
   return (
     <ClientContext.Consumer>
       {client => {
-        if(client) {
-          const container = useRef<HTMLDivElement>(null);
-          return (<>
-            <div ref={container}>
-              {Array.from(client.users.value.entries()).map(
-                ([k, v]) => <Cursor name={k} x={v.x} y={v.y} key={k} />
-              )}
-            </div>
-            <MouseTracker client={client} />
-          </>);
-        } else return "Connecting...";
+        if(!client) return "Connecting...";
+        return <>
+          <div>
+            {Array.from(client.ui.users.value.entries()).map(
+              ([k, v]) => <Cursor name={k} x={v.x} y={v.y} key={k} />
+            )}
+          </div>
+          <MouseTracker client={client} />
+        </>
       }}
     </ClientContext.Consumer>
   );

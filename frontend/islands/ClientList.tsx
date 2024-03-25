@@ -5,7 +5,7 @@ export default function ClientList() {
     <ClientContext.Consumer>
       {client => {
         if(client) return (<ul> {
-          Array.from(client.users.value.values()).map(u => (<li key={u.id}>{u.id} <b>{u.pings}</b></li>))
+          Array.from(client.ui.users.value.values()).map(u => (<li key={u.id}>{u.id} <b>{u.pings}</b></li>))
         }</ul>);
         else return "Connecting...";
       }}
