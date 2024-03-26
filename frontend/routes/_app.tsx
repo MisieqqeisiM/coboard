@@ -1,8 +1,8 @@
 import { type PageProps } from "$fresh/server.ts";
-import { createServer } from "../../liaison/liaison.ts"
 import { WithClient } from "../islands/WithClient.tsx";
+import { server } from "../../liaison/server.ts"
 
-export const AppServer = createServer();
+server;
 
 export default function App({ Component }: PageProps) {
   return (
@@ -12,6 +12,7 @@ export default function App({ Component }: PageProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>coboard</title>
         <link rel="stylesheet" href="/styles.css" />
+        <link rel="stylesheet" href="/board_styles.css" />
       </head>
       <body>
         <WithClient>
