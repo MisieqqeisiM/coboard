@@ -31,6 +31,10 @@ export class SocketClient {
         newUsers.set(user.id, user);
       client.users.value = newUsers;
     });
+
+    io.on("onDraw", (id, start_x, start_y, end_x, end_y)=> {
+
+    });
   }
 
   public ping() {
@@ -40,6 +44,11 @@ export class SocketClient {
   public move(x: number, y: number) {
     this.io.emit("move", x, y);
   }
+
+  public draw(start_x: number, start_y: number, end_x: number, end_y: number){
+    this.io.emit("draw", start_x, start_y, end_x, end_y);
+  }
+
 
   public disconnect(): void {
     this.io.disconnect();  
