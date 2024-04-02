@@ -1,9 +1,8 @@
-
 import { useEffect } from "preact/hooks";
-import { Client } from "../../client/client.ts"
+import { Client } from "../../../client/client.ts";
 
 interface MouseTrackerProps {
-  client: Client,
+  client: Client;
 }
 
 export default function MouseTracker(props: MouseTrackerProps) {
@@ -15,16 +14,15 @@ export default function MouseTracker(props: MouseTrackerProps) {
     const f1 = (e: MouseEvent) => {
       x = e.clientX;
       y = e.clientY;
-    }
+    };
     const f2 = (e: TouchEvent) => {
       x = e.touches.item(0)?.clientX ?? 0;
       y = e.touches.item(0)?.clientY ?? 0;
-    }
+    };
     globalThis.addEventListener("mousemove", f1);
     globalThis.addEventListener("touchmove", f2);
     const interval = setInterval(() => {
-      if(lastX == x && lastY == y)
-        return;
+      if (lastX == x && lastY == y) return;
       lastX = x;
       lastY = y;
       props.client.socket.move(x, y);
@@ -34,8 +32,7 @@ export default function MouseTracker(props: MouseTrackerProps) {
       globalThis.removeEventListener("mousemove", f1);
       globalThis.removeEventListener("touchmove", f2);
       clearInterval(interval);
-    }
-
-  });
+    };
+  }, []);
   return <></>;
 }
