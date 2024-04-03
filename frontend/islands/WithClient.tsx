@@ -19,7 +19,7 @@ export function WithClient( { children }: WithClientProps ) {
   useEffect(() => {
     if(client) { return () => { client.socket.disconnect() } }
     const io = createClient();
-    const uiClient = new UIClient(signal(new Map()));
+    const uiClient = new UIClient(signal(new Map()),signal(new Array()));
     const socketClient = new SocketClient(io, uiClient);
     io.on("connect", () => {
       setClient(new Client(socketClient, uiClient));

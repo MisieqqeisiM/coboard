@@ -1,7 +1,8 @@
 import ClientList from "../islands/ClientList.tsx";
 import CursorBox from "../islands/CursorBox.tsx";
-import Canvas from "../islands/Canvas.tsx";
+import DrawableCanvas from "../islands/DrawableCanvas.tsx" 
 import PingButton from "../islands/PingButton.tsx";
+import ObservableCanvas from "../islands/ObservableCanvas.tsx";
 
 export default function Home() {
   return (
@@ -10,7 +11,7 @@ export default function Home() {
         <h1 class="text-4xl font-bold">Current users:</h1>
         <ClientList />
         <PingButton />
-        <Canvas />
+        <DrawableCanvas />
         <CursorBox />
       </div>
     </div>

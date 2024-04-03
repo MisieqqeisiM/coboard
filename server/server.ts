@@ -46,9 +46,9 @@ export class Server {
           c.socket.emit("onMove", socket.id, client.user.x, client.user.y);
       });
 
-      socket.on("draw", (start_x: number, start_y: number, end_x: number, end_y: number) => {
+      socket.on("draw", (points: {x:number, y:number}[]) => {
         for(const c of this.clients)
-          c.socket.emit("onDraw", socket.id, start_x, start_y, end_x, end_y);
+          c.socket.emit("onDraw", socket.id, points);
       });
     });
   }
