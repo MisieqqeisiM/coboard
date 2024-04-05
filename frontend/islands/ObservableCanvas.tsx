@@ -15,8 +15,8 @@ export default function ObservableCanvas(props: CanvasProps) {
         if(!context)
             return;
 
-        for (let i = 0; i < props.client.ui.strokes.value.length; i++) {
-            let line: { x: number, y: number }[] = props.client.ui.strokes.value[i];
+        if(props.client.ui.stroke && props.client.ui.stroke.value.length>1) {
+            const line: {x:number, y:number}[] = props.client.ui.stroke.value;
             context.beginPath();
             context.lineWidth = 3;
             context.strokeStyle = 'black';
@@ -27,7 +27,7 @@ export default function ObservableCanvas(props: CanvasProps) {
             }
             context.closePath();
         }
-    }, props.client.ui.strokes.value);
+    }, props.client.ui.stroke.value);
     
     return <canvas ref={canvasRef} style={{ position:'absolute', left:0, top:0, border:'3px solid blue'}} height='300px' width='600px' />;
 }
