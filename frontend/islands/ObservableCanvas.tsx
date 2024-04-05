@@ -7,9 +7,7 @@ interface CanvasProps{
 
 export default function ObservableCanvas(props: CanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    //props.client.socket.ping();
     useEffect(() => {
-        props.client.socket.ping();
         let canvas = canvasRef.current;
         if(!canvas)
             return;
@@ -31,5 +29,5 @@ export default function ObservableCanvas(props: CanvasProps) {
         }
     }, props.client.ui.strokes.value);
     
-    return <canvas ref={canvasRef} height='300px' width='300px' />;
+    return <canvas ref={canvasRef} style={{ position:'absolute', left:0, top:0, border:'3px solid blue'}} height='300px' width='600px' />;
 }

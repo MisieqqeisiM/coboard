@@ -5,9 +5,9 @@
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $index from "./routes/index.tsx";
+import * as $Canvas from "./islands/Canvas.tsx";
 import * as $ClientList from "./islands/ClientList.tsx";
 import * as $CursorBox from "./islands/CursorBox.tsx";
-import * as $Draw from "./islands/Draw.tsx";
 import * as $DrawableCanvas from "./islands/DrawableCanvas.tsx";
 import * as $MouseTracker from "./islands/MouseTracker.tsx";
 import * as $ObservableCanvas from "./islands/ObservableCanvas.tsx";
@@ -22,9 +22,9 @@ const manifest = {
     "./routes/index.tsx": $index,
   },
   islands: {
+    "./islands/Canvas.tsx": $Canvas,
     "./islands/ClientList.tsx": $ClientList,
     "./islands/CursorBox.tsx": $CursorBox,
-    "./islands/Draw.tsx": $Draw,
     "./islands/DrawableCanvas.tsx": $DrawableCanvas,
     "./islands/MouseTracker.tsx": $MouseTracker,
     "./islands/ObservableCanvas.tsx": $ObservableCanvas,
