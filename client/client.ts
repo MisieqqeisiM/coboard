@@ -8,12 +8,12 @@ export class Client {
 
 export class UIClient {
   constructor(readonly users: Signal<Map<string, User>>, 
-    readonly strokes: Signal<{x:number,y:number}[][]>) {}
+    readonly strokes: Signal<{x:number,y:number}[][]>=new Signal([])) {}
 }
 
 export class SocketClient {
   constructor(private io: ClientSocket, private client: UIClient) {
-    io.on("onPing", id => {
+    io.on("onPing", (id) => {
       const user = client.users.value.get(id)!;
       user.pings++;
       client.users.value = new Map(client.users.value);
@@ -26,15 +26,18 @@ export class SocketClient {
       client.users.value = new Map(client.users.value);
     });
 
-    io.on("userList", users => {
+    io.on("userList", (users) => {
       const newUsers = new Map<string, User>();
-      for(const user of users)
-        newUsers.set(user.id, user);
+      for (const user of users) newUsers.set(user.id, user);
       client.users.value = newUsers;
     });
 
     io.on("onDraw", (id, points: {x:number, y:number}[])=> {
       client.strokes.value=[...client.strokes.value,points];
+    });
+
+    io.on("onAuthenticate", (tokenName: string) => {
+      sessionStorage.setItem("token", tokenName);
     });
   }
 
@@ -50,8 +53,11 @@ export class SocketClient {
     this.io.emit("draw", points);
   }
 
+  public authenticate(username: string, password: string): void {
+    this.io.emit("authenticate", username, password);
+  }
 
   public disconnect(): void {
-    this.io.disconnect();  
+    this.io.disconnect();
   }
 }

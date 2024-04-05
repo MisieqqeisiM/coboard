@@ -1,6 +1,5 @@
-import { ClientContext } from "./WithClient.tsx";
 import { useRef, useEffect } from 'preact/hooks';
-import { Client } from "../../client/client.ts";
+import { Client } from "../../../client/client.ts";
 interface CanvasProps{
     client: Client;
 }

@@ -1,6 +1,5 @@
-import { ClientContext } from "./WithClient.tsx";
 import { useRef, useEffect } from 'preact/hooks';
-import { Client } from "../../client/client.ts";
+import { Client } from "../../../client/client.ts";
 interface CanvasProps{
     client: Client;
 }
@@ -15,7 +14,7 @@ export default function ObservableCanvas(props: CanvasProps) {
         if(!context)
             return;
 
-        if(props.client.ui.strokes.value && props.client.ui.strokes.value.length>0) {
+        if(props.client.ui.strokes && props.client.ui.strokes.value && props.client.ui.strokes.value.length>0) {
             //inefficient, should be a proper queue
             const line: {x:number, y:number}[] = props.client.ui.strokes.value.shift();
             if(line && line.length>1) {
@@ -30,7 +29,7 @@ export default function ObservableCanvas(props: CanvasProps) {
                 context.closePath();
             }
         }
-    }, props.client.ui.strokes.value);
+    }, props.client.ui.strokes?.value);
     
     return <canvas ref={canvasRef} style={{ position:'absolute', left:0, top:0 }} height='300px' width='600px' />;
 }

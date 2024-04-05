@@ -12,12 +12,12 @@ export interface ServerToClientEvents {
   onPing(user: string): void;
   onMove(user: string, x: number, y: number): void;
   onDraw(user: string, points: {x:number, y:number}[]): void;
+  onAuthenticate(token: string): void;
 }
 
 export interface ClientToServerEvents {
   ping(): void;
   move(x: number, y: number): void;
   draw(points: {x: number, y: number}[]): void;
+  authenticate(username: string, password: string): void;
 }
-
-
