@@ -8,7 +8,6 @@ interface CanvasProps{
 export default function ObservableCanvas(props: CanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
-        const line: {x:number, y:number}[] = Array.from(props.client.ui.stroke.value);
         let canvas = canvasRef.current;
         if(!canvas)
             return;
@@ -16,19 +15,22 @@ export default function ObservableCanvas(props: CanvasProps) {
         if(!context)
             return;
 
-        if(line && line.length>1) {
-            props.client.socket.ping();
-            context.beginPath();
-            context.lineWidth = 3;
-            context.strokeStyle = 'black';
-            context.moveTo(line[0].x, line[0].y);
-            for (let j = 1; j < line.length; j++) {
-                context.lineTo(line[j].x, line[j].y);
-                context.stroke();
+        if(props.client.ui.strokes.value && props.client.ui.strokes.value.length>0) {
+            //inefficient, should be a proper queue
+            const line: {x:number, y:number}[] = props.client.ui.strokes.value.shift();
+            if(line && line.length>1) {
+                context.beginPath();
+                context.lineWidth = 3;
+                context.strokeStyle = 'black';
+                context.moveTo(line[0].x, line[0].y);
+                for (let j = 1; j < line.length; j++) {
+                    context.lineTo(line[j].x, line[j].y);
+                    context.stroke();
+                }
+                context.closePath();
             }
-            context.closePath();
         }
-    }, props.client.ui.stroke.value);
+    }, props.client.ui.strokes.value);
     
-    return <canvas ref={canvasRef} style={{ position:'absolute', left:0, top:0, border:'3px solid blue'}} height='300px' width='600px' />;
+    return <canvas ref={canvasRef} style={{ position:'absolute', left:0, top:0 }} height='300px' width='600px' />;
 }

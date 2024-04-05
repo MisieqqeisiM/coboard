@@ -8,7 +8,7 @@ export class Client {
 
 export class UIClient {
   constructor(readonly users: Signal<Map<string, User>>, 
-    readonly stroke: Signal<{x:number,y:number}[]>) {}
+    readonly strokes: Signal<{x:number,y:number}[][]>) {}
 }
 
 export class SocketClient {
@@ -34,7 +34,7 @@ export class SocketClient {
     });
 
     io.on("onDraw", (id, points: {x:number, y:number}[])=> {
-      client.stroke.value=points;
+      client.strokes.value=[...client.strokes.value,points];
     });
   }
 

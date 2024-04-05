@@ -46,8 +46,8 @@ export default function DrawableCanvas (props: CanvasProps){
         const endDraw = () => {
             drawing = false;
             context.closePath();
-            context.clearRect(0,0,canvas.width,canvas.height);
             props.client.socket.draw(points);
+            context.clearRect(0,0,canvas.width,canvas.height);
         };
  
         canvas.addEventListener('mousedown', startDraw);
@@ -60,6 +60,6 @@ export default function DrawableCanvas (props: CanvasProps){
             canvas.removeEventListener('mousemove', draw);
         };
     }, []);
-    return <canvas ref={canvasRef} style={{ position:'absolute', left:0, top:0, border: '2px solid red' }} width='600px' height='300px'/>;
+    return <canvas ref={canvasRef} style={{ position:'absolute', left:0, top:0 }} width='600px' height='300px'/>;
 }
 
