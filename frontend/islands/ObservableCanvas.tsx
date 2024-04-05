@@ -8,6 +8,7 @@ interface CanvasProps{
 export default function ObservableCanvas(props: CanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
+        const line: {x:number, y:number}[] = Array.from(props.client.ui.stroke.value);
         let canvas = canvasRef.current;
         if(!canvas)
             return;
@@ -15,8 +16,8 @@ export default function ObservableCanvas(props: CanvasProps) {
         if(!context)
             return;
 
-        if(props.client.ui.stroke && props.client.ui.stroke.value.length>1) {
-            const line: {x:number, y:number}[] = props.client.ui.stroke.value;
+        if(line && line.length>1) {
+            props.client.socket.ping();
             context.beginPath();
             context.lineWidth = 3;
             context.strokeStyle = 'black';

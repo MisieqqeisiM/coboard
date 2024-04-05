@@ -18,6 +18,7 @@ function initUser(id: string, name: string): User {
 
 export class Server {
   private clients: Array<Client> = [];
+  private strokes: {x:number, y:number}[][]=[];
 
   constructor(io: SocketServer) {
     io.on("connection", socket => {
@@ -27,6 +28,8 @@ export class Server {
       }
       this.clients.push(client);
       this.updateUsers();
+      for(const stroke of this.strokes)
+        client.socket.emit("onDraw", null, stroke);
       
       socket.on("disconnect", () => {
         this.clients.splice(this.clients.indexOf(client), 1);
@@ -47,6 +50,7 @@ export class Server {
       });
 
       socket.on("draw", (points: {x:number, y:number}[]) => {
+        this.strokes.push(points);
         for(const c of this.clients)
           c.socket.emit("onDraw", socket.id, points);
       });
