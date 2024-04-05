@@ -50,13 +50,13 @@ export default function DrawableCanvas (props: CanvasProps){
         };
  
         canvas.addEventListener('mousedown', startDraw);
-        canvas.addEventListener('mouseup', endDraw);
-        canvas.addEventListener('mousemove', draw);
+        globalThis.addEventListener('mouseup', endDraw);
+        globalThis.addEventListener('mousemove', draw);
 
         return () => {
             canvas.removeEventListener('mousedown', startDraw);
-            canvas.removeEventListener('mouseup', endDraw);
-            canvas.removeEventListener('mousemove', draw);
+            globalThis.removeEventListener('mouseup', endDraw);
+            globalThis.removeEventListener('mousemove', draw);
         };
     }, []);
     return <canvas ref={canvasRef} style={{ position:'absolute', left:0, top:0 }} width='600px' height='300px'/>;
