@@ -1,6 +1,5 @@
 import { User } from "../liaison/liaison.ts";
 import { ServerSocket, SocketServer } from "../liaison/server.ts";
-
 interface Client {
   user: User;
   socket: ServerSocket;
@@ -20,14 +19,23 @@ export class Server {
   private clients: Array<Client> = [];
 
   constructor(io: SocketServer) {
-    io.on("connection", socket => {
-      const client: Client =  {
+    io.on("connection", (socket) => {
+      const client: Client = {
         user: initUser(socket.id, socket.id),
         socket,
-      }
+      };
       this.clients.push(client);
       this.updateUsers();
-      
+
+      socket.on("authenticate", (username: string, password: string) => {
+        client.user.name = username;
+        this.updateUsers();
+        const authenticated = true; //TODO: add proper authentication logic with database and login the user this way
+        if (authenticated) {
+          client.socket.emit("onAuthenticate", "some-token"); //Generate proper auth token
+        }
+      });
+
       socket.on("disconnect", () => {
         this.clients.splice(this.clients.indexOf(client), 1);
         this.updateUsers();
@@ -35,21 +43,23 @@ export class Server {
 
       socket.on("ping", () => {
         client.user.pings++;
-        for(const c of this.clients)
-          c.socket.emit("onPing", socket.id);
+        for (const c of this.clients) c.socket.emit("onPing", socket.id);
       });
 
       socket.on("move", (x: number, y: number) => {
         client.user.x = x;
         client.user.y = y;
-        for(const c of this.clients)
+        for (const c of this.clients)
           c.socket.emit("onMove", socket.id, client.user.x, client.user.y);
       });
     });
   }
 
   private updateUsers(): void {
-    for(const c of this.clients)
-      c.socket.emit("userList", this.clients.map(c => c.user));
+    for (const c of this.clients)
+      c.socket.emit(
+        "userList",
+        this.clients.map((c) => c.user)
+      );
   }
 }

@@ -1,6 +1,6 @@
 import { type PageProps } from "$fresh/server.ts";
-import { WithClient } from "../islands/WithClient.tsx";
-import { server } from "../../liaison/server.ts"
+import { WithClient } from "../islands/app/WithClient.tsx";
+import { server } from "../../liaison/server.ts";
 
 server;
 
@@ -13,6 +13,7 @@ export default function App({ Component }: PageProps) {
         <title>coboard</title>
         <link rel="stylesheet" href="/styles.css" />
         <link rel="stylesheet" href="/board_styles.css" />
+        <link rel="stylesheet" href="/login_styles.css" />
       </head>
       <body>
         <WithClient>

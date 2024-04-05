@@ -5,11 +5,13 @@
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $index from "./routes/index.tsx";
-import * as $ClientList from "./islands/ClientList.tsx";
-import * as $CursorBox from "./islands/CursorBox.tsx";
-import * as $MouseTracker from "./islands/MouseTracker.tsx";
-import * as $PingButton from "./islands/PingButton.tsx";
-import * as $WithClient from "./islands/WithClient.tsx";
+import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
+import * as $app_MainDashboard from "./islands/app/MainDashboard.tsx";
+import * as $app_WithClient from "./islands/app/WithClient.tsx";
+import * as $board_ClientList from "./islands/board/ClientList.tsx";
+import * as $board_CursorBox from "./islands/board/CursorBox.tsx";
+import * as $board_MouseTracker from "./islands/board/MouseTracker.tsx";
+import * as $board_PingButton from "./islands/board/PingButton.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -19,11 +21,13 @@ const manifest = {
     "./routes/index.tsx": $index,
   },
   islands: {
-    "./islands/ClientList.tsx": $ClientList,
-    "./islands/CursorBox.tsx": $CursorBox,
-    "./islands/MouseTracker.tsx": $MouseTracker,
-    "./islands/PingButton.tsx": $PingButton,
-    "./islands/WithClient.tsx": $WithClient,
+    "./islands/app/LoginForm.tsx": $app_LoginForm,
+    "./islands/app/MainDashboard.tsx": $app_MainDashboard,
+    "./islands/app/WithClient.tsx": $app_WithClient,
+    "./islands/board/ClientList.tsx": $board_ClientList,
+    "./islands/board/CursorBox.tsx": $board_CursorBox,
+    "./islands/board/MouseTracker.tsx": $board_MouseTracker,
+    "./islands/board/PingButton.tsx": $board_PingButton,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;
