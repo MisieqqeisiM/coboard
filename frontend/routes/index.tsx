@@ -3,6 +3,7 @@ import { server } from "../../liaison/server.ts";
 import { deleteCookie, getCookies } from "$std/http/cookie.ts";
 import LoginForm from "../islands/app/LoginForm.tsx";
 import Board from "../islands/board/Board.tsx";
+import { WithClient } from "../islands/app/WithClient.tsx";
 
 interface HomePars {
   currentUserId: string | null;
@@ -27,5 +28,9 @@ export default function Home(props: PageProps<HomePars>) {
   if (!props.data.currentUserId) {
     return <LoginForm />;
   }
-  return <Board />;
+  return (
+    <WithClient>
+      <Board />
+    </WithClient>
+  );
 }

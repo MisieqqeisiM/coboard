@@ -1,11 +1,14 @@
-import { WithClient } from "../app/WithClient.tsx";
+import { useContext } from "preact/hooks";
+import { ClientContext, WithClient } from "../app/WithClient.tsx";
 import ClientList from "../board/ClientList.tsx";
 import CursorBox from "../board/CursorBox.tsx";
 import PingButton from "../board/PingButton.tsx";
+import Loading from "../app/Loading.tsx";
 
 export default function Board() {
-  return (
-    <WithClient>
+  const client = useContext(ClientContext);
+  if (client) {
+    return (
       <div class="px-4 py-8 mx-auto bg-[#86efac]">
         <div class="max-w-screen-md mx-auto flex flex-col items-center justify-center">
         </div>
@@ -16,6 +19,8 @@ export default function Board() {
         <CursorBox />
         <div />
       </div>
-    </WithClient>
-  );
+    );
+  } else {
+    return <Loading />;
+  }
 }
