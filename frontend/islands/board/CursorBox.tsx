@@ -13,7 +13,6 @@ export default function CursorBox() {
             <Cursor name={v.name} x={v.x} y={v.y} key={k} />
           ))}
         </div>
-        <MouseTracker client={client} />
       </>
     );
   }

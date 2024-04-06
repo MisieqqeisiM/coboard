@@ -1,8 +1,14 @@
 import { useEffect } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
+import { transform } from "https://deno.land/x/esbuild@v0.19.11/mod.js";
+
+export interface Transformer {
+  transform(x: number, y: number): [number, number];
+}
 
 interface MouseTrackerProps {
   client: Client;
+  transformer: Transformer;
 }
 
 export default function MouseTracker(props: MouseTrackerProps) {
@@ -25,7 +31,7 @@ export default function MouseTracker(props: MouseTrackerProps) {
       if (lastX == x && lastY == y) return;
       lastX = x;
       lastY = y;
-      props.client.socket.move(x, y);
+      props.client.socket.move(...props.transformer.transform(x, y));
     }, 50);
 
     return () => {

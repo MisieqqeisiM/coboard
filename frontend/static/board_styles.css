@@ -1,3 +1,6 @@
+html, body {
+  overflow: hidden;
+}
 .cursor {
   position: absolute;
   pointer-events: none;
