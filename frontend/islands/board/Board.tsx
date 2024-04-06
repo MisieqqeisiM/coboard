@@ -119,33 +119,36 @@ export default function Board() {
   }, [client]);
   if (client) {
     return (
-      <div
-        style={{
-          position: "absolute",
-          width: "0px",
-          height: "0px",
-          transform:
-            `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
-        }}
-      >
+      <>
         <div
           style={{
             position: "absolute",
-            left: 0,
-            top: 0,
-            width: "600px",
-            height: "300px",
-            backgroundColor: "green",
+            width: "0px",
+            height: "0px",
+            transform:
+              `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
           }}
-        />
-        <ObservableCanvas client={client} />
-        <DrawableCanvas client={client} transformer={transformer} />
-        <CursorBox />
-        <MouseTracker
-          client={client}
-          transformer={transformer}
-        />
-      </div>
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: "600px",
+              height: "300px",
+              backgroundColor: "green",
+            }}
+          />
+          <ObservableCanvas client={client} />
+          <DrawableCanvas client={client} transformer={transformer} />
+          <CursorBox />
+          <MouseTracker
+            client={client}
+            transformer={transformer}
+          />
+        </div>
+        <button onClick={() => location.href = "/api/logout"}>log out</button>
+      </>
     );
   }
   return <Loading />;
