@@ -16,5 +16,4 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   ping(): void;
   move(x: number, y: number): void;
-  authenticate(username: string, password: string): void;
 }

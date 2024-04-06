@@ -16,9 +16,7 @@ export default function App({ Component }: PageProps) {
         <link rel="stylesheet" href="/login_styles.css" />
       </head>
       <body>
-        <WithClient>
-          <Component />
-        </WithClient>
+        <Component />
       </body>
     </html>
   );

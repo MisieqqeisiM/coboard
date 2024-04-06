@@ -3,11 +3,11 @@ import { ClientSocket } from "../liaison/client.ts";
 import { User } from "../liaison/liaison.ts";
 
 export class Client {
-  constructor(readonly socket: SocketClient, readonly ui: UIClient) {}
+  constructor(readonly socket: SocketClient, readonly ui: UIClient) { }
 }
 
 export class UIClient {
-  constructor(readonly users: Signal<Map<string, User>>) {}
+  constructor(readonly users: Signal<Map<string, User>>) { }
 }
 
 export class SocketClient {
@@ -19,6 +19,7 @@ export class SocketClient {
     });
 
     io.on("onMove", (id, x, y) => {
+      console.log(id)
       const user = client.users.value.get(id)!;
       user.x = x;
       user.y = y;
@@ -42,10 +43,6 @@ export class SocketClient {
 
   public move(x: number, y: number) {
     this.io.emit("move", x, y);
-  }
-
-  public authenticate(username: string, password: string): void {
-    this.io.emit("authenticate", username, password);
   }
 
   public disconnect(): void {
