@@ -5,6 +5,7 @@ import ObservableCanvas from "./ObservableCanvas.tsx";
 import CursorBox from "./CursorBox.tsx";
 import MouseTracker from "./MouseTracker.tsx";
 import { Transformer } from "./MouseTracker.tsx";
+import Loading from "../app/Loading.tsx";
 
 class MyTransformer implements Transformer {
   constructor(public dx: number, public dy: number, public scale: number) {}
@@ -147,5 +148,5 @@ export default function Board() {
       </div>
     );
   }
-  return <>Connecting...</>;
+  return <Loading />;
 }

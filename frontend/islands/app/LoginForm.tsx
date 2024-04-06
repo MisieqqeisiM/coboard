@@ -1,41 +1,22 @@
-import { useContext, useState } from "preact/hooks";
-import { ClientContext } from "./WithClient.tsx";
-
-export default function LoginForm({ stateChanger }: any) {
-  const [username, setUserName] = useState("");
-  const [password, setPassword] = useState("");
-
-  const client = useContext(ClientContext);
-  if (client) {
-    return (
-      <div className="login-form">
-        <h1>Please Log In</h1>
+export default function LoginForm() {
+  return (
+    <div className="login-form">
+      <h1>Please Log In</h1>
+      <form method="post" action="/api/login">
         <label>
           <p>Username</p>
           <input
             type="text"
-            onInput={(e) => setUserName(e.currentTarget.value)}
+            name="login"
           />
         </label>
-        {/*<label> //TODO: uncomment when password handling is added
-              <p>Password</p>
-              <input type="password" onInput={e=> setPassword(e.currentTarget.value)}/>
-    </label>*/}
+        {/* TODO: password */}
         <div>
-          <button
-            onClick={() => {
-              client.socket.authenticate(username, password);
-              setTimeout(() => {
-                //TODO: make the proper response handling, can't listen to sessionStorage on the same window in UseEffect...
-                stateChanger(sessionStorage.getItem("token"));
-              }, 1000);
-            }}
-          >
+          <button type="submit">
             Submit
           </button>
         </div>
-      </div>
-    );
-  }
-  return <>Connecting...</>;
+      </form>
+    </div>
+  );
 }

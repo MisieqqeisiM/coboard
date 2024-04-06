@@ -3,12 +3,12 @@ import { ClientSocket } from "../liaison/client.ts";
 import { User } from "../liaison/liaison.ts";
 
 export class Client {
-  constructor(readonly socket: SocketClient, readonly ui: UIClient) {}
+  constructor(readonly socket: SocketClient, readonly ui: UIClient) { }
 }
 
 export class UIClient {
-  constructor(readonly users: Signal<Map<string, User>>, 
-    readonly strokes: Signal<{x:number,y:number}[][]>=new Signal([])) {}
+  constructor(readonly users: Signal<Map<string, User>>,
+    readonly strokes: Signal<{ x: number, y: number }[][]> = new Signal([])) { }
 }
 
 export class SocketClient {
@@ -20,6 +20,7 @@ export class SocketClient {
     });
 
     io.on("onMove", (id, x, y) => {
+      console.log(id)
       const user = client.users.value.get(id)!;
       user.x = x;
       user.y = y;
@@ -32,8 +33,8 @@ export class SocketClient {
       client.users.value = newUsers;
     });
 
-    io.on("onDraw", (id, points: {x:number, y:number}[])=> {
-      client.strokes.value=[...client.strokes.value,points];
+    io.on("onDraw", (id, points: { x: number, y: number }[]) => {
+      client.strokes.value = [...client.strokes.value, points];
     });
 
     io.on("onAuthenticate", (tokenName: string) => {
@@ -49,12 +50,8 @@ export class SocketClient {
     this.io.emit("move", x, y);
   }
 
-  public draw(points: {x:number, y:number}[]){
+  public draw(points: { x: number, y: number }[]) {
     this.io.emit("draw", points);
-  }
-
-  public authenticate(username: string, password: string): void {
-    this.io.emit("authenticate", username, password);
   }
 
   public disconnect(): void {
