@@ -23,17 +23,18 @@ export default function Board() {
   useEffect(() => {
     if (!client) return;
     setTransformer(new MyTransformer(0, 0, 1));
+    function zoomCamera(x: number, y: number, amount: number) {
+      const [pivotX, pivotY] = transformer.transform(x, y);
+      setTranslateX((x) => transformer.dx = (x + pivotX) / amount - pivotX);
+      setTranslateY((y) => transformer.dy = (y + pivotY) / amount - pivotY);
+      setScale((s) => transformer.scale = s * amount);
+    }
     const zoom = (e: WheelEvent) => {
-      const [pivotX, pivotY] = transformer.transform(e.pageX, e.pageY);
       const amount = e.deltaY;
       if (amount > 0) {
-        setTranslateX((x) => transformer.dx = (x + pivotX) * 1.1 - pivotX);
-        setTranslateY((y) => transformer.dy = (y + pivotY) * 1.1 - pivotY);
-        setScale((s) => transformer.scale = s / 1.1);
+        zoomCamera(e.clientX, e.clientY, 1 / 1.1);
       } else {
-        setTranslateX((x) => transformer.dx = (x + pivotX) / 1.1 - pivotX);
-        setTranslateY((y) => transformer.dy = (y + pivotY) / 1.1 - pivotY);
-        setScale((s) => transformer.scale = s * 1.1);
+        zoomCamera(e.clientX, e.clientY, 1.1);
       }
     };
 
@@ -47,16 +48,51 @@ export default function Board() {
       }
     };
 
+    function moveCamera(dx: number, dy: number) {
+      setTranslateX((x) => transformer.dx = x + dx / transformer.scale);
+      setTranslateY((y) => transformer.dy = y + dy / transformer.scale);
+    }
+
     const move = (e: MouseEvent) => {
       if (e.buttons & 2) {
-        const x = e.pageX;
-        const y = e.pageY;
-        const deltaX = (x - prevX) / transformer.scale;
-        const deltaY = (y - prevY) / transformer.scale;
-        prevX = x;
-        prevY = y;
-        setTranslateX((x) => transformer.dx = x + deltaX);
-        setTranslateY((y) => transformer.dy = y + deltaY);
+        const dx = e.pageX - prevX;
+        const dy = e.pageY - prevY;
+        prevX = e.pageX;
+        prevY = e.pageY;
+        moveCamera(dx, dy);
+      }
+    };
+
+    let touchX = 0;
+    let touchY = 0;
+    let touchDist = 1;
+
+    function getTouchData(a: Touch, b: Touch) {
+      const touchX = (a.clientX + b.clientX) / 2;
+      const touchY = (a.clientY + b.clientY) / 2;
+      const touchDist = Math.sqrt(
+        Math.pow(a.clientX - b.clientX, 2) + Math.pow(a.clientY - b.clientY, 2),
+      );
+      return [touchX, touchY, touchDist];
+    }
+
+    const touchStart = (e: TouchEvent) => {
+      if (e.touches.length == 2) {
+        const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
+        touchX = x;
+        touchY = y;
+        touchDist = d;
+      }
+    };
+
+    const touchMove = (e: TouchEvent) => {
+      if (e.touches.length == 2) {
+        const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
+        moveCamera(x - touchX, y - touchY);
+        zoomCamera(x, y, d / touchDist);
+        touchX = x;
+        touchY = y;
+        touchDist = d;
       }
     };
 
@@ -67,12 +103,16 @@ export default function Board() {
     globalThis.addEventListener("wheel", zoom);
     globalThis.addEventListener("mousemove", move);
     globalThis.addEventListener("mousedown", startMove);
+    globalThis.addEventListener("touchstart", touchStart);
+    globalThis.addEventListener("touchmove", touchMove);
     globalThis.addEventListener("contextmenu", preventContextMenu);
 
     return () => {
       globalThis.removeEventListener("wheel", zoom);
       globalThis.removeEventListener("mousemove", move);
       globalThis.removeEventListener("mousedown", startMove);
+      globalThis.removeEventListener("touchstart", touchStart);
+      globalThis.removeEventListener("touchmove", touchMove);
       globalThis.removeEventListener("contextmenu", preventContextMenu);
     };
   }, [client]);
@@ -98,7 +138,7 @@ export default function Board() {
           }}
         />
         <ObservableCanvas client={client} />
-        <DrawableCanvas client={client} />
+        <DrawableCanvas client={client} transformer={transformer} />
         <CursorBox />
         <MouseTracker
           client={client}

@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
+import { Transformer } from "./MouseTracker.tsx";
+
 interface CanvasProps {
   client: Client;
+  transformer: Transformer;
 }
 
 export default function DrawableCanvas(props: CanvasProps) {
@@ -21,11 +24,8 @@ export default function DrawableCanvas(props: CanvasProps) {
     let drawing = false;
     let points: { x: number; y: number }[];
 
-    const startDraw = (event: MouseEvent) => {
-      if (event.button != 0) return;
+    const startDraw = (x: number, y: number) => {
       drawing = true;
-      const x = event.offsetX;
-      const y = event.offsetY;
       points = [{ x: x, y: y }];
       context.beginPath();
       context.lineWidth = 3;
@@ -33,12 +33,8 @@ export default function DrawableCanvas(props: CanvasProps) {
       context.moveTo(x, y);
     };
 
-    const draw = (event: MouseEvent) => {
-      if (!drawing) {
-        return;
-      }
-      const x = event.offsetX;
-      const y = event.offsetY;
+    const draw = (x: number, y: number) => {
+      if (!drawing) return;
       points.push({ x: x, y: y });
       context.lineTo(x, y);
       context.stroke();
@@ -51,14 +47,59 @@ export default function DrawableCanvas(props: CanvasProps) {
       context.clearRect(0, 0, canvas.width, canvas.height);
     };
 
-    canvas.addEventListener("mousedown", startDraw);
-    globalThis.addEventListener("mouseup", endDraw);
-    globalThis.addEventListener("mousemove", draw);
+    const mouseDown = (event: MouseEvent) => {
+      if (event.button != 0) return;
+      startDraw(event.offsetX, event.offsetY);
+    };
+
+    const mouseMove = (event: MouseEvent) => {
+      draw(event.offsetX, event.offsetY);
+    };
+
+    const mouseUp = () => {
+      endDraw();
+    };
+
+    const touchStart = (event: TouchEvent) => {
+      if (event.touches.length != 1) return;
+      startDraw(
+        ...props.transformer.transform(
+          event.touches[0].clientX,
+          event.touches[0].clientY,
+        ),
+      );
+    };
+
+    const touchMove = (event: TouchEvent) => {
+      if (event.touches.length != 1) return;
+      draw(
+        ...props.transformer.transform(
+          event.touches[0].clientX,
+          event.touches[0].clientY,
+        ),
+      );
+    };
+
+    const touchEnd = () => {
+      endDraw();
+    };
+
+    canvas.addEventListener("touchstart", touchStart);
+    globalThis.addEventListener("touchend", touchEnd);
+    globalThis.addEventListener("touchcancel", touchEnd);
+    globalThis.addEventListener("touchmove", touchMove);
+    canvas.addEventListener("mousedown", mouseDown);
+    globalThis.addEventListener("mouseup", mouseUp);
+    globalThis.addEventListener("mousemove", mouseMove);
 
     return () => {
-      canvas.removeEventListener("mousedown", startDraw);
-      globalThis.removeEventListener("mouseup", endDraw);
-      globalThis.removeEventListener("mousemove", draw);
+      canvas.removeEventListener("touchstart", touchStart);
+      globalThis.removeEventListener("touchend", touchEnd);
+      globalThis.removeEventListener("touchcancel", touchEnd);
+      globalThis.removeEventListener("touchmove", touchMove);
+      canvas.removeEventListener("mousedown", mouseDown);
+      globalThis.removeEventListener("mouseup", mouseUp);
+      globalThis.removeEventListener("mousemove", mouseMove);
     };
   }, []);
   return (
