@@ -43,11 +43,14 @@ export default function DrawableCanvas(props: CanvasProps) {
     };
 
     const endDraw = () => {
-      drawing = false;
-      context.closePath();
-      props.client.socket.draw(points);
-      context.clearRect(0, 0, canvas.width, canvas.height);
+      if (drawing) {
+        drawing = false;
+        context.closePath();
+        props.client.socket.draw(points);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+      }
     };
+
 
     const mouseDown = (event: MouseEvent) => {
       if (event.button != 0) return;
