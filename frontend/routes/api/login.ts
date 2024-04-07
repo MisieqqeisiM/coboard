@@ -16,8 +16,11 @@ export const handler: Handlers = {
     const token = await server.auth(login.toString(), "");
 
     if (!token) {
+      const headers = new Headers();
+      headers.set("location", "/");
       return new Response(null, {
-        status: 403
+        status: 303,
+        headers,
       });
     }
 

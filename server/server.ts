@@ -92,6 +92,8 @@ export class Server {
   }
 
   public async auth(login: string, _password: string): Promise<string | null> {
+    if (login.length > 64)
+      return null;
     console.log(`New user: ${login}`);
     const header: Header = {
       alg: "HS256",
