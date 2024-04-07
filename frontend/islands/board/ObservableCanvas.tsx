@@ -18,7 +18,7 @@ export default function ObservableCanvas(props: CanvasProps) {
       return;
     }
 
-    if (
+    while (
       props.client.ui.strokes && props.client.ui.strokes.value &&
       props.client.ui.strokes.value.length > 0
     ) {
