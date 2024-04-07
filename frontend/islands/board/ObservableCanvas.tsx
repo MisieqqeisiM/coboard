@@ -40,18 +40,23 @@ export default function ObservableCanvas(props: CanvasProps) {
   }, props.client.ui.strokes?.value);
   
   useEffect(()=>{
-    if(props.client.ui.clear && props.client.ui.clear.value) {
-      props.client.ui.clear.value=false;
-      const canvas = canvasRef.current;
-      if(!canvas)
-        return;
-      const context = canvas.getContext("2d");
-      if(!context)
-        return;
+    const subscription = props.client.ui.clear.subscribe((newValue) => {
+      if (newValue) {
+        props.client.ui.clear.value=false;
+        const canvas = canvasRef.current;
+        if (!canvas)
+          return;
+        const context = canvas.getContext("2d");
+        if (!context)
+          return;
 
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  }, props.client.ui.clear?.value);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <canvas
