@@ -103,7 +103,7 @@ export class Server {
     const id = crypto.randomUUID();
     const payload: UserPayload = {
       iss: "test",
-      exp: getNumericDate(300),
+      exp: getNumericDate(3600),
       id
     }
 
