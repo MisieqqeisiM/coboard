@@ -6,7 +6,7 @@
     "manifest": "deno task cli manifest $(pwd)",
     "start": "deno run -A --watch=frontend/,server/,liaison/ frontend/dev.ts",
     "build": "deno run -A dev.ts build",
-    "preview": "deno run -A main.ts",
+    "preview": "deno run -A frontend/main.ts",
     "update": "deno run -A -r https://fresh.deno.dev/update ."
   },
   "lint": {
