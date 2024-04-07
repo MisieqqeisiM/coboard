@@ -14,8 +14,8 @@ html, body {
 .cursor {
   position: absolute;
   pointer-events: none;
-  left: -50px;
-  top: -15px;
+  left: -49px;
+  top: -29px;
   width: 100px;
   user-select: none;
   transition: transform 200ms;
@@ -23,11 +23,9 @@ html, body {
 
 .cursor > .dot {
   position: absolute;
-  left: 35px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 5px solid;
+  left: 43px;
+  width: 30px;
+  height: 30px;
   display: inline-block;
 }
 

@@ -8,6 +8,7 @@ export default function LoginForm() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        gap: 30,
       }}
     >
       <div
@@ -17,6 +18,20 @@ export default function LoginForm() {
           alignItems: "center",
         }}
       >
+        <div style="position: relative">
+          <img
+            width="1000"
+            height="1000"
+            style={{
+              position: "absolute",
+              zIndex: -1,
+              left: -570,
+              top: -300,
+              opacity: 0.3,
+            }}
+            src="/icons/coboard.svg"
+          />
+        </div>
         <h3>Welcome to Coboard</h3>
         <form method="post" action="/api/login">
           <label for="login">Username</label>
@@ -39,7 +54,7 @@ export default function LoginForm() {
         </form>
         <div style="display: flex; justify-content: center; flex-direction: column; align-items: center">
           Powered by:
-          <div style="display: flex; gap: 5px">
+          <div style="display: flex; gap: 3px">
             <a href="https://deno.com/">
               <img
                 width={iconSize}

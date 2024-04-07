@@ -21,7 +21,7 @@ export default function Board() {
   const client = useContext(ClientContext);
   if (!client) return <Loading />;
 
-  const [scale, setScale] = useState(0.4);
+  const [scale, setScale] = useState(1);
   const [translateX, setTranslateX] = useState(
     globalThis.window.innerWidth / 2 / scale - width / 2,
   );
