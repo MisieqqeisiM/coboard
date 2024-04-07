@@ -152,16 +152,21 @@ export default function Board() {
           transformer={transformer}
         />
       </div>
-      <button
-        style={{
-          position: "absolute",
-          backgroundColor: "#ffffff",
-          margin: 3,
-        }}
-        onClick={() => location.href = "/api/logout"}
-      >
-        log out
-      </button>
+      <div style={{ position: "absolute" }}>
+        <button
+          style={{ backgroundColor: "#ffffff", margin: 3 }}
+          onClick={() => location.href = "/api/logout"}
+        >
+          log out
+        </button>
+
+        <button
+          style={{ backgroundColor: "#ffffff", margin: 3 }}
+          onClick={() => client.socket.reset()}
+        >
+          reset
+        </button>
+      </div>
     </>
   );
 }

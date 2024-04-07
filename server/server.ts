@@ -52,6 +52,10 @@ export class Server {
       for (const stroke of this.strokes)
         client.socket.emit("onDraw", null, stroke);
 
+      socket.on("reset", () => {
+        console.log("reset");
+        // TODO: remove all lines
+      });
 
       socket.on("disconnect", () => {
         this.clients.splice(this.clients.indexOf(client), 1);

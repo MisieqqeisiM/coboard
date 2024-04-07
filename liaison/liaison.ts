@@ -19,4 +19,5 @@ export interface ClientToServerEvents {
   ping(): void;
   move(x: number, y: number): void;
   draw(points: { x: number, y: number }[]): void;
+  reset(): void;
 }
