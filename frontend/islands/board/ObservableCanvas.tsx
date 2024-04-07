@@ -40,7 +40,7 @@ export default function ObservableCanvas(props: CanvasProps) {
   }, props.client.ui.strokes?.value);
   
   useEffect(()=>{
-    if(props.client.ui.clear.value) {
+    if(props.client.ui.clear && props.client.ui.clear.value) {
       props.client.ui.clear.value=false;
       const canvas = canvasRef.current;
       if(!canvas)
@@ -51,7 +51,7 @@ export default function ObservableCanvas(props: CanvasProps) {
 
       context.clearRect(0, 0, canvas.width, canvas.height);
     }
-  }, props.client.ui.clear.value);
+  }, props.client.ui.clear?.value);
 
   return (
     <canvas
