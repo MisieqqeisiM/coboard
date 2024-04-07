@@ -9,7 +9,6 @@ function initUser(id: string, name: string): User {
     x: 0,
     y: 0,
     pings: 0,
-    newStrokes: [],
   };
 }
 
@@ -49,12 +48,14 @@ export class Server {
 
       this.clients.push(client);
       this.updateUsers();
+
       for (const stroke of this.strokes)
         client.socket.emit("onDraw", null, stroke);
 
       socket.on("reset", () => {
-        console.log("reset");
-        // TODO: remove all lines
+        this.strokes = [];
+        for (const c of this.clients)
+          c.socket.emit("onReset");
       });
 
       socket.on("disconnect", () => {

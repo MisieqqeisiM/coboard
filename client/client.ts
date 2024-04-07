@@ -8,7 +8,8 @@ export class Client {
 
 export class UIClient {
   constructor(readonly users: Signal<Map<string, User>>,
-    readonly strokes: Signal<{ x: number, y: number }[][]> = new Signal([])) { }
+    readonly strokes: Signal<{ x: number, y: number }[][]> = new Signal([]),
+    readonly clear: Signal<boolean> = new Signal(false)) { }
 }
 
 export class SocketClient implements ClientToServerEvents {
@@ -38,6 +39,11 @@ export class SocketClient implements ClientToServerEvents {
 
     io.on("onAuthenticate", (tokenName: string) => {
       sessionStorage.setItem("token", tokenName);
+    });
+
+    io.on("onReset", ()=>{
+      client.strokes.value=[];
+      client.clear.value=true;
     });
   }
 
