@@ -12,7 +12,6 @@ import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
 import * as $app_MainDashboard from "./islands/app/MainDashboard.tsx";
 import * as $app_WithClient from "./islands/app/WithClient.tsx";
 import * as $board_Board from "./islands/board/Board.tsx";
-import * as $board_Canvas from "./islands/board/Canvas.tsx";
 import * as $board_ClientList from "./islands/board/ClientList.tsx";
 import * as $board_CursorBox from "./islands/board/CursorBox.tsx";
 import * as $board_DrawableCanvas from "./islands/board/DrawableCanvas.tsx";
@@ -35,7 +34,6 @@ const manifest = {
     "./islands/app/MainDashboard.tsx": $app_MainDashboard,
     "./islands/app/WithClient.tsx": $app_WithClient,
     "./islands/board/Board.tsx": $board_Board,
-    "./islands/board/Canvas.tsx": $board_Canvas,
     "./islands/board/ClientList.tsx": $board_ClientList,
     "./islands/board/CursorBox.tsx": $board_CursorBox,
     "./islands/board/DrawableCanvas.tsx": $board_DrawableCanvas,

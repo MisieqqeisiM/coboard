@@ -5,6 +5,8 @@ import { Transformer } from "./MouseTracker.tsx";
 interface CanvasProps {
   client: Client;
   transformer: Transformer;
+  width: number;
+  height: number;
 }
 
 export default function DrawableCanvas(props: CanvasProps) {
@@ -53,7 +55,7 @@ export default function DrawableCanvas(props: CanvasProps) {
     };
 
     const mouseMove = (event: MouseEvent) => {
-      draw(event.offsetX, event.offsetY);
+      draw(...props.transformer.transform(event.clientX, event.clientY));
     };
 
     const mouseUp = () => {
@@ -106,8 +108,8 @@ export default function DrawableCanvas(props: CanvasProps) {
     <canvas
       ref={canvasRef}
       style={{ position: "absolute", left: 0, top: 0 }}
-      width="600px"
-      height="300px"
+      width={`${props.width}px`}
+      height={`${props.height}px`}
     />
   );
 }

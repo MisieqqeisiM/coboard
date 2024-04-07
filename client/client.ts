@@ -3,7 +3,7 @@ import { ClientSocket } from "../liaison/client.ts";
 import { User } from "../liaison/liaison.ts";
 
 export class Client {
-  constructor(readonly socket: SocketClient, readonly ui: UIClient) { }
+  constructor(readonly socket: SocketClient, readonly ui: UIClient, readonly myId: string) { }
 }
 
 export class UIClient {
@@ -20,7 +20,6 @@ export class SocketClient {
     });
 
     io.on("onMove", (id, x, y) => {
-      console.log(id)
       const user = client.users.value.get(id)!;
       user.x = x;
       user.y = y;

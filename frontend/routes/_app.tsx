@@ -15,9 +15,16 @@ export default function App({ Component }: PageProps) {
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
         <title>coboard</title>
-        <link rel="stylesheet" href="/styles.css" />
         <link rel="stylesheet" href="/board_styles.css" />
         <link rel="stylesheet" href="/login_styles.css" />
+        <link
+          href="//fonts.googleapis.com/css?family=Raleway:400,300,600"
+          rel="stylesheet"
+          type="text/css"
+        />
+
+        <link rel="stylesheet" href="skeleton/normalize.css" />
+        <link rel="stylesheet" href="skeleton/skeleton.css" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"

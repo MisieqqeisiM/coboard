@@ -15,15 +15,23 @@ class MyTransformer implements Transformer {
 }
 
 export default function Board() {
+  const width = 2048;
+  const height = 2048;
+
   const client = useContext(ClientContext);
-  const [scale, setScale] = useState(1);
-  const [translateX, setTranslateX] = useState(0);
-  const [translateY, setTranslateY] = useState(0);
-  const [transformer, setTransformer] = useState(new MyTransformer(0, 0, 1));
+  if (!client) return <Loading />;
+
+  const [scale, setScale] = useState(0.4);
+  const [translateX, setTranslateX] = useState(
+    globalThis.window.innerWidth / 2 / scale - width / 2,
+  );
+  const [translateY, setTranslateY] = useState(
+    globalThis.window.innerHeight / 2 / scale - height / 2,
+  );
+
+  const transformer = new MyTransformer(translateX, translateY, scale);
 
   useEffect(() => {
-    if (!client) return;
-    setTransformer(new MyTransformer(0, 0, 1));
     function zoomCamera(x: number, y: number, amount: number) {
       const [pivotX, pivotY] = transformer.transform(x, y);
       setTranslateX((x) => transformer.dx = (x + pivotX) / amount - pivotX);
@@ -116,40 +124,44 @@ export default function Board() {
       globalThis.removeEventListener("touchmove", touchMove);
       globalThis.removeEventListener("contextmenu", preventContextMenu);
     };
-  }, [client]);
-  if (client) {
-    return (
-      <>
-        <div
-          style={{
-            position: "absolute",
-            width: "0px",
-            height: "0px",
-            transform:
-              `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              width: "600px",
-              height: "300px",
-              backgroundColor: "green",
-            }}
-          />
-          <ObservableCanvas client={client} />
-          <DrawableCanvas client={client} transformer={transformer} />
-          <CursorBox />
-          <MouseTracker
+  }, []);
+
+  return (
+    <>
+      <div
+        style={{
+          position: "absolute",
+          width: "0px",
+          height: "0px",
+          transform:
+            `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
+        }}
+      >
+        <div class="board" style={{ width, height }}>
+          <ObservableCanvas client={client} width={width} height={height} />
+          <DrawableCanvas
             client={client}
             transformer={transformer}
+            width={width}
+            height={height}
           />
         </div>
-        <button onClick={() => location.href = "/api/logout"}>log out</button>
-      </>
-    );
-  }
-  return <Loading />;
+        <CursorBox />
+        <MouseTracker
+          client={client}
+          transformer={transformer}
+        />
+      </div>
+      <button
+        style={{
+          position: "absolute",
+          backgroundColor: "#ffffff",
+          margin: 3,
+        }}
+        onClick={() => location.href = "/api/logout"}
+      >
+        log out
+      </button>
+    </>
+  );
 }

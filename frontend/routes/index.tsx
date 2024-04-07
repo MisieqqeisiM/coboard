@@ -29,7 +29,7 @@ export default function Home(props: PageProps<HomePars>) {
     return <LoginForm />;
   }
   return (
-    <WithClient>
+    <WithClient myId={props.data.currentUserId}>
       <Board />
     </WithClient>
   );
