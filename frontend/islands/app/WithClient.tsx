@@ -6,14 +6,16 @@ import { Client, SocketClient } from "../../../client/client.ts";
 import { UIClient } from "../../../client/client.ts";
 import { signal } from "@preact/signals";
 import { createContext } from "preact";
+import { PropertySignature } from "https://deno.land/x/ts_morph@20.0.0/ts_morph.js";
 
 export const ClientContext = createContext<Client | undefined>(undefined); //Dummy value, as we will always return the ClientContext from WithClient
 
 interface WithClientProps {
+  myId: string;
   children: ComponentChildren;
 }
 
-export function WithClient({ children }: WithClientProps) {
+export function WithClient({ children, myId }: WithClientProps) {
   const [client, setClient] = useState<Client | undefined>(undefined);
   useEffect(() => {
     if (client) {
@@ -25,7 +27,7 @@ export function WithClient({ children }: WithClientProps) {
     const uiClient = new UIClient(signal(new Map()));
     const socketClient = new SocketClient(io, uiClient);
     io.on("connect", () => {
-      setClient(new Client(socketClient, uiClient));
+      setClient(new Client(socketClient, uiClient, myId));
     });
     io.connect();
   }, []);

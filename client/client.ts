@@ -1,16 +1,18 @@
 import { Signal } from "@preact/signals";
 import { ClientSocket } from "../liaison/client.ts";
-import { User } from "../liaison/liaison.ts";
+import { User, ClientToServerEvents } from "../liaison/liaison.ts";
 
 export class Client {
-  constructor(readonly socket: SocketClient, readonly ui: UIClient) {}
+  constructor(readonly socket: SocketClient, readonly ui: UIClient, readonly myId: string) { }
 }
 
 export class UIClient {
-  constructor(readonly users: Signal<Map<string, User>>) {}
+  constructor(readonly users: Signal<Map<string, User>>,
+    readonly strokes: Signal<{ x: number, y: number }[][]> = new Signal([]),
+    readonly clear: Signal<boolean> = new Signal(false)) { }
 }
 
-export class SocketClient {
+export class SocketClient implements ClientToServerEvents {
   constructor(private io: ClientSocket, private client: UIClient) {
     io.on("onPing", (id) => {
       const user = client.users.value.get(id)!;
@@ -31,8 +33,17 @@ export class SocketClient {
       client.users.value = newUsers;
     });
 
+    io.on("onDraw", (id, points: { x: number, y: number }[]) => {
+      client.strokes.value = [...client.strokes.value, points];
+    });
+
     io.on("onAuthenticate", (tokenName: string) => {
       sessionStorage.setItem("token", tokenName);
+    });
+
+    io.on("onReset", ()=>{
+      client.strokes.value=[];
+      client.clear.value=true;
     });
   }
 
@@ -44,8 +55,12 @@ export class SocketClient {
     this.io.emit("move", x, y);
   }
 
-  public authenticate(username: string, password: string): void {
-    this.io.emit("authenticate", username, password);
+  public draw(points: { x: number, y: number }[]) {
+    this.io.emit("draw", points);
+  }
+
+  public reset() {
+    this.io.emit("reset");
   }
 
   public disconnect(): void {

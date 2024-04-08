@@ -9,11 +9,13 @@ export default function CursorBox() {
     return (
       <>
         <div>
-          {Array.from(client.ui.users.value.entries()).map(([k, v]) => (
-            <Cursor name={v.name} x={v.x} y={v.y} key={k} />
-          ))}
+          {Array.from(client.ui.users.value.entries()).map(([k, v]) => {
+            if (client.myId == v.id) {
+              return <></>;
+            }
+            return <Cursor name={v.name} x={v.x} y={v.y} key={k} />;
+          })}
         </div>
-        <MouseTracker client={client} />
       </>
     );
   }

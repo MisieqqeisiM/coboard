@@ -2,13 +2,24 @@ import { Server, Socket } from "$socketio/mod.ts";
 import { cert, key } from "../certificates/certificates.ts";
 import { Server as ServerLogic } from "../server/server.ts";
 import { ClientToServerEvents, ServerToClientEvents } from "./liaison.ts";
+import { User } from "./liaison.ts"
+
+export interface SocketData {
+  client: Client;
+};
+
+export interface Client {
+  user: User;
+  socket: ServerSocket;
+}
 
 export type SocketServer = Server<
   ClientToServerEvents,
   ServerToClientEvents,
   {},
-  {}
+  SocketData
 >;
+
 export type ServerSocket = Socket<
   ClientToServerEvents,
   ServerToClientEvents,

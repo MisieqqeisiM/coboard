@@ -1,8 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
-import ClientList from "../board/ClientList.tsx";
-import CursorBox from "../board/CursorBox.tsx";
-import PingButton from "../board/PingButton.tsx";
 import LoginForm from "./LoginForm.tsx";
+import Board from "../board/Board.tsx";
 
 export default function MainDashboard() {
   const [component, setComponent] = useState(<></>);
@@ -12,29 +10,21 @@ export default function MainDashboard() {
     if (!token) {
       setComponent(
         <>
-          <LoginForm stateChanger={setToken} />
-        </>
+          <LoginForm />
+        </>,
       );
     } else {
       setComponent(
         <>
-          <h1 class="text-4xl font-bold">Current users:</h1>
-          <ClientList />
-          <PingButton />
-          <CursorBox />
-        </>
+          <Board />
+        </>,
       );
     }
   }, [token]);
 
   return (
     <>
-      {" "}
-      <div class="px-4 py-8 mx-auto bg-[#86efac]">
-        <div class="max-w-screen-md mx-auto flex flex-col items-center justify-center"></div>
-        <>{component}</>
-        <div />
-      </div>
+      {component}
     </>
   );
 }

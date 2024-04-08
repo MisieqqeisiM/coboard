@@ -10,7 +10,7 @@ export function Cursor(props: CursorProps) {
       class="cursor"
       style={`transform: translate(${props.x}px, ${props.y}px)`}
     >
-      <div class="dot"> </div>
+      <img class="dot" src="/pencil.svg" width="30" height="30" />
       <div class="label">
         <b>{props.name}</b>
       </div>
