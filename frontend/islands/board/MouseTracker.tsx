@@ -23,9 +23,8 @@ export default function MouseTracker(props: MouseTrackerProps) {
       y = e.clientY;
     };
     const f2 = (e: TouchEvent) => {
-      if (e.touches.length != 1) {
-        return;
-      }
+      if (e.touches.length != 1) return;
+      e.preventDefault();
       x = e.touches[0].clientX ?? 0;
       y = e.touches[0].clientY ?? 0;
     };

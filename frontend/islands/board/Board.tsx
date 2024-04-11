@@ -70,29 +70,29 @@ export default function Board() {
     }
 
     const touchStart = (e: TouchEvent) => {
-      if (e.touches.length == 2) {
-        const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
-        touchX = x;
-        touchY = y;
-        touchDist = d;
-      }
+      if (e.touches.length < 2) return;
+      e.preventDefault();
+      const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
+      touchX = x;
+      touchY = y;
+      touchDist = d;
     };
 
     const touchMove = (e: TouchEvent) => {
-      if (e.touches.length == 2) {
-        const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
-        camera.value = camera.peek().move(
-          x - touchX,
-          y - touchY,
-        ).zoom(
-          x,
-          y,
-          d / touchDist,
-        );
-        touchX = x;
-        touchY = y;
-        touchDist = d;
-      }
+      if (e.touches.length < 2) return;
+      e.preventDefault();
+      const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
+      camera.value = camera.peek().move(
+        x - touchX,
+        y - touchY,
+      ).zoom(
+        x,
+        y,
+        d / touchDist,
+      );
+      touchX = x;
+      touchY = y;
+      touchDist = d;
     };
 
     const preventContextMenu = (e: Event) => {

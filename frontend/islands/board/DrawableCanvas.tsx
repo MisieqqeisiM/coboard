@@ -67,6 +67,7 @@ export default function DrawableCanvas(props: CanvasProps) {
 
     const touchStart = (event: TouchEvent) => {
       if (event.touches.length != 1) return;
+      event.preventDefault();
       startDraw(
         ...props.camera.peek().toBoardCoords(
           event.touches[0].clientX,
@@ -77,6 +78,7 @@ export default function DrawableCanvas(props: CanvasProps) {
 
     const touchMove = (event: TouchEvent) => {
       if (event.touches.length != 1) return;
+      event.preventDefault();
       draw(
         ...props.camera.peek().toBoardCoords(
           event.touches[0].clientX,
