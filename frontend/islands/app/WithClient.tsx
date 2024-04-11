@@ -7,15 +7,16 @@ import { UIClient } from "../../../client/client.ts";
 import { signal } from "@preact/signals";
 import { createContext } from "preact";
 import { PropertySignature } from "https://deno.land/x/ts_morph@20.0.0/ts_morph.js";
+import { Account } from "../../../liaison/liaison.ts";
 
 export const ClientContext = createContext<Client | undefined>(undefined); //Dummy value, as we will always return the ClientContext from WithClient
 
 interface WithClientProps {
-  myId: string;
+  account: Account;
   children: ComponentChildren;
 }
 
-export function WithClient({ children, myId }: WithClientProps) {
+export function WithClient({ children, account }: WithClientProps) {
   const [client, setClient] = useState<Client | undefined>(undefined);
   useEffect(() => {
     if (client) {
@@ -27,7 +28,7 @@ export function WithClient({ children, myId }: WithClientProps) {
     const uiClient = new UIClient(signal(new Map()));
     const socketClient = new SocketClient(io, uiClient);
     io.on("connect", () => {
-      setClient(new Client(socketClient, uiClient, myId));
+      setClient(new Client(socketClient, uiClient, account));
     });
     io.connect();
   }, []);

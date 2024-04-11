@@ -1,5 +1,4 @@
 import { Cursor } from "../../components/board/Cursor.tsx";
-import MouseTracker from "./MouseTracker.tsx";
 import { ClientContext } from "../app/WithClient.tsx";
 import { useContext } from "preact/hooks";
 
@@ -10,10 +9,10 @@ export default function CursorBox() {
       <>
         <div>
           {Array.from(client.ui.users.value.entries()).map(([k, v]) => {
-            if (client.myId == v.id) {
+            if (client.account.id == v.account.id) {
               return <></>;
             }
-            return <Cursor name={v.name} x={v.x} y={v.y} key={k} />;
+            return <Cursor name={v.account.name} x={v.x} y={v.y} key={k} />;
           })}
         </div>
       </>

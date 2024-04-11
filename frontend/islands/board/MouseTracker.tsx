@@ -1,6 +1,5 @@
 import { useEffect } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
-import { transform } from "https://deno.land/x/esbuild@v0.19.11/mod.js";
 
 export interface Transformer {
   transform(x: number, y: number): [number, number];
