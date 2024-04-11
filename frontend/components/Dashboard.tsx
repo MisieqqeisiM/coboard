@@ -31,7 +31,7 @@ export default function Dashboard({ boards }: DashboardPars) {
           }}
         >
           {boards.map((board) => <BoardTile id={board} name={board} />)}
-          <BoardTile id="api/new_board" name="new" />
+          <a class="button button-primary" href="/api/new_board">new</a>
         </div>
       </div>
     </>
