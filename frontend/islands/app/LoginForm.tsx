@@ -1,4 +1,7 @@
-export default function LoginForm() {
+interface LoginFormProps {
+  board: string;
+}
+export default function LoginForm({ board }: LoginFormProps) {
   const iconSize = 40;
   return (
     <div
@@ -34,6 +37,7 @@ export default function LoginForm() {
         </div>
         <h3>Welcome to Coboard</h3>
         <form method="post" action="/api/login">
+          <input type="hidden" name="board" id="board" value={board} />
           <label for="login">Username</label>
           <input class="u-full-width" type="text" name="login" id="login" />
           <label for="password" style={{ color: "#eee" }}>Password</label>

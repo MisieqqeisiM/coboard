@@ -21,6 +21,7 @@
     "**/_fresh/*"
   ],
   "imports": {
+    "$nanoid/": "https://deno.land/x/nanoid@v3.0.0/",
     "$fresh/": "https://deno.land/x/fresh@1.6.5/",
     "$socketio/": "https://deno.land/x/socket_io@0.2.0/",
     "$djwt/": "https://deno.land/x/djwt@v3.0.2/",

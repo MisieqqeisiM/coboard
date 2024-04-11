@@ -134,16 +134,30 @@ export default function Board() {
           camera={camera}
         />
       </CameraView>
-      <div style={{ position: "absolute" }}>
+      <div
+        style={{
+          position: "absolute",
+          display: "flex",
+          flexDirection: "column",
+          margin: 3,
+        }}
+      >
         <button
-          style={{ backgroundColor: "#ffffff", margin: 3 }}
+          style={{ backgroundColor: "#ffffff" }}
           onClick={() => location.href = "/api/logout"}
         >
           log out
         </button>
 
         <button
-          style={{ backgroundColor: "#ffffff", margin: 3 }}
+          style={{ backgroundColor: "#ffffff" }}
+          onClick={() => location.href = "/"}
+        >
+          boards
+        </button>
+
+        <button
+          style={{ backgroundColor: "#ffffff" }}
           onClick={() => client.socket.reset()}
         >
           reset
