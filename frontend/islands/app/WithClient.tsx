@@ -1,12 +1,11 @@
 import { useEffect, useState } from "preact/hooks";
-import { ComponentChildren, Context } from "preact";
+import { ComponentChildren } from "preact";
 
 import { createClient } from "../../../liaison/client.ts";
 import { Client, SocketClient } from "../../../client/client.ts";
 import { UIClient } from "../../../client/client.ts";
 import { signal } from "@preact/signals";
 import { createContext } from "preact";
-import { PropertySignature } from "https://deno.land/x/ts_morph@20.0.0/ts_morph.js";
 import { Account } from "../../../liaison/liaison.ts";
 
 export const ClientContext = createContext<Client | undefined>(undefined); //Dummy value, as we will always return the ClientContext from WithClient
@@ -29,6 +28,9 @@ export function WithClient({ children, account }: WithClientProps) {
     const socketClient = new SocketClient(io, uiClient);
     io.on("connect", () => {
       setClient(new Client(socketClient, uiClient, account));
+    });
+    io.on("connect_error", () => {
+      globalThis.window.location.href = "/";
     });
     io.connect();
   }, []);
