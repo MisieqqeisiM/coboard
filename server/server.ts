@@ -1,4 +1,4 @@
-import { ALREADY_LOGGED_IN } from "../liaison/liaison.ts";
+import { ALREADY_LOGGED_IN, BAD_TOKEN } from "../liaison/liaison.ts";
 import { SocketServer } from "../liaison/server.ts";
 import { Accounts } from "./accounts.ts"
 import { Board } from "./board.ts"
