@@ -3,7 +3,12 @@ import { ClientSocket } from "../liaison/client.ts";
 import { Account, BoardUser, ClientToServerEvents } from "../liaison/liaison.ts";
 
 export class Client {
-  constructor(readonly socket: SocketClient, readonly ui: UIClient, readonly account: Account) { }
+  constructor(
+    readonly socket: SocketClient,
+    readonly ui: UIClient,
+    readonly account: Account,
+    readonly allowed: boolean
+  ) { }
 }
 
 export class UIClient {
@@ -36,9 +41,6 @@ export class SocketClient implements ClientToServerEvents {
       client.clear.value = true;
     });
 
-    io.on("connect_error", () => {
-      globalThis.window.location.href = "/";
-    });
   }
 
   public move(x: number, y: number) {

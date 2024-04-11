@@ -7,7 +7,6 @@ import * as $_app from "./routes/_app.tsx";
 import * as $api_login from "./routes/api/login.ts";
 import * as $api_logout from "./routes/api/logout.ts";
 import * as $index from "./routes/index.tsx";
-import * as $app_Loading from "./islands/app/Loading.tsx";
 import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
 import * as $app_WithClient from "./islands/app/WithClient.tsx";
 import * as $board_Board from "./islands/board/Board.tsx";
@@ -27,7 +26,6 @@ const manifest = {
     "./routes/index.tsx": $index,
   },
   islands: {
-    "./islands/app/Loading.tsx": $app_Loading,
     "./islands/app/LoginForm.tsx": $app_LoginForm,
     "./islands/app/WithClient.tsx": $app_WithClient,
     "./islands/board/Board.tsx": $board_Board,

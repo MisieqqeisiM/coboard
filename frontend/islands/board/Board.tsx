@@ -4,10 +4,11 @@ import DrawableCanvas from "./DrawableCanvas.tsx";
 import ObservableCanvas from "./ObservableCanvas.tsx";
 import CursorBox from "./CursorBox.tsx";
 import MouseTracker from "./MouseTracker.tsx";
-import Loading from "../app/Loading.tsx";
+import Loading from "../../components/Loading.tsx";
 import { Camera } from "../../../client/camera.ts";
 import { signal } from "@preact/signals";
 import CameraView from "./CameraView.tsx";
+import AlreadyLoggedIn from "../../components/AlreadyLoggedIn.tsx";
 
 export default function Board() {
   const width = 2048;
@@ -15,6 +16,7 @@ export default function Board() {
 
   const client = useContext(ClientContext);
   if (!client) return <Loading />;
+  if (!client.allowed) return <AlreadyLoggedIn />;
 
   const camera = signal(
     new Camera(

@@ -8,6 +8,10 @@ export class Board {
 
   constructor(private io: SocketServer) { }
 
+  public hasUser(id: string) {
+    return this.users.has(id);
+  }
+
   public newUser(client: Client) {
     const user: BoardUser = {
       account: client.account,

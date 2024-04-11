@@ -21,3 +21,6 @@ export interface ClientToServerEvents {
   draw(points: { x: number, y: number }[]): void;
   reset(): void;
 }
+
+export const ALREADY_LOGGED_IN = "already logged in";
+export const BAD_TOKEN = "bad token";
