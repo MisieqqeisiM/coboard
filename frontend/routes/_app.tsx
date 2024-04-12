@@ -1,5 +1,4 @@
 import { type PageProps } from "$fresh/server.ts";
-import { WithClient } from "../islands/app/WithClient.tsx";
 import { server } from "../../liaison/server.ts";
 
 server;

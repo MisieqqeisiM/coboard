@@ -1,18 +1,14 @@
 import { ClientContext } from "../app/WithClient.tsx";
-import { useContext, useEffect, useState } from "preact/hooks";
+import { useContext, useEffect } from "preact/hooks";
 import DrawableCanvas from "./DrawableCanvas.tsx";
 import ObservableCanvas from "./ObservableCanvas.tsx";
 import CursorBox from "./CursorBox.tsx";
 import MouseTracker from "./MouseTracker.tsx";
-import { Transformer } from "./MouseTracker.tsx";
-import Loading from "../app/Loading.tsx";
-
-class MyTransformer implements Transformer {
-  constructor(public dx: number, public dy: number, public scale: number) {}
-  transform(x: number, y: number): [number, number] {
-    return [x / this.scale - this.dx, y / this.scale - this.dy];
-  }
-}
+import Loading from "../../components/Loading.tsx";
+import { Camera } from "../../../client/camera.ts";
+import { signal } from "@preact/signals";
+import CameraView from "./CameraView.tsx";
+import AlreadyLoggedIn from "../../components/AlreadyLoggedIn.tsx";
 
 export default function Board() {
   const width = 2048;
@@ -20,30 +16,23 @@ export default function Board() {
 
   const client = useContext(ClientContext);
   if (!client) return <Loading />;
+  if (!client.allowed) return <AlreadyLoggedIn />;
 
-  const [scale, setScale] = useState(1);
-  const [translateX, setTranslateX] = useState(
-    globalThis.window.innerWidth / 2 / scale - width / 2,
+  const camera = signal(
+    new Camera(
+      globalThis.window.innerWidth / 2 - width / 2,
+      globalThis.window.innerHeight / 2 - height / 2,
+      1,
+    ),
   );
-  const [translateY, setTranslateY] = useState(
-    globalThis.window.innerHeight / 2 / scale - height / 2,
-  );
-
-  const transformer = new MyTransformer(translateX, translateY, scale);
 
   useEffect(() => {
-    function zoomCamera(x: number, y: number, amount: number) {
-      const [pivotX, pivotY] = transformer.transform(x, y);
-      setTranslateX((x) => transformer.dx = (x + pivotX) / amount - pivotX);
-      setTranslateY((y) => transformer.dy = (y + pivotY) / amount - pivotY);
-      setScale((s) => transformer.scale = s * amount);
-    }
     const zoom = (e: WheelEvent) => {
       const amount = e.deltaY;
       if (amount > 0) {
-        zoomCamera(e.clientX, e.clientY, 1 / 1.1);
+        camera.value = camera.peek().zoom(e.clientX, e.clientY, 1 / 1.1);
       } else {
-        zoomCamera(e.clientX, e.clientY, 1.1);
+        camera.value = camera.peek().zoom(e.clientX, e.clientY, 1.1);
       }
     };
 
@@ -52,23 +41,18 @@ export default function Board() {
 
     const startMove = (e: MouseEvent) => {
       if (e.buttons & 2) {
-        prevX = e.pageX;
-        prevY = e.pageY;
+        prevX = e.clientX;
+        prevY = e.clientY;
       }
     };
 
-    function moveCamera(dx: number, dy: number) {
-      setTranslateX((x) => transformer.dx = x + dx / transformer.scale);
-      setTranslateY((y) => transformer.dy = y + dy / transformer.scale);
-    }
-
     const move = (e: MouseEvent) => {
       if (e.buttons & 2) {
-        const dx = e.pageX - prevX;
-        const dy = e.pageY - prevY;
-        prevX = e.pageX;
-        prevY = e.pageY;
-        moveCamera(dx, dy);
+        const dx = e.clientX - prevX;
+        const dy = e.clientY - prevY;
+        prevX = e.clientX;
+        prevY = e.clientY;
+        camera.value = camera.peek().move(dx, dy);
       }
     };
 
@@ -86,23 +70,29 @@ export default function Board() {
     }
 
     const touchStart = (e: TouchEvent) => {
-      if (e.touches.length == 2) {
-        const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
-        touchX = x;
-        touchY = y;
-        touchDist = d;
-      }
+      if (e.touches.length < 2) return;
+      e.preventDefault();
+      const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
+      touchX = x;
+      touchY = y;
+      touchDist = d;
     };
 
     const touchMove = (e: TouchEvent) => {
-      if (e.touches.length == 2) {
-        const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
-        moveCamera(x - touchX, y - touchY);
-        zoomCamera(x, y, d / touchDist);
-        touchX = x;
-        touchY = y;
-        touchDist = d;
-      }
+      if (e.touches.length < 2) return;
+      e.preventDefault();
+      const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
+      camera.value = camera.peek().move(
+        x - touchX,
+        y - touchY,
+      ).zoom(
+        x,
+        y,
+        d / touchDist,
+      );
+      touchX = x;
+      touchY = y;
+      touchDist = d;
     };
 
     const preventContextMenu = (e: Event) => {
@@ -128,20 +118,12 @@ export default function Board() {
 
   return (
     <>
-      <div
-        style={{
-          position: "absolute",
-          width: "0px",
-          height: "0px",
-          transform:
-            `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
-        }}
-      >
+      <CameraView camera={camera}>
         <div class="board" style={{ width, height }}>
           <ObservableCanvas client={client} width={width} height={height} />
           <DrawableCanvas
             client={client}
-            transformer={transformer}
+            camera={camera}
             width={width}
             height={height}
           />
@@ -149,9 +131,9 @@ export default function Board() {
         <CursorBox />
         <MouseTracker
           client={client}
-          transformer={transformer}
+          camera={camera}
         />
-      </div>
+      </CameraView>
       <div style={{ position: "absolute" }}>
         <button
           style={{ backgroundColor: "#ffffff", margin: 3 }}

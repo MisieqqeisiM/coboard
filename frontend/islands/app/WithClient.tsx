@@ -1,21 +1,20 @@
 import { useEffect, useState } from "preact/hooks";
-import { ComponentChildren, Context } from "preact";
-
+import { ComponentChildren } from "preact";
 import { createClient } from "../../../liaison/client.ts";
 import { Client, SocketClient } from "../../../client/client.ts";
 import { UIClient } from "../../../client/client.ts";
 import { signal } from "@preact/signals";
 import { createContext } from "preact";
-import { PropertySignature } from "https://deno.land/x/ts_morph@20.0.0/ts_morph.js";
+import { Account, ALREADY_LOGGED_IN } from "../../../liaison/liaison.ts";
 
 export const ClientContext = createContext<Client | undefined>(undefined); //Dummy value, as we will always return the ClientContext from WithClient
 
 interface WithClientProps {
-  myId: string;
+  account: Account;
   children: ComponentChildren;
 }
 
-export function WithClient({ children, myId }: WithClientProps) {
+export function WithClient({ children, account }: WithClientProps) {
   const [client, setClient] = useState<Client | undefined>(undefined);
   useEffect(() => {
     if (client) {
@@ -27,7 +26,15 @@ export function WithClient({ children, myId }: WithClientProps) {
     const uiClient = new UIClient(signal(new Map()));
     const socketClient = new SocketClient(io, uiClient);
     io.on("connect", () => {
-      setClient(new Client(socketClient, uiClient, myId));
+      setClient(new Client(socketClient, uiClient, account, true));
+    });
+    io.on("connect_error", (e) => {
+      console.log(e.message);
+      if (e.message == ALREADY_LOGGED_IN) {
+        setClient(new Client(socketClient, uiClient, account, false));
+      } else {
+        globalThis.window.location.href = "/";
+      }
     });
     io.connect();
   }, []);
