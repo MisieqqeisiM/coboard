@@ -6,7 +6,6 @@ import { UIClient } from "../../../client/client.ts";
 import { signal } from "@preact/signals";
 import { createContext } from "preact";
 import { Account, ALREADY_LOGGED_IN } from "../../../liaison/liaison.ts";
-import { nanoid } from "$nanoid/mod.ts";
 
 export const ClientContext = createContext<Client | undefined>(undefined); //Dummy value, as we will always return the ClientContext from WithClient
 

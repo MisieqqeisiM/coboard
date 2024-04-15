@@ -13,7 +13,6 @@ export default function App({ Component }: PageProps) {
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
-        <title>coboard</title>
         <link rel="stylesheet" href="/board_styles.css" />
         <link rel="stylesheet" href="/login_styles.css" />
         <link
@@ -24,6 +23,31 @@ export default function App({ Component }: PageProps) {
 
         <link rel="stylesheet" href="skeleton/normalize.css" />
         <link rel="stylesheet" href="skeleton/skeleton.css" />
+        <title>Coboard</title>
+        <meta
+          name="description"
+          content="The best opensource web whiteboard."
+        />
+
+        <meta property="og:url" content="https://coboard.pl/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Coboard" />
+        <meta
+          property="og:description"
+          content="The best opensource web whiteboard."
+        />
+        <meta property="og:image" content="https://coboard.pl/thumbnail.png" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="twitter:domain" content="coboard.pl" />
+        <meta property="twitter:url" content="https://coboard.pl/" />
+        <meta name="twitter:title" content="Coboard" />
+        <meta
+          name="twitter:description"
+          content="The best opensource web whiteboard."
+        />
+        <meta name="twitter:image" content="https://coboard.pl/thumbnail.png" />
+
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
