@@ -99,6 +99,9 @@ export default function Board() {
       e.preventDefault();
     };
 
+    globalThis.addEventListener("gesturestart", (e) => {
+      e.preventDefault();
+    });
     globalThis.addEventListener("wheel", zoom);
     globalThis.addEventListener("mousemove", move);
     globalThis.addEventListener("mousedown", startMove);
