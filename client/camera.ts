@@ -1,3 +1,5 @@
+import { Context, createContext } from "preact";
+
 export class Camera {
   constructor(public dx: number, public dy: number, public scale: number) { }
   public toBoardCoords(x: number, y: number): [number, number] {
@@ -21,3 +23,7 @@ export class Camera {
     );
   }
 }
+
+export const CameraContext: Context<Signal<Camera>> = createContext(
+  new Camera(0, 0, 0),
+);

@@ -34,7 +34,7 @@ export const handler: Handlers = {
       secure: true,
     });
 
-    headers.set("location", `/${form.get("board") ?? ""}`);
+    headers.set("location", `${form.get("redirectTo") ?? "/"}`);
     return new Response(null, {
       status: 303,
       headers,

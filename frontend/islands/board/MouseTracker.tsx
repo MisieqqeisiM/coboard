@@ -1,7 +1,6 @@
-import { useEffect } from "preact/hooks";
+import { useContext, useEffect } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
-import { Signal } from "@preact/signals";
-import { Camera } from "../../../client/camera.ts";
+import { CameraContext } from "../../../client/camera.ts";
 
 export interface Transformer {
   transform(x: number, y: number): [number, number];
@@ -9,10 +8,10 @@ export interface Transformer {
 
 interface MouseTrackerProps {
   client: Client;
-  camera: Signal<Camera>;
 }
 
 export default function MouseTracker(props: MouseTrackerProps) {
+  const camera = useContext(CameraContext);
   useEffect(() => {
     let x = 0;
     let y = 0;
@@ -34,7 +33,7 @@ export default function MouseTracker(props: MouseTrackerProps) {
       if (lastX == x && lastY == y) return;
       lastX = x;
       lastY = y;
-      props.client.socket.move(...props.camera.peek().toBoardCoords(x, y));
+      props.client.socket.move(...camera.peek().toBoardCoords(x, y));
     }, 50);
 
     return () => {

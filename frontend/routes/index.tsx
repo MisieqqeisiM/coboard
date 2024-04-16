@@ -4,6 +4,7 @@ import { deleteCookie, getCookies } from "$std/http/cookie.ts";
 import LoginForm from "../islands/app/LoginForm.tsx";
 import { Account } from "../../liaison/liaison.ts";
 import Dashboard from "../components/Dashboard.tsx";
+import { getAccount } from "../../server/utils.ts";
 
 interface HomePars {
   account: Account | null;
@@ -12,16 +13,12 @@ interface HomePars {
 
 export const handler: Handlers = {
   async GET(req, ctx) {
-    const cookies = getCookies(req.headers);
-    const token = cookies["auth"];
-    if (!token) return ctx.render!({ account: null });
-    const account = await server.accounts.getAccount(token);
+    const account = await getAccount(req);
     if (account) {
-      const boards = await server.boards.getUserBoards(account?.id);
+      const boards = await server.boards.getUserBoards(account.id);
       return await ctx.render!({ account, boards });
     } else {
       const res = await ctx.render!({ account });
-      deleteCookie(res.headers, "auth");
       return res;
     }
   },
@@ -29,7 +26,7 @@ export const handler: Handlers = {
 
 export default function Home(props: PageProps<HomePars>) {
   if (!props.data.account) {
-    return <LoginForm board="" />;
+    return <LoginForm redirectTo="/" />;
   }
   return <Dashboard boards={props.data.boards} />;
 }

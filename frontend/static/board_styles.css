@@ -5,6 +5,10 @@ html, body {
   touch-action: none;
 }
 
+.button:not(.button-primary) {
+  background-color: white !important;
+}
+
 .board {
   border: 3px dashed;
   box-sizing: border-box;

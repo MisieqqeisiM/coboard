@@ -2,14 +2,15 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $_slug_ from "./routes/[slug].tsx";
+import * as $_board_ from "./routes/[board].tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_login from "./routes/api/login.ts";
 import * as $api_logout from "./routes/api/logout.ts";
-import * as $api_new_board from "./routes/api/new_board.ts";
+import * as $api_new_board from "./routes/api/new_board.tsx";
 import * as $index from "./routes/index.tsx";
 import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
+import * as $app_Reload from "./islands/app/Reload.tsx";
 import * as $app_WithClient from "./islands/app/WithClient.tsx";
 import * as $board_Board from "./islands/board/Board.tsx";
 import * as $board_CameraView from "./islands/board/CameraView.tsx";
@@ -21,16 +22,17 @@ import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
-    "./routes/[slug].tsx": $_slug_,
+    "./routes/[board].tsx": $_board_,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/api/login.ts": $api_login,
     "./routes/api/logout.ts": $api_logout,
-    "./routes/api/new_board.ts": $api_new_board,
+    "./routes/api/new_board.tsx": $api_new_board,
     "./routes/index.tsx": $index,
   },
   islands: {
     "./islands/app/LoginForm.tsx": $app_LoginForm,
+    "./islands/app/Reload.tsx": $app_Reload,
     "./islands/app/WithClient.tsx": $app_WithClient,
     "./islands/board/Board.tsx": $board_Board,
     "./islands/board/CameraView.tsx": $board_CameraView,
