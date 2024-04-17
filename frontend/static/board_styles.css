@@ -5,6 +5,65 @@ html, body {
   touch-action: none;
 }
 
+.color {
+  border: 2px solid transparent;
+  border-radius: 7px;
+  margin-bottom: -9px;
+  width: 100px;
+  height: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.color-selector > .color-box > .color {
+  margin-bottom: -20px;
+}
+
+.color-selector:hover > .color-box > .color {
+  margin-bottom: -9px;
+}
+
+.color:hover {
+  height: 50px !important;
+}
+
+
+.color-selector {
+  display: flex;
+  flex-direction: row;
+  margin-left: -110px;
+  transition: all 0.2s;
+}
+
+.color-selector:hover {
+  margin-left: -40px;
+}
+
+.color-box {
+  border: 1px solid;
+  border-radius: 8px;
+  padding-bottom: 9px;
+}
+
+.color-indicator {
+  margin-left: 10px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid  #777;
+  border-radius: 7px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.color-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid;
+  border-radius: 50%;
+}
+
 .button:not(.button-primary) {
   background-color: white !important;
 }

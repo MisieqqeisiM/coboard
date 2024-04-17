@@ -9,6 +9,7 @@ import { Camera } from "../../../client/camera.ts";
 import { signal } from "@preact/signals";
 import CameraView from "./CameraView.tsx";
 import AlreadyLoggedIn from "../../components/AlreadyLoggedIn.tsx";
+import ColorSelector from "./ColorSelector.tsx";
 
 export default function Board() {
   const width = 2048;
@@ -22,8 +23,8 @@ export default function Board() {
     new Camera(
       globalThis.window.innerWidth / 2 - width / 2,
       globalThis.window.innerHeight / 2 - height / 2,
-      1,
-    ),
+      1
+    )
   );
 
   return (
@@ -44,11 +45,16 @@ export default function Board() {
           margin: 3,
         }}
       >
-        <a class="button" href="/api/logout">log out</a>
-        <a class="button" href="/">boards</a>
+        <a class="button" href="/api/logout">
+          log out
+        </a>
+        <a class="button" href="/">
+          boards
+        </a>
         <button class="button" onClick={() => client.socket.reset()}>
           reset
         </button>
+        <ColorSelector />
       </div>
     </>
   );
