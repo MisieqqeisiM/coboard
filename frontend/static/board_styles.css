@@ -52,6 +52,7 @@ html, body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  background-color: white;
 }
 
 .color-selector {
