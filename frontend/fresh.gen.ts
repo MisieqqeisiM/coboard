@@ -12,6 +12,7 @@ import * as $index from "./routes/index.tsx";
 import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
 import * as $app_Reload from "./islands/app/Reload.tsx";
 import * as $app_WithClient from "./islands/app/WithClient.tsx";
+import * as $board_AccountMenu from "./islands/board/AccountMenu.tsx";
 import * as $board_Board from "./islands/board/Board.tsx";
 import * as $board_CameraView from "./islands/board/CameraView.tsx";
 import * as $board_ColorSelector from "./islands/board/ColorSelector.tsx";
@@ -37,6 +38,7 @@ const manifest = {
     "./islands/app/LoginForm.tsx": $app_LoginForm,
     "./islands/app/Reload.tsx": $app_Reload,
     "./islands/app/WithClient.tsx": $app_WithClient,
+    "./islands/board/AccountMenu.tsx": $board_AccountMenu,
     "./islands/board/Board.tsx": $board_Board,
     "./islands/board/CameraView.tsx": $board_CameraView,
     "./islands/board/ColorSelector.tsx": $board_ColorSelector,

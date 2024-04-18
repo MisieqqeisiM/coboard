@@ -1,4 +1,5 @@
 import { useRef, useState } from "preact/hooks";
+import IconCircle from "../../components/IconCircle.tsx";
 
 export default function ToolSelector() {
   const tools = [
@@ -9,14 +10,5 @@ export default function ToolSelector() {
   const nextTool = () => {
     setTool((t) => (t + 1) % tools.length);
   };
-  return (
-    <div
-      class="tool-selector"
-      dangerouslySetInnerHTML={{
-        __html: `<ion-icon name='${tools[tool]}'></ion-icon>`,
-      }}
-      onClick={nextTool}
-    >
-    </div>
-  );
+  return <IconCircle iconName={tools[tool]} onClick={nextTool} />;
 }

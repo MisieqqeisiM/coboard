@@ -38,24 +38,6 @@ export default function Board() {
         <CursorBox />
         <MouseTracker client={client} />
       </CameraView>
-      <div
-        style={{
-          position: "absolute",
-          display: "flex",
-          flexDirection: "column",
-          margin: 3,
-        }}
-      >
-        <a class="button" href="/api/logout">
-          log out
-        </a>
-        <a class="button" href="/">
-          boards
-        </a>
-        <button class="button" onClick={() => client.socket.reset()}>
-          reset
-        </button>
-      </div>
       <Toolbar />
     </>
   );
