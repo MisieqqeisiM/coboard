@@ -81,6 +81,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
 
     const prevent = (e: Event) => {
       e.preventDefault();
+      e.stopPropagation();
     };
 
     globalThis.addEventListener("gesturestart", prevent);

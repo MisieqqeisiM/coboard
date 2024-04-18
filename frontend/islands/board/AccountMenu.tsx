@@ -19,7 +19,7 @@ export default function AccountMenu(
     <div style={{ position: "relative" }}>
       <div class="slide-out" ref={slide}>
         {children}
-        <div style={{ zIndex: 1001 }}>
+        <div class="cover" style={{ zIndex: 1001 }}>
           <IconCircle
             iconName="person-outline"
             onClick={toggle}

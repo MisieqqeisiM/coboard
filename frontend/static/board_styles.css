@@ -3,6 +3,8 @@ html, body {
   width: 100%;
   height: 100%;
   touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .toolbar {
@@ -57,7 +59,15 @@ html, body {
   align-items: center;
   justify-content: center;
   background-color: white;
+  transition: transform 0.1s;
 }
+
+@media (any-pointer: fine) {
+  .icon-circle:hover {
+    transform: scale(1.1);
+  }
+}
+
 
 .slide-out {
   display: flex;
@@ -66,11 +76,22 @@ html, body {
   flex-direction: row-reverse;
 }
 .slide-out > *{
-  transition: all 0.2s;
+  transition: margin-right 0.2s, transform 0.1s;
+}
+
+.slide-out > :not(.cover)  {
+  transform: scale(0.9);
+}
+
+
+@media (any-pointer: fine) {
+  .slide-out > :not(.cover):hover  {
+    transform: scale(1.0);
+  }
 }
 
 .slide-out > *{
-  margin-right: -54px;
+  margin-right: -53.5px;
 }
 
 .slide-out.active > *{
@@ -105,6 +126,13 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.1s;
+}
+
+@media (any-pointer: fine) {
+  .color-indicator:hover {
+    transform: scale(1.1);
+  }
 }
 
 .color-circle {
