@@ -1,14 +1,16 @@
-import { StateUpdater, useRef, useState } from "preact/hooks";
+import { useContext, useRef, useState } from "preact/hooks";
+import { Color } from "../../../client/settings.ts";
+import { SettingsContext } from "../../../client/settings.ts";
 
-function Color({
+function ColorBar({
   color,
   selectColor,
   rotation,
   selectColorTmp,
 }: {
-  color: string;
-  selectColor: (color: string) => void;
-  selectColorTmp: (color: string) => void;
+  color: Color;
+  selectColor: (color: Color) => void;
+  selectColorTmp: (color: Color) => void;
   rotation: number;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -32,31 +34,17 @@ function Color({
 }
 
 export default function ColorSelector() {
-  const colors = [
-    "#13161b",
-    "#1e20a6",
-    "#0f93ff",
-    "#00ffd5",
-    "#56eb20",
-    "#ffeb0a",
-    "#ff7518",
-    "#db1d00",
-    "#ff007b",
-    "#cf60ff",
-  ];
-
   const selector = useRef<HTMLDivElement | null>(null);
+  const color = useContext(SettingsContext).color;
 
-  const [color, setColor] = useState(colors[0]);
-
-  const selectColor = (color: string) => {
-    setColor(color);
+  const selectColor = (c: Color) => {
+    color.value = c;
     selector.current?.classList.remove("active");
   };
 
   const spread = 120;
   const start = -spread / 2;
-  const d = spread / (colors.length - 1);
+  const d = spread / (Object.keys(Color).length - 1);
   let downTime = 0;
   let nextFlip = false;
 
@@ -78,12 +66,12 @@ export default function ColorSelector() {
   return (
     <div class="color-selector" ref={selector}>
       <div class="color-box">
-        {Array.from(colors.entries()).map(([i, color]) => (
-          <Color
-            color={color}
+        {Array.from(Object.values(Color).entries()).map(([i, c]) => (
+          <ColorBar
+            color={c}
             selectColor={selectColor}
             rotation={start + i * d}
-            selectColorTmp={setColor}
+            selectColorTmp={(c) => color.value = c}
           />
         ))}
       </div>
@@ -92,7 +80,8 @@ export default function ColorSelector() {
         onPointerDown={down}
         onPointerUp={up}
       >
-        <div class="color-circle" style={{ backgroundColor: color }}></div>
+        <div class="color-circle" style={{ backgroundColor: color.value }}>
+        </div>
       </div>
     </div>
   );

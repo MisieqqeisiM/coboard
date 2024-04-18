@@ -1,3 +1,4 @@
+import { Signal, signal } from "@preact/signals";
 import { Context, createContext } from "preact";
 
 export class Camera {
@@ -25,5 +26,5 @@ export class Camera {
 }
 
 export const CameraContext: Context<Signal<Camera>> = createContext(
-  new Camera(0, 0, 0),
+  signal(new Camera(0, 0, 0)),
 );

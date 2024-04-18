@@ -1,8 +1,7 @@
 import { useContext, useEffect, useRef } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
-import { Camera } from "../../../client/camera.ts";
-import { Signal } from "@preact/signals";
 import { CameraContext } from "../../../client/camera.ts";
+import { SettingsContext } from "../../../client/settings.ts";
 
 interface CanvasProps {
   client: Client;
@@ -13,6 +12,7 @@ interface CanvasProps {
 export default function DrawableCanvas(props: CanvasProps) {
   const camera = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const stylusMode = useContext(SettingsContext).stylusMode;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -67,6 +67,7 @@ export default function DrawableCanvas(props: CanvasProps) {
     };
 
     const touchStart = (event: TouchEvent) => {
+      if (stylusMode.peek()) return;
       if (event.touches.length != 1) return;
       event.preventDefault();
       startDraw(

@@ -1,14 +1,24 @@
-import { useRef, useState } from "preact/hooks";
+import { useContext } from "preact/hooks";
 import IconCircle from "../../components/IconCircle.tsx";
+import { SettingsContext } from "../../../client/settings.ts";
+import { Tool } from "../../../client/settings.ts";
+
+const toolIcons: Record<Tool, string> = {
+  [Tool.PEN]: "pencil-outline",
+  [Tool.ERASER]: "ban-outline",
+};
 
 export default function ToolSelector() {
-  const tools = [
-    "pencil-outline",
-    "ban-outline",
-  ];
-  const [tool, setTool] = useState(0);
+  const tool = useContext(SettingsContext).tool;
   const nextTool = () => {
-    setTool((t) => (t + 1) % tools.length);
+    switch (tool.peek()) {
+      case Tool.PEN:
+        tool.value = Tool.ERASER;
+        break;
+      case Tool.ERASER:
+        tool.value = Tool.PEN;
+        break;
+    }
   };
-  return <IconCircle iconName={tools[tool]} onClick={nextTool} />;
+  return <IconCircle iconName={toolIcons[tool.value]} onClick={nextTool} />;
 }

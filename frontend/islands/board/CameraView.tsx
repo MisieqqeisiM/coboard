@@ -2,7 +2,8 @@ import { Camera } from "../../../client/camera.ts";
 import { ComponentChildren } from "preact";
 import { Signal } from "@preact/signals";
 import { CameraContext } from "../../../client/camera.ts";
-import { useEffect } from "preact/hooks";
+import { useContext, useEffect } from "preact/hooks";
+import { SettingsContext } from "../../../client/settings.ts";
 
 interface CameraViewProps {
   camera: Signal<Camera>;
@@ -10,6 +11,8 @@ interface CameraViewProps {
 }
 
 export default function CameraView({ camera, children }: CameraViewProps) {
+  const stylusMode = useContext(SettingsContext).stylusMode;
+
   useEffect(() => {
     const zoom = (e: WheelEvent) => {
       const amount = e.deltaY;
@@ -54,8 +57,13 @@ export default function CameraView({ camera, children }: CameraViewProps) {
     }
 
     const touchStart = (e: TouchEvent) => {
-      if (e.touches.length < 2) return;
       e.preventDefault();
+      if (stylusMode.peek() && e.touches.length == 1) {
+        touchX = e.touches[0].clientX;
+        touchY = e.touches[0].clientY;
+        touchDist = 1;
+      }
+      if (e.touches.length < 2) return;
       const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
       touchX = x;
       touchY = y;
@@ -63,8 +71,16 @@ export default function CameraView({ camera, children }: CameraViewProps) {
     };
 
     const touchMove = (e: TouchEvent) => {
-      if (e.touches.length < 2) return;
       e.preventDefault();
+      if (stylusMode.peek() && e.touches.length == 1) {
+        camera.value = camera.peek().move(
+          e.touches[0].clientX - touchX,
+          e.touches[0].clientY - touchY,
+        );
+        touchX = e.touches[0].clientX;
+        touchY = e.touches[0].clientY;
+      }
+      if (e.touches.length < 2) return;
       const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
       camera.value = camera.peek().move(
         x - touchX,
@@ -77,6 +93,13 @@ export default function CameraView({ camera, children }: CameraViewProps) {
       touchX = x;
       touchY = y;
       touchDist = d;
+    };
+
+    const touchEnd = (e: TouchEvent) => {
+      if (stylusMode.peek() && e.touches.length == 1) {
+        touchX = e.touches[0].clientX;
+        touchY = e.touches[0].clientY;
+      }
     };
 
     const prevent = (e: Event) => {
@@ -92,6 +115,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
     globalThis.addEventListener("mousedown", startMove);
     globalThis.addEventListener("touchstart", touchStart);
     globalThis.addEventListener("touchmove", touchMove);
+    globalThis.addEventListener("touchend", touchEnd);
 
     return () => {
       globalThis.removeEventListener("gesturestart", prevent);
@@ -102,6 +126,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
       globalThis.removeEventListener("mousedown", startMove);
       globalThis.removeEventListener("touchstart", touchStart);
       globalThis.removeEventListener("touchmove", touchMove);
+      globalThis.removeEventListener("touchend", touchEnd);
     };
   }, []);
 

@@ -4,6 +4,7 @@ import AccountMenu from "./AccountMenu.tsx";
 import ColorSelector from "./ColorSelector.tsx";
 import ToolSelector from "./ToolSelector.tsx";
 import { ClientContext } from "../app/WithClient.tsx";
+import StylusModeSelector from "./StylusModeSelector.tsx";
 export default function Toolbar() {
   const client = useContext(ClientContext);
   return (
@@ -32,6 +33,7 @@ export default function Toolbar() {
         </AccountMenu>
         <ColorSelector />
         <ToolSelector />
+        <StylusModeSelector />
       </div>
     </div>
   );
