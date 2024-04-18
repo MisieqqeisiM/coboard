@@ -2,7 +2,7 @@ import { Camera } from "../../../client/camera.ts";
 import { ComponentChildren } from "preact";
 import { Signal } from "@preact/signals";
 import { CameraContext } from "../../../client/camera.ts";
-import { useContext, useEffect } from "preact/hooks";
+import { useContext, useEffect, useRef } from "preact/hooks";
 import { SettingsContext } from "../../../client/settings.ts";
 
 interface CameraViewProps {
@@ -10,8 +10,11 @@ interface CameraViewProps {
   children: ComponentChildren;
 }
 
-export default function CameraView({ camera, children }: CameraViewProps) {
+export default function CameraView(
+  { camera, children }: CameraViewProps,
+) {
   const stylusMode = useContext(SettingsContext).stylusMode;
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const zoom = (e: WheelEvent) => {
@@ -27,6 +30,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
     let prevY = 0;
 
     const startMove = (e: MouseEvent) => {
+      console.log(e.target == globalThis.document.body);
       if (e.buttons & 2) {
         prevX = e.clientX;
         prevY = e.clientY;
@@ -46,6 +50,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
     let touchX = 0;
     let touchY = 0;
     let touchDist = 1;
+    let moving = false;
 
     function getTouchData(a: Touch, b: Touch) {
       const touchX = (a.clientX + b.clientX) / 2;
@@ -58,6 +63,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
 
     const touchStart = (e: TouchEvent) => {
       e.preventDefault();
+      moving = true;
       if (stylusMode.peek() && e.touches.length == 1) {
         touchX = e.touches[0].clientX;
         touchY = e.touches[0].clientY;
@@ -72,6 +78,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
 
     const touchMove = (e: TouchEvent) => {
       e.preventDefault();
+      if (!moving) return;
       if (stylusMode.peek() && e.touches.length == 1) {
         camera.value = camera.peek().move(
           e.touches[0].clientX - touchX,
@@ -96,6 +103,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
     };
 
     const touchEnd = (e: TouchEvent) => {
+      moving = false;
       if (stylusMode.peek() && e.touches.length == 1) {
         touchX = e.touches[0].clientX;
         touchY = e.touches[0].clientY;
@@ -113,7 +121,7 @@ export default function CameraView({ camera, children }: CameraViewProps) {
     globalThis.addEventListener("wheel", zoom);
     globalThis.addEventListener("mousemove", move);
     globalThis.addEventListener("mousedown", startMove);
-    globalThis.addEventListener("touchstart", touchStart);
+    ref.current?.addEventListener("touchstart", touchStart);
     globalThis.addEventListener("touchmove", touchMove);
     globalThis.addEventListener("touchend", touchEnd);
 
@@ -124,7 +132,6 @@ export default function CameraView({ camera, children }: CameraViewProps) {
       globalThis.removeEventListener("wheel", zoom);
       globalThis.removeEventListener("mousemove", move);
       globalThis.removeEventListener("mousedown", startMove);
-      globalThis.removeEventListener("touchstart", touchStart);
       globalThis.removeEventListener("touchmove", touchMove);
       globalThis.removeEventListener("touchend", touchEnd);
     };
@@ -133,16 +140,26 @@ export default function CameraView({ camera, children }: CameraViewProps) {
   return (
     <div
       style={{
+        overflow: "hidden",
+        width: "100%",
+        height: "100%",
         position: "absolute",
-        width: "0px",
-        height: "0px",
-        transform:
-          `scale(${camera.value.scale}) translate(${camera.value.dx}px, ${camera.value.dy}px)`,
       }}
+      ref={ref}
     >
-      <CameraContext.Provider value={camera}>
-        {children}
-      </CameraContext.Provider>
+      <div
+        style={{
+          position: "absolute",
+          width: "0px",
+          height: "0px",
+          transform:
+            `scale(${camera.value.scale}) translate(${camera.value.dx}px, ${camera.value.dy}px)`,
+        }}
+      >
+        <CameraContext.Provider value={camera}>
+          {children}
+        </CameraContext.Provider>
+      </div>
     </div>
   );
 }

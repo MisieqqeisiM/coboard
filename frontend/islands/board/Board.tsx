@@ -1,5 +1,5 @@
 import { ClientContext } from "../app/WithClient.tsx";
-import { useContext, useEffect } from "preact/hooks";
+import { useContext, useEffect, useRef } from "preact/hooks";
 import DrawableCanvas from "./DrawableCanvas.tsx";
 import ObservableCanvas from "./ObservableCanvas.tsx";
 import CursorBox from "./CursorBox.tsx";
