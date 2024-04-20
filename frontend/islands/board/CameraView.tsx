@@ -30,7 +30,6 @@ export default function CameraView(
     let prevY = 0;
 
     const startMove = (e: MouseEvent) => {
-      console.log(e.target == globalThis.document.body);
       if (e.buttons & 2) {
         prevX = e.clientX;
         prevY = e.clientY;
