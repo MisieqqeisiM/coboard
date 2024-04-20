@@ -25,7 +25,6 @@ export class Board {
     });
 
     client.socket.on("disconnect", () => {
-      console.log("disconnect");
       this.users.delete(user.account.id);
       this.updateUsers();
     });

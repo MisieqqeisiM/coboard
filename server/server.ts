@@ -37,7 +37,6 @@ export class Server {
     });
 
     io.on("connection", socket => {
-      console.log("connect");
       socket.data.client!.board.newUser(socket.data.client!);
     });
   }

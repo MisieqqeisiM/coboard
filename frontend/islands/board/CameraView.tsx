@@ -28,28 +28,32 @@ export default function CameraView(
 
     let prevX = 0;
     let prevY = 0;
-
-    const startMove = (e: MouseEvent) => {
-      if (e.buttons & 2) {
-        prevX = e.clientX;
-        prevY = e.clientY;
-      }
-    };
+    let touchX = 0;
+    let touchY = 0;
+    let touchDist = 1;
+    let moving = false;
 
     const move = (e: MouseEvent) => {
       if (e.buttons & 2) {
+        if (!moving) {
+          moving = true;
+          prevX = e.clientX;
+          prevY = e.clientY;
+          return;
+        }
         const dx = e.clientX - prevX;
         const dy = e.clientY - prevY;
         prevX = e.clientX;
         prevY = e.clientY;
         camera.value = camera.peek().move(dx, dy);
+      } else {
+        moving = false;
       }
     };
 
-    let touchX = 0;
-    let touchY = 0;
-    let touchDist = 1;
-    let moving = false;
+    const endMove = (e: MouseEvent) => {
+      moving = false;
+    };
 
     function getTouchData(a: Touch, b: Touch) {
       const touchX = (a.clientX + b.clientX) / 2;
@@ -119,7 +123,7 @@ export default function CameraView(
 
     globalThis.addEventListener("wheel", zoom);
     globalThis.addEventListener("mousemove", move);
-    globalThis.addEventListener("mousedown", startMove);
+    globalThis.addEventListener("mouseup", endMove);
     ref.current?.addEventListener("touchstart", touchStart);
     globalThis.addEventListener("touchmove", touchMove);
     globalThis.addEventListener("touchend", touchEnd);
@@ -130,7 +134,7 @@ export default function CameraView(
 
       globalThis.removeEventListener("wheel", zoom);
       globalThis.removeEventListener("mousemove", move);
-      globalThis.removeEventListener("mousedown", startMove);
+      globalThis.removeEventListener("mouseup", endMove);
       globalThis.removeEventListener("touchmove", touchMove);
       globalThis.removeEventListener("touchend", touchEnd);
     };
