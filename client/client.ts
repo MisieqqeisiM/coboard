@@ -1,6 +1,7 @@
 import { Signal } from "@preact/signals";
 import { ClientSocket } from "../liaison/client.ts";
 import { Account, BoardUser, ClientToServerEvents } from "../liaison/liaison.ts";
+import { Line } from "../liaison/liaison.ts"
 
 export class Client {
   constructor(
@@ -13,7 +14,7 @@ export class Client {
 
 export class UIClient {
   constructor(readonly users: Signal<Map<string, BoardUser>>,
-    readonly strokes: Signal<{ x: number, y: number }[][]> = new Signal([]),
+    readonly strokes: Signal<Line[]> = new Signal([]),
     readonly clear: Signal<boolean> = new Signal(false)) { }
 }
 
@@ -32,7 +33,7 @@ export class SocketClient implements ClientToServerEvents {
       client.users.value = newUsers;
     });
 
-    io.on("onDraw", (_id, points: { x: number, y: number }[]) => {
+    io.on("onDraw", (_id, points: Line) => {
       client.strokes.value = [...client.strokes.value, points];
     });
 
@@ -47,7 +48,7 @@ export class SocketClient implements ClientToServerEvents {
     this.io.emit("move", x, y);
   }
 
-  public draw(points: { x: number, y: number }[]) {
+  public draw(points: Line) {
     this.io.emit("draw", points);
   }
 
