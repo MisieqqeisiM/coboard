@@ -1,20 +1,21 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useContext, useEffect, useRef } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
-import { Camera } from "../../../client/camera.ts";
-import { Signal } from "@preact/signals";
+import { CameraContext } from "../../../client/camera.ts";
+import { SettingsContext } from "../../../client/settings.ts";
 import { Line, StrokeStyle } from "../../../liaison/liaison.ts";
 
 interface CanvasProps {
   client: Client;
-  camera: Signal<Camera>;
   width: number;
   height: number;
 }
 
 export default function DrawableCanvas(props: CanvasProps) {
+  const camera = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   let stroke_color: string = "black";
   let stroke_width: number = 3;//to be replaced
+  const stylusMode = useContext(SettingsContext).stylusMode;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -63,7 +64,7 @@ export default function DrawableCanvas(props: CanvasProps) {
     };
 
     const mouseMove = (event: MouseEvent) => {
-      draw(...props.camera.peek().toBoardCoords(event.clientX, event.clientY));
+      draw(...camera.peek().toBoardCoords(event.clientX, event.clientY));
     };
 
     const mouseUp = () => {
@@ -71,10 +72,11 @@ export default function DrawableCanvas(props: CanvasProps) {
     };
 
     const touchStart = (event: TouchEvent) => {
+      if (stylusMode.peek()) return;
       if (event.touches.length != 1) return;
       event.preventDefault();
       startDraw(
-        ...props.camera.peek().toBoardCoords(
+        ...camera.peek().toBoardCoords(
           event.touches[0].clientX,
           event.touches[0].clientY,
         ),
@@ -85,7 +87,7 @@ export default function DrawableCanvas(props: CanvasProps) {
       if (event.touches.length != 1) return;
       event.preventDefault();
       draw(
-        ...props.camera.peek().toBoardCoords(
+        ...camera.peek().toBoardCoords(
           event.touches[0].clientX,
           event.touches[0].clientY,
         ),

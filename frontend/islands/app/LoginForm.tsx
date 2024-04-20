@@ -1,4 +1,7 @@
-export default function LoginForm() {
+interface LoginFormProps {
+  redirectTo: string;
+}
+export default function LoginForm({ redirectTo }: LoginFormProps) {
   const iconSize = 40;
   return (
     <div
@@ -34,6 +37,12 @@ export default function LoginForm() {
         </div>
         <h3>Welcome to Coboard</h3>
         <form method="post" action="/api/login">
+          <input
+            type="hidden"
+            name="redirectTo"
+            id="redirectTo"
+            value={redirectTo}
+          />
           <label for="login">Username</label>
           <input class="u-full-width" type="text" name="login" id="login" />
           <label for="password" style={{ color: "#eee" }}>Password</label>
