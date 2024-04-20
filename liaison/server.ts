@@ -31,7 +31,7 @@ export type ServerSocket = Socket<
 >;
 
 export function createServer(): ServerLogic {
-  const io: SocketServer = new Server({});
+  const io: SocketServer = new Server({ pingTimeout: 5000, pingInterval: 5000 });
   const server = new ServerLogic(io);
   const handler = io.handler();
 

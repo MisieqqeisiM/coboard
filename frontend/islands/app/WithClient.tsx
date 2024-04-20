@@ -37,6 +37,9 @@ export function WithClient({ children, account, boardID }: WithClientProps) {
       }
     });
     io.connect();
+    globalThis.addEventListener("beforeunload", () => {
+      socketClient.disconnect();
+    });
   }, []);
 
   return (
