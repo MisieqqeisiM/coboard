@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
 import { CameraContext } from "../../../client/camera.ts";
 import { SettingsContext } from "../../../client/settings.ts";
-import { Line, StrokeStyle } from "../../../liaison/liaison.ts";
+import { Line } from "../../../liaison/liaison.ts";
 
 interface CanvasProps {
   client: Client;
@@ -13,8 +13,8 @@ interface CanvasProps {
 export default function DrawableCanvas(props: CanvasProps) {
   const camera = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  let stroke_color: string = "black";
-  let stroke_width: number = 3;//to be replaced
+  let stroke_color = useContext(SettingsContext).color;
+  let stroke_width = useContext(SettingsContext).width;
   const stylusMode = useContext(SettingsContext).stylusMode;
 
   useEffect(() => {
@@ -32,8 +32,6 @@ export default function DrawableCanvas(props: CanvasProps) {
     let points: { x: number; y: number }[];
 
     const startDraw = (x: number, y: number) => {
-      stroke_color = props.client.ui.stroke_style.color;
-      stroke_width = props.client.ui.stroke_style.width;
       drawing = true;
       points = [{ x: x, y: y }];
       context.beginPath();

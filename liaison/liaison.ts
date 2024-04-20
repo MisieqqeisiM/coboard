@@ -26,13 +26,6 @@ export const ALREADY_LOGGED_IN = "already logged in";
 export const BAD_TOKEN = "bad token";
 
 
-export class StrokeStyle {
-  constructor (
-    readonly width: number = 3,
-    readonly color: string = "black"
-  ) {}
-}
-
 export class Line {
   constructor (
     readonly width: number, 
