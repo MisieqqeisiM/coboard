@@ -2,38 +2,54 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $_board_ from "./routes/[board].tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_login from "./routes/api/login.ts";
 import * as $api_logout from "./routes/api/logout.ts";
+import * as $api_new_board from "./routes/api/new_board.tsx";
 import * as $index from "./routes/index.tsx";
 import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
+import * as $app_Reload from "./islands/app/Reload.tsx";
 import * as $app_WithClient from "./islands/app/WithClient.tsx";
+import * as $board_AccountMenu from "./islands/board/AccountMenu.tsx";
 import * as $board_Board from "./islands/board/Board.tsx";
 import * as $board_CameraView from "./islands/board/CameraView.tsx";
+import * as $board_ColorSelector from "./islands/board/ColorSelector.tsx";
 import * as $board_CursorBox from "./islands/board/CursorBox.tsx";
 import * as $board_DrawableCanvas from "./islands/board/DrawableCanvas.tsx";
 import * as $board_MouseTracker from "./islands/board/MouseTracker.tsx";
 import * as $board_ObservableCanvas from "./islands/board/ObservableCanvas.tsx";
+import * as $board_StylusModeSelector from "./islands/board/StylusModeSelector.tsx";
+import * as $board_ToolSelector from "./islands/board/ToolSelector.tsx";
+import * as $board_Toolbar from "./islands/board/Toolbar.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
+    "./routes/[board].tsx": $_board_,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/api/login.ts": $api_login,
     "./routes/api/logout.ts": $api_logout,
+    "./routes/api/new_board.tsx": $api_new_board,
     "./routes/index.tsx": $index,
   },
   islands: {
     "./islands/app/LoginForm.tsx": $app_LoginForm,
+    "./islands/app/Reload.tsx": $app_Reload,
     "./islands/app/WithClient.tsx": $app_WithClient,
+    "./islands/board/AccountMenu.tsx": $board_AccountMenu,
     "./islands/board/Board.tsx": $board_Board,
     "./islands/board/CameraView.tsx": $board_CameraView,
+    "./islands/board/ColorSelector.tsx": $board_ColorSelector,
     "./islands/board/CursorBox.tsx": $board_CursorBox,
     "./islands/board/DrawableCanvas.tsx": $board_DrawableCanvas,
     "./islands/board/MouseTracker.tsx": $board_MouseTracker,
     "./islands/board/ObservableCanvas.tsx": $board_ObservableCanvas,
+    "./islands/board/StylusModeSelector.tsx": $board_StylusModeSelector,
+    "./islands/board/ToolSelector.tsx": $board_ToolSelector,
+    "./islands/board/Toolbar.tsx": $board_Toolbar,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

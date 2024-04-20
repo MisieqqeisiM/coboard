@@ -16,6 +16,7 @@ export const handler: Handlers = {
   async POST(req) {
     const url = new URL(req.url);
     const form = await req.formData();
+
     const login = form.get("login");
     if (!login) return redirectToHome();
 
@@ -32,7 +33,8 @@ export const handler: Handlers = {
       path: "/",
       secure: true,
     });
-    headers.set("location", "/");
+
+    headers.set("location", `${form.get("redirectTo") ?? "/"}`);
     return new Response(null, {
       status: 303,
       headers,

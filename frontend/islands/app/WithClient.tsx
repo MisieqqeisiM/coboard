@@ -11,10 +11,11 @@ export const ClientContext = createContext<Client | undefined>(undefined); //Dum
 
 interface WithClientProps {
   account: Account;
+  boardID: string;
   children: ComponentChildren;
 }
 
-export function WithClient({ children, account }: WithClientProps) {
+export function WithClient({ children, account, boardID }: WithClientProps) {
   const [client, setClient] = useState<Client | undefined>(undefined);
   useEffect(() => {
     if (client) {
@@ -22,14 +23,13 @@ export function WithClient({ children, account }: WithClientProps) {
         client.socket.disconnect();
       };
     }
-    const io = createClient();
+    const io = createClient(boardID);
     const uiClient = new UIClient(signal(new Map()));
     const socketClient = new SocketClient(io, uiClient);
     io.on("connect", () => {
       setClient(new Client(socketClient, uiClient, account, true));
     });
     io.on("connect_error", (e) => {
-      console.log(e.message);
       if (e.message == ALREADY_LOGGED_IN) {
         setClient(new Client(socketClient, uiClient, account, false));
       } else {
