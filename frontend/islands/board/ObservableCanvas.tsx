@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
 import { Line } from "../../../liaison/liaison.ts";
+import { EraserColor } from "../../../client/settings.ts";
 
 interface CanvasProps {
   client: Client;
@@ -30,9 +31,15 @@ export default function ObservableCanvas(props: CanvasProps) {
           .strokes.value
           .shift();
         if (line && line.coordinates && line.coordinates.length > 1) {
+          //temporary solution
+          if(line.color==EraserColor.TRANSPARENT)
+            context.globalCompositeOperation = 'destination-out';
+          else
+            context.globalCompositeOperation = 'source-over';
+
           context.beginPath();
-          context.lineWidth = line.width;
           context.strokeStyle = line.color;
+          context.lineWidth = line.width;
           context.moveTo(line.coordinates[0].x, line.coordinates[0].y);
           for (let j = 1; j < line.coordinates.length; j++) {
             context.lineTo(line.coordinates[j].x, line.coordinates[j].y);

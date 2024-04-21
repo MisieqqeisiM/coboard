@@ -19,6 +19,12 @@ export enum Color {
   VIOLET = "#cf60ff",
 }
 
+//this is nonsensical and should be removed when we're done with it
+export enum EraserColor {
+  WHITE = "#ffffff",
+  TRANSPARENT = "#000000",
+}
+
 export interface Settings {
   color: Signal<Color>;
   tool: Signal<Tool>;

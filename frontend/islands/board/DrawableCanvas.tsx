@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
 import { CameraContext } from "../../../client/camera.ts";
-import { SettingsContext } from "../../../client/settings.ts";
+import { SettingsContext, Tool, EraserColor } from "../../../client/settings.ts";
 import { Line } from "../../../liaison/liaison.ts";
 
 interface CanvasProps {
@@ -13,8 +13,10 @@ interface CanvasProps {
 export default function DrawableCanvas(props: CanvasProps) {
   const camera = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  let stroke_color = useContext(SettingsContext).color;
-  let stroke_width = useContext(SettingsContext).width;
+  
+  const tool = useContext(SettingsContext).tool;
+  const stroke_color = useContext(SettingsContext).color;
+  const stroke_width = useContext(SettingsContext).width;
   const stylusMode = useContext(SettingsContext).stylusMode;
 
   useEffect(() => {
@@ -28,6 +30,7 @@ export default function DrawableCanvas(props: CanvasProps) {
       return;
     }
 
+
     let drawing = false;
     let points: { x: number; y: number }[];
 
@@ -36,7 +39,12 @@ export default function DrawableCanvas(props: CanvasProps) {
       points = [{ x: x, y: y }];
       context.beginPath();
       context.lineWidth = stroke_width;
-      context.strokeStyle = stroke_color;
+
+      if(tool == Tool.PEN) 
+        context.strokeStyle = stroke_color;
+      else 
+        context.strokeStyle = EraserColor.WHITE;
+
       context.moveTo(x, y);
     };
 
@@ -51,7 +59,10 @@ export default function DrawableCanvas(props: CanvasProps) {
       if (drawing) {
         drawing = false;
         context.closePath();
-        props.client.socket.draw(new Line(stroke_width, stroke_color, points));
+        if(tool == Tool.PEN)
+          props.client.socket.draw(new Line(stroke_width, stroke_color, points));
+        else
+          props.client.socket.draw(new Line(stroke_width, EraserColor.TRANSPARENT, points));
         context.clearRect(0, 0, canvas.width, canvas.height);
       }
     };
