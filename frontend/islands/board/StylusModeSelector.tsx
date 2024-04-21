@@ -1,9 +1,8 @@
 import { useContext } from "preact/hooks";
 import IconCircle from "../../components/IconCircle.tsx";
 import { SettingsContext } from "../../../client/settings.ts";
-import { Tool } from "../../../client/settings.ts";
 
-export default function ToolSelector() {
+export default function StylusModeSelector() {
   const stylusMode = useContext(SettingsContext).stylusMode;
   const toggle = () => {
     stylusMode.value = !stylusMode.peek();
