@@ -16,7 +16,7 @@ export default function DrawableCanvas(props: CanvasProps) {
   
   const tool = useContext(SettingsContext).tool;
   const stroke_color = useContext(SettingsContext).color;
-  const stroke_width = useContext(SettingsContext).width;
+  const stroke_width = useContext(SettingsContext).size;
   const stylusMode = useContext(SettingsContext).stylusMode;
 
   useEffect(() => {

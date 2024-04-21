@@ -34,7 +34,6 @@ export interface Settings {
 
 export const SettingsContext = createContext<Settings>({
   color: signal(Color.BLACK),
-  stroke_width: signal(3),
   tool: signal(Tool.PEN),
   size: signal(20),
   stylusMode: signal(false),

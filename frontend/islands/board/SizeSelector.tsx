@@ -32,7 +32,7 @@ export default function SizeSelector() {
       >
         <input
           type="range"
-          min="10"
+          min="3"
           max="40"
           ref={slider}
           onInput={() => {
