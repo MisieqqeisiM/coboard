@@ -39,6 +39,7 @@ export class Board {
     client.socket.on("draw", (line: Line) => {
       this.strokes.push(line);
       this.io.to(this.room).emit("onDraw", user.account.id, line);
+      client.socket.emit("confirmLine");
     });
 
     client.socket.join(this.room);

@@ -1,8 +1,10 @@
 import { Signal } from "@preact/signals";
+import { useContext } from "preact/hooks";
 import { ClientSocket } from "../liaison/client.ts";
 import { Account, BoardUser, ClientToServerEvents } from "../liaison/liaison.ts";
 import { Line } from "../liaison/liaison.ts"
 import { SettingsContext } from "./settings.ts"
+import { createContext } from "preact";
 
 export class Client {
   constructor(
@@ -13,22 +15,17 @@ export class Client {
   ) { }
 }
 
+
 export class UIClient {
   constructor(readonly users: Signal<Map<string, BoardUser>>,
     readonly strokes: Signal<Line[]> = new Signal([]),
+    readonly local_strokes: Signal<Line[]> = new Signal([]),
     readonly clear: Signal<boolean> = new Signal(false),
   ) {}
-  public change_color(new_color: string) {
-    useContext(SettingsContext).color = new_color;
-  }
-
-  public change_width(new_width: number) {
-    useContext(SettingsContext).width = new_width;
-  }
 }
 
 export class SocketClient implements ClientToServerEvents {
-  constructor(private io: ClientSocket, private client: UIClient) {
+    constructor(private io: ClientSocket, private client: UIClient) {
     io.on("onMove", (id, x, y) => {
       const user = client.users.value.get(id)!;
       user.x = x;
@@ -42,8 +39,12 @@ export class SocketClient implements ClientToServerEvents {
       client.users.value = newUsers;
     });
 
-    io.on("onDraw", (_id, points: Line) => {
+    io.on("onDraw", (id, points: Line) => {
       client.strokes.value = [...client.strokes.value, points];
+    });
+
+    io.on("confirmLine", () => {
+      client.local_strokes.value = [...client.local_strokes.value.slice(1)];
     });
 
     io.on("onReset", () => {

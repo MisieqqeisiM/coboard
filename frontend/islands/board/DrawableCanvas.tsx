@@ -18,6 +18,7 @@ export default function DrawableCanvas(props: CanvasProps) {
   const stroke_color = useContext(SettingsContext).color;
   const stroke_width = useContext(SettingsContext).size;
   const stylusMode = useContext(SettingsContext).stylusMode;
+  let points: { x: number; y: number }[]=[];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -30,9 +31,7 @@ export default function DrawableCanvas(props: CanvasProps) {
       return;
     }
 
-
     let drawing = false;
-    let points: { x: number; y: number }[];
 
     const startDraw = (x: number, y: number) => {
       drawing = true;
@@ -59,11 +58,16 @@ export default function DrawableCanvas(props: CanvasProps) {
       if (drawing) {
         drawing = false;
         context.closePath();
-        if(tool == Tool.PEN)
-          props.client.socket.draw(new Line(stroke_width, stroke_color, points));
-        else
+        if(tool == Tool.PEN) {
+          let line: Line = new Line(stroke_width, stroke_color, points);
+          props.client.ui.local_strokes.value.push(line);
+          props.client.socket.draw(line);
+        }
+        else {
+          props.client.ui.local_strokes.value.push(new Line(stroke_width, EraserColor.WHITE, points));
           props.client.socket.draw(new Line(stroke_width, EraserColor.TRANSPARENT, points));
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        points = [];
       }
     };
 
@@ -125,6 +129,46 @@ export default function DrawableCanvas(props: CanvasProps) {
       globalThis.removeEventListener("mousemove", mouseMove);
     };
   }, []);
+
+   useEffect(() => {
+    const subscription = props.client.ui.local_strokes.subscribe((strokes) => {
+      const canvas = canvasRef.current;
+      if (!canvas)
+        return;
+
+      const context = canvas.getContext("2d");
+      if (!context)
+        return;
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      const draw_line = (line: Line) => {
+        if (line && line.coordinates && line.coordinates.length > 1) {
+          context.beginPath();
+          context.strokeStyle = line.color;
+          context.lineWidth = line.width;
+          context.moveTo(line.coordinates[0].x, line.coordinates[0].y);
+          for (let j = 1; j < line.coordinates.length; j++) {
+            context.lineTo(line.coordinates[j].x, line.coordinates[j].y);
+            context.stroke();
+          }
+          context.closePath();
+        }
+      };
+
+      draw_line(new Line(stroke_width, stroke_color, points));
+      if((!props.client.ui.local_strokes) ||(!props.client.ui.local_strokes.value))
+        return;
+
+      props.client.ui.local_strokes.value.forEach(draw_line);
+    });
+    return () => {
+      // TODO: unsubscribe
+    };
+  }, []);
+
+
+
+
   return (
     <canvas
       ref={canvasRef}
