@@ -1,7 +1,8 @@
 import { useContext, useEffect, useRef } from "preact/hooks";
 import { Client } from "../../../client/client.ts";
 import { CameraContext } from "../../../client/camera.ts";
-import { SettingsContext } from "../../../client/settings.ts";
+import { SettingsContext, Tool, EraserColor } from "../../../client/settings.ts";
+import { Line } from "../../../liaison/liaison.ts";
 
 interface CanvasProps {
   client: Client;
@@ -12,7 +13,12 @@ interface CanvasProps {
 export default function DrawableCanvas(props: CanvasProps) {
   const camera = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  const tool = useContext(SettingsContext).tool;
+  const stroke_color = useContext(SettingsContext).color;
+  const stroke_width = useContext(SettingsContext).size;
   const stylusMode = useContext(SettingsContext).stylusMode;
+  let points: { x: number; y: number }[]=[];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -26,14 +32,18 @@ export default function DrawableCanvas(props: CanvasProps) {
     }
 
     let drawing = false;
-    let points: { x: number; y: number }[];
 
     const startDraw = (x: number, y: number) => {
       drawing = true;
       points = [{ x: x, y: y }];
       context.beginPath();
-      context.lineWidth = 3;
-      context.strokeStyle = "black";
+      context.lineWidth = stroke_width;
+
+      if(tool == Tool.PEN) 
+        context.strokeStyle = stroke_color;
+      else 
+        context.strokeStyle = EraserColor.WHITE;
+
       context.moveTo(x, y);
     };
 
@@ -48,8 +58,16 @@ export default function DrawableCanvas(props: CanvasProps) {
       if (drawing) {
         drawing = false;
         context.closePath();
-        props.client.socket.draw(points);
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        if(tool == Tool.PEN) {
+          let line: Line = new Line(stroke_width, stroke_color, points);
+          props.client.ui.local_strokes.value.push(line);
+          props.client.socket.draw(line);
+        }
+        else {
+          props.client.ui.local_strokes.value.push(new Line(stroke_width, EraserColor.WHITE, points));
+          props.client.socket.draw(new Line(stroke_width, EraserColor.TRANSPARENT, points));
+        }
+        points = [];
       }
     };
 
@@ -111,6 +129,46 @@ export default function DrawableCanvas(props: CanvasProps) {
       globalThis.removeEventListener("mousemove", mouseMove);
     };
   }, []);
+
+   useEffect(() => {
+    const subscription = props.client.ui.local_strokes.subscribe((strokes) => {
+      const canvas = canvasRef.current;
+      if (!canvas)
+        return;
+
+      const context = canvas.getContext("2d");
+      if (!context)
+        return;
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      const draw_line = (line: Line) => {
+        if (line && line.coordinates && line.coordinates.length > 1) {
+          context.beginPath();
+          context.strokeStyle = line.color;
+          context.lineWidth = line.width;
+          context.moveTo(line.coordinates[0].x, line.coordinates[0].y);
+          for (let j = 1; j < line.coordinates.length; j++) {
+            context.lineTo(line.coordinates[j].x, line.coordinates[j].y);
+            context.stroke();
+          }
+          context.closePath();
+        }
+      };
+
+      draw_line(new Line(stroke_width, stroke_color, points));
+      if((!props.client.ui.local_strokes) ||(!props.client.ui.local_strokes.value))
+        return;
+
+      props.client.ui.local_strokes.value.forEach(draw_line);
+    });
+    return () => {
+      // TODO: unsubscribe
+    };
+  }, []);
+
+
+
+
   return (
     <canvas
       ref={canvasRef}

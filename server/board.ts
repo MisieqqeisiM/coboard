@@ -1,10 +1,11 @@
 import { Client, SocketServer } from "../liaison/server.ts";
 import { BoardUser } from "../liaison/liaison.ts";
+import { Line } from "../liaison/liaison.ts";
 
 export class Board {
   private room = crypto.randomUUID();
   private users: Map<string, BoardUser> = new Map();
-  private strokes: { x: number, y: number }[][] = [];
+  private strokes: Line[] = [];
 
   constructor(private io: SocketServer) { }
 
@@ -35,9 +36,10 @@ export class Board {
       this.io.to(this.room).emit("onMove", user.account.id, user.x, user.y);
     });
 
-    client.socket.on("draw", (points: { x: number, y: number }[]) => {
-      this.strokes.push(points);
-      this.io.to(this.room).emit("onDraw", user.account.id, points);
+    client.socket.on("draw", (line: Line) => {
+      this.strokes.push(line);
+      this.io.to(this.room).emit("onDraw", user.account.id, line);
+      client.socket.emit("confirmLine");
     });
 
     client.socket.join(this.room);

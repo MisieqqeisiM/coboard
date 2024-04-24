@@ -45,6 +45,36 @@ html, body {
   width: 120px;
 }
 
+.size-selector {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.slider-box {
+  pointer-events: auto;
+  height: 20px;
+  border: 2px solid #222222;
+  border-radius: 10px;
+  padding-bottom: 1px;
+  margin-left: -30px;
+  padding-right: 7px;
+  background-color: white;
+  transition: all 0.2s;
+  width: 0px;
+  pointer-events: none;
+}
+
+.slider-box > input {
+  width: 100% !important;
+}
+
+.slider-box.active {
+  width: 150px;
+  padding-left: 25px;
+  pointer-events: auto;
+}
+
 .icon-circle {
   z-index: 1000;
   pointer-events: auto;
