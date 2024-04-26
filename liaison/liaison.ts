@@ -9,16 +9,9 @@ export interface BoardUser {
   y: number;
 }
 
-export interface ServerToClientEvents {
-  userList(users: Array<BoardUser>): void;
-  onMove(user: string, x: number, y: number): void;
-  onDraw(user: string, line: Line): void;
-  onReset(): void;
-}
-
 export interface ClientToServerEvents {
   move(x: number, y: number): void;
-  draw(points: { x: number, y: number }[]): void;
+  draw(line: Line): void;
   reset(): void;
 }
 
@@ -27,8 +20,9 @@ export const BAD_TOKEN = "bad token";
 
 
 export class Line {
-  constructor (
-    readonly width: number, 
-    readonly color: string, 
-    readonly coordinates: {x: number, y: number}[]) {}
+  constructor(
+    readonly width: number,
+    readonly color: string,
+    readonly coordinates: { x: number, y: number }[]
+  ) { }
 }
