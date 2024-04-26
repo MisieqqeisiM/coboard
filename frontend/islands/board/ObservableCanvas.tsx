@@ -22,20 +22,15 @@ export default function ObservableCanvas(props: CanvasProps) {
         return;
       }
 
-      while (
-        props.client.ui.strokes && props.client.ui.strokes.value &&
-        props.client.ui.strokes.value.length > 0
-      ) {
+      for (const line of strokes) {
         //inefficient, should be a proper queue
-        const line: Line | undefined = props.client.ui
-          .strokes.value
-          .shift();
         if (line && line.coordinates && line.coordinates.length > 1) {
           //temporary solution
-          if(line.color==EraserColor.TRANSPARENT)
-            context.globalCompositeOperation = 'destination-out';
-          else
-            context.globalCompositeOperation = 'source-over';
+          if (line.color == EraserColor.TRANSPARENT) {
+            context.globalCompositeOperation = "destination-out";
+          } else {
+            context.globalCompositeOperation = "source-over";
+          }
 
           context.beginPath();
           context.strokeStyle = line.color;
@@ -48,6 +43,7 @@ export default function ObservableCanvas(props: CanvasProps) {
           context.closePath();
         }
       }
+      props.client.ui.strokes.peek().length = 0;
     });
     return () => {
       // TODO: unsubscribe
