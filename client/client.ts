@@ -1,4 +1,4 @@
-import { Signal } from "@preact/signals";
+import { Signal, signal } from "@preact/signals";
 import { ClientSocket } from "../liaison/client.ts";
 import { Account, BoardUser, ClientToServerEvents } from "../liaison/liaison.ts";
 import { Line } from "../liaison/liaison.ts"
@@ -15,20 +15,21 @@ export class Client {
 
 
 export class UIClient {
-  constructor(readonly users: Signal<Map<string, BoardUser>>,
-    readonly strokes: Signal<Line[]> = new Signal([]),
-    readonly local_strokes: Signal<Line[]> = new Signal([]),
-    readonly clear: Signal<boolean> = new Signal(false),
-  ) { }
+  readonly users: Signal<Map<string, BoardUser>> = signal(new Map());
+  readonly strokes: Signal<Line[]> = signal([]);
+  readonly local_strokes: Signal<Line[]> = signal([])
+  readonly clear: Signal<boolean> = signal(false);
+
+  constructor(initialState: ClientState) {
+    this.strokes.value = initialState.lines;
+    const newUsers = new Map<string, BoardUser>();
+    for (const user of initialState.users) newUsers.set(user.account.id, user);
+    this.users.value = newUsers;
+  }
 }
 
 export class SocketClient implements ClientToServerEvents {
-  constructor(private io: ClientSocket, client: UIClient, state: ClientState) {
-    client.strokes.value = state.lines;
-    const newUsers = new Map<string, BoardUser>();
-    for (const user of state.users) newUsers.set(user.account.id, user);
-    client.users.value = newUsers;
-
+  constructor(private io: ClientSocket, client: UIClient) {
     io.on("onMove", (e) => {
       const user = client.users.value.get(e.user)!;
       user.x = e.x;

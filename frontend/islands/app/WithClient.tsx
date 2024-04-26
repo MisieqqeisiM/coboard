@@ -3,7 +3,6 @@ import { ComponentChildren } from "preact";
 import { createClient } from "../../../liaison/client.ts";
 import { Client, SocketClient } from "../../../client/client.ts";
 import { UIClient } from "../../../client/client.ts";
-import { signal } from "@preact/signals";
 import { createContext } from "preact";
 import { Account, ALREADY_LOGGED_IN } from "../../../liaison/liaison.ts";
 import { ClientState } from "../../../liaison/client.ts";
@@ -28,8 +27,8 @@ export function WithClient(
       };
     }
     const io = createClient(boardID);
-    const uiClient = new UIClient(signal(new Map()));
-    const socketClient = new SocketClient(io, uiClient, initialState);
+    const uiClient = new UIClient(initialState);
+    const socketClient = new SocketClient(io, uiClient);
     io.on("connect", () => {
       setClient(new Client(socketClient, uiClient, account, true));
     });
