@@ -4,8 +4,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 100MB
-    memswap_limit: 1G
+          memory: 200MB
+    memswap_limit: 3G
     build:
       context: ../..
       dockerfile: ./config/prod/Dockerfile
