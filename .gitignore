@@ -10,5 +10,8 @@ _fresh/
 # npm dependencies
 node_modules/
 
+# Database
+.data/
+
 #IDEs
 .vscode/
