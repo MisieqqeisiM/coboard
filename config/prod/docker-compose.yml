@@ -4,7 +4,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 60M
+          memory: 100MB
     memswap_limit: 1G
     build:
       context: ../..
@@ -13,7 +13,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 50M
+          memory: 100MB
     memswap_limit: 2G
     image: mongo:7.0.10-rc0
     volumes:
