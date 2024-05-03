@@ -1,4 +1,4 @@
-import { ClientSocket as Socket, getCookies, io } from "../deps.ts";
+import { ClientSocket as Socket, getCookies, io } from "../deps_client.ts";
 import { ClientToServerEvents } from "./liaison.ts";
 import { BoardEventVisitor } from "./events.ts";
 import { BoardUser, Line } from "./liaison.ts";

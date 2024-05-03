@@ -4,7 +4,7 @@ import {
   useContext,
   useEffect,
   useRef,
-} from "../../../deps.ts";
+} from "../../../deps_client.ts";
 import { Camera } from "../../../client/camera.ts";
 import { CameraContext } from "../../../client/camera.ts";
 import { SettingsContext } from "../../../client/settings.ts";

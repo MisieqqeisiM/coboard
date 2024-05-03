@@ -1,4 +1,4 @@
-import { ComponentChildren, useRef, useState } from "../../../deps.ts";
+import { ComponentChildren, useRef, useState } from "../../../deps_client.ts";
 import IconCircle from "../../components/IconCircle.tsx";
 
 export default function AccountMenu(

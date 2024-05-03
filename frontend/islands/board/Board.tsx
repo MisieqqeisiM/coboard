@@ -1,4 +1,4 @@
-import { signal, useContext } from "../../../deps.ts";
+import { signal, useContext } from "../../../deps_client.ts";
 import { ClientContext } from "../app/WithClient.tsx";
 import DrawableCanvas from "./DrawableCanvas.tsx";
 import ObservableCanvas from "./ObservableCanvas.tsx";

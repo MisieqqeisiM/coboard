@@ -1,6 +1,6 @@
 import { Cursor } from "../../components/board/Cursor.tsx";
 import { ClientContext } from "../app/WithClient.tsx";
-import { useContext } from "../../../deps.ts";
+import { useContext } from "../../../deps_client.ts";
 
 export default function CursorBox() {
   const client = useContext(ClientContext);

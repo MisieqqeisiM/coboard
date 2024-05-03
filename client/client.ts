@@ -1,4 +1,4 @@
-import { Signal, signal } from "../deps.ts";
+import { Signal, signal } from "../deps_client.ts";
 import { ClientSocket, ClientState } from "../liaison/client.ts";
 import {
   Account,

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "../../../deps.ts";
+import { useEffect, useRef } from "../../../deps_client.ts";
 import { Client } from "../../../client/client.ts";
 import { EraserColor } from "../../../client/settings.ts";
 

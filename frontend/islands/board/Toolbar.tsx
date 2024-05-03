@@ -1,4 +1,4 @@
-import { useContext } from "../../../deps.ts";
+import { useContext } from "../../../deps_client.ts";
 import IconCircle from "../../components/IconCircle.tsx";
 import AccountMenu from "./AccountMenu.tsx";
 import ColorSelector from "./ColorSelector.tsx";

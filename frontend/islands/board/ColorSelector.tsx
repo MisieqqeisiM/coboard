@@ -1,4 +1,4 @@
-import { useContext, useRef } from "../../../deps.ts";
+import { useContext, useRef } from "../../../deps_client.ts";
 import { Color } from "../../../client/settings.ts";
 import { SettingsContext } from "../../../client/settings.ts";
 

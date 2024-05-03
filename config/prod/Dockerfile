@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY ./deno.json .
 COPY ./deps.ts .
-RUN deno cache deps.ts
+COPY ./deps_client.ts .
+RUN deno cache deps.ts deps_client.ts
 
 COPY . .
 

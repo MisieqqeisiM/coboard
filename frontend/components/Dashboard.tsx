@@ -1,4 +1,4 @@
-import { Partial } from "../../deps.ts";
+import { Partial } from "../../deps_client.ts";
 import BoardTile from "./BoardTile.tsx";
 
 interface DashboardPars {

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "../../../deps.ts";
+import { useContext, useEffect, useRef } from "../../../deps_client.ts";
 import { Client } from "../../../client/client.ts";
 import { CameraContext } from "../../../client/camera.ts";
 import {

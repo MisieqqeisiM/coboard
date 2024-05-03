@@ -1,4 +1,4 @@
-import { useEffect } from "../../../deps.ts";
+import { useEffect } from "../../../deps_client.ts";
 
 export default function Reload() {
   useEffect(() => {

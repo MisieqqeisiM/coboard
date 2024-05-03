@@ -3,7 +3,7 @@ import {
   createContext,
   useEffect,
   useState,
-} from "../../../deps.ts";
+} from "../../../deps_client.ts";
 import { createClient } from "../../../liaison/client.ts";
 import { Client, SocketClient } from "../../../client/client.ts";
 import { UIClient } from "../../../client/client.ts";

@@ -1,4 +1,4 @@
-import { createContext, Signal, signal } from "../deps.ts";
+import { createContext, Signal, signal } from "../deps_client.ts";
 
 export enum Tool {
   PEN,

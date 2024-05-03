@@ -1,4 +1,4 @@
-import { Context, createContext, Signal, signal } from "../deps.ts";
+import { Context, createContext, Signal, signal } from "../deps_client.ts";
 
 export class Camera {
   constructor(public dx: number, public dy: number, public scale: number) {}
