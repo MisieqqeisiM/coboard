@@ -1,15 +1,11 @@
 import { Server, Socket } from "$socketio/mod.ts";
-import { cert, key } from "../certificates/certificates.ts";
-import {
-  INNER_SOCKET_PORT,
-  INNER_HTTP_PORT,
-  OUTER_HTTPS_PORT,
-} from "../config.ts";
+import { DATABASE_URL, SOCKET_PORT } from "../config.ts";
 import { Board } from "../server/board.ts";
 import { Server as ServerLogic } from "../server/server.ts";
 import { Account } from "./liaison.ts";
 import { ClientToServerEvents, ServerToClientEvents } from "./liaison.ts";
 import { MongoClient } from "https://deno.land/x/mongo@v0.33.0/mod.ts";
+import { sleep } from "https://deno.land/x/sleep/mod.ts"
 
 export interface SocketData {
   client: Client;
@@ -42,34 +38,26 @@ export async function createServer(): Promise<ServerLogic> {
   });
 
   const mongoClient = new MongoClient();
-  const url = "mongodb://localhost:27017";
-  try {
-    await mongoClient.connect(url);
-  } catch (error) {
-    console.log(error);
+  while (true) {
+    console.log("connecting to database...")
+    try {
+      await mongoClient.connect(DATABASE_URL);
+      break;
+    } catch {
+      await sleep(3);
+    }
   }
   const server = new ServerLogic(io, mongoClient);
   const handler = io.handler();
 
-  Deno.serve({ port: INNER_HTTP_PORT }, (req, _) => {
-    const redirectURL = new URL(req.url);
-    redirectURL.protocol = "https:";
-    redirectURL.port = `${OUTER_HTTPS_PORT}`;
-    return Response.redirect(redirectURL, 301);
-  });
-
   Deno.serve(
-    {
-      port: INNER_SOCKET_PORT,
-      cert: cert(),
-      key: key(),
-    } as Deno.ServeTlsOptions,
+    { port: SOCKET_PORT },
     (req, info) =>
       handler(req, {
         localAddr: {
           transport: "tcp",
           hostname: "localhost",
-          port: INNER_SOCKET_PORT,
+          port: SOCKET_PORT,
         },
         remoteAddr: info.remoteAddr,
       })
@@ -77,4 +65,4 @@ export async function createServer(): Promise<ServerLogic> {
   return server;
 }
 
-export const server = createServer();
+export const server = await createServer();

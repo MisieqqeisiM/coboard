@@ -1,6 +1,5 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { server } from "../../liaison/server.ts";
-import { deleteCookie, getCookies } from "$std/http/cookie.ts";
 import LoginForm from "../islands/app/LoginForm.tsx";
 import { Account } from "../../liaison/liaison.ts";
 import Dashboard from "../components/Dashboard.tsx";
