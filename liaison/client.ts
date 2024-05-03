@@ -1,8 +1,17 @@
 import { Socket, io } from "$socketio_client/";
-import { ClientToServerEvents, ServerToClientEvents } from "./liaison.ts";
+import { ClientToServerEvents } from "./liaison.ts";
+import { BoardEventVisitor } from "./events.ts"
+import { Line, BoardUser } from "./liaison.ts";
 import { getCookies } from "$std/http/cookie.ts"
 
-export type ClientSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+export type ClientSocket = Socket<BoardEventVisitor, ClientToServerEvents>;
+
+export class ClientState {
+  constructor(
+    readonly lines: Line[],
+    readonly users: BoardUser[],
+  ) { }
+}
 
 export function createClient(board: string): ClientSocket {
   const headers = new Headers();
@@ -15,7 +24,5 @@ export function createClient(board: string): ClientSocket {
     },
     transports: ["websocket"],
     autoConnect: false,
-    secure: true,
-    rejectUnauthorized: false,
   });
 }

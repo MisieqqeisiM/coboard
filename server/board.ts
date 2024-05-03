@@ -1,56 +1,68 @@
 import { Client, SocketServer } from "../liaison/server.ts";
 import { BoardUser } from "../liaison/liaison.ts";
 import { Line } from "../liaison/liaison.ts";
+import { ClientStore } from "../liaison/server.ts";
+import { OnMoveEvent } from "../liaison/events.ts";
+import { OnResetEvent } from "../liaison/events.ts";
+import { OnDrawEvent } from "../liaison/events.ts";
+import { ConfirmLineEvent } from "../liaison/events.ts";
+import { UserListEvent } from "../liaison/events.ts";
+import { ClientState } from "../liaison/client.ts";
 
 export class Board {
-  private room = crypto.randomUUID();
   private users: Map<string, BoardUser> = new Map();
+  private clients: ClientStore = new ClientStore();
   private strokes: Line[] = [];
 
   constructor(private io: SocketServer) { }
+
+  public getUser(id: string) {
+    return this.clients.getClient(id);
+  }
 
   public hasUser(id: string) {
     return this.users.has(id);
   }
 
-  public newUser(client: Client) {
+  public newUser(client: Client): ClientState {
     const user: BoardUser = {
       account: client.account,
       x: 0,
       y: 0,
     };
 
-    client.socket.on("reset", () => {
-      this.strokes = [];
-      this.io.to(this.room).emit("onReset");
-    });
-
-    client.socket.on("disconnect", () => {
-      this.users.delete(user.account.id);
-      this.updateUsers();
-    });
-
-    client.socket.on("move", (x: number, y: number) => {
-      user.x = x;
-      user.y = y;
-      this.io.to(this.room).emit("onMove", user.account.id, user.x, user.y);
-    });
-
-    client.socket.on("draw", (line: Line) => {
-      this.strokes.push(line);
-      this.io.to(this.room).emit("onDraw", user.account.id, line);
-      client.socket.emit("confirmLine");
-    });
-
-    client.socket.join(this.room);
     this.users.set(user.account.id, user);
-
+    this.clients.addClient(client);
     this.updateUsers();
-    for (const stroke of this.strokes)
-      client.socket.emit("onDraw", null!, stroke);
+
+    return new ClientState(this.strokes, Array.from(this.users.values()));
+  }
+
+  public disconnect(client: Client) {
+    this.users.delete(client.account.id);
+    this.clients.removeClient(client);
+    this.updateUsers();
+  }
+
+  public reset(_client: Client) {
+    this.strokes = [];
+    this.clients.emit(new OnResetEvent());
+  }
+
+  public move(client: Client, x: number, y: number) {
+    const user = this.users.get(client.account.id)!;
+    user.x = x;
+    user.y = y;
+    this.clients.emit(new OnMoveEvent(client.account.id, x, y));
+  }
+
+  public draw(client: Client, line: Line) {
+    this.strokes.push(line);
+    this.clients.emit(new OnDrawEvent(client.account.id, line));
+    client.emit(new ConfirmLineEvent());
   }
 
   private updateUsers(): void {
-    this.io.to(this.room).emit("userList", Array.from(this.users.values()));
+    this.clients.emit(new UserListEvent(Array.from(this.users.values())));
   }
 }
