@@ -1,14 +1,29 @@
 version: '3'
 services:
   server:
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+    memswap_limit: 3G
     build:
       context: ../..
       dockerfile: ./config/prod/Dockerfile
   database:
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    memswap_limit: 2G
     image: mongo:7.0.10-rc0
     volumes:
       - ../../.data:/data/db
   nginx:
+    deploy:
+      resources:
+        limits:
+          memory: 6M
+    memswap_limit: 100M
     image: nginx:1.25.5
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro

@@ -1,4 +1,4 @@
-import { FreshContext, Handlers, PageProps } from "$fresh/server.ts";
+import { FreshContext, Handlers, PageProps } from "../../deps.ts";
 import { ClientState } from "../../liaison/client.ts";
 import { Account } from "../../liaison/liaison.ts";
 import { server } from "../../liaison/server.ts";

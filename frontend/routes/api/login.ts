@@ -1,7 +1,6 @@
-import { Handlers } from "$fresh/server.ts"
-import { setCookie } from "$std/http/cookie.ts"
+import { Handlers, setCookie } from "../../../deps.ts";
 import { TOKEN_LIFETIME } from "../../../config.ts";
-import { server } from "../../../liaison/server.ts"
+import { server } from "../../../liaison/server.ts";
 
 function redirectToHome(): Response {
   const headers = new Headers();
@@ -39,6 +38,5 @@ export const handler: Handlers = {
       status: 303,
       headers,
     });
-
   },
 };

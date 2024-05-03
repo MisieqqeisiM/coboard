@@ -1,6 +1,6 @@
+import { nanoid } from "../deps.ts";
 import { SocketServer } from "../liaison/server.ts";
-import { Board } from "./board.ts"
-import { nanoid } from "$nanoid/mod.ts"
+import { Board } from "./board.ts";
 
 export class Boards {
   private boards: Map<string, Board> = new Map();
@@ -28,8 +28,9 @@ export class Boards {
 
   public async addUserToBoard(userID: string, boardID: string) {
     const boards = await this.getUserBoards(userID);
-    if (! await this.userInBoard(userID, boardID))
+    if (!await this.userInBoard(userID, boardID)) {
       boards.push(boardID);
+    }
     this.userBoards.set(userID, boards);
   }
 

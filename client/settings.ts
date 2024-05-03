@@ -1,9 +1,8 @@
-import { Signal, signal } from "@preact/signals";
-import { createContext } from "preact";
+import { createContext, Signal, signal } from "../deps_client.ts";
 
 export enum Tool {
   PEN,
-  ERASER
+  ERASER,
 }
 
 export enum Color {
@@ -37,4 +36,4 @@ export const SettingsContext = createContext<Settings>({
   tool: signal(Tool.PEN),
   size: signal(20),
   stylusMode: signal(false),
-})
+});

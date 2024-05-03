@@ -1,6 +1,5 @@
-import { useRef, useState } from "preact/hooks";
+import { ComponentChildren, useRef, useState } from "../../../deps_client.ts";
 import IconCircle from "../../components/IconCircle.tsx";
-import { ComponentChildren } from "https://esm.sh/v128/preact@10.19.2/src/index.js";
 
 export default function AccountMenu(
   { children }: { children: ComponentChildren },

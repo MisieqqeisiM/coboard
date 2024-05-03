@@ -1,4 +1,4 @@
-import { Handlers, PageProps } from "$fresh/server.ts";
+import { Handlers, PageProps } from "../../deps.ts";
 import { server } from "../../liaison/server.ts";
 import LoginForm from "../islands/app/LoginForm.tsx";
 import { Account } from "../../liaison/liaison.ts";

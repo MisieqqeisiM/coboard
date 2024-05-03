@@ -1,5 +1,4 @@
-import { Handlers } from "$fresh/server.ts";
-import { deleteCookie } from "$std/http/cookie.ts";
+import { deleteCookie, Handlers } from "../../../deps.ts";
 
 export const handler: Handlers = {
   GET(req) {

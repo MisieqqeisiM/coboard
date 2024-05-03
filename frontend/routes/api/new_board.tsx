@@ -1,7 +1,7 @@
-import { Partial } from "$fresh/runtime.ts";
+import { Partial } from "../../../deps.ts";
 import { server } from "../../../liaison/server.ts";
 import { defineRoute } from "$fresh/src/server/defines.ts";
-import { getAccount, redirectToHome } from "../../../server/utils.ts";
+import { getAccount } from "../../../server/utils.ts";
 import BoardTile from "../../components/BoardTile.tsx";
 import Reload from "../../islands/app/Reload.tsx";
 

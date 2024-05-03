@@ -1,6 +1,6 @@
-import { getCookies } from "$std/http/cookie.ts";
+import { getCookies } from "../deps.ts";
 import { Account } from "../liaison/liaison.ts";
-import { server } from "../liaison/server.ts"
+import { server } from "../liaison/server.ts";
 
 export function redirectToHome(): Response {
   const headers = new Headers();

@@ -1,12 +1,13 @@
 import { Client, SocketServer } from "../liaison/server.ts";
-import { BoardUser } from "../liaison/liaison.ts";
-import { Line } from "../liaison/liaison.ts";
+import { BoardUser, Line } from "../liaison/liaison.ts";
 import { ClientStore } from "../liaison/server.ts";
-import { OnMoveEvent } from "../liaison/events.ts";
-import { OnResetEvent } from "../liaison/events.ts";
-import { OnDrawEvent } from "../liaison/events.ts";
-import { ConfirmLineEvent } from "../liaison/events.ts";
-import { UserListEvent } from "../liaison/events.ts";
+import {
+  ConfirmLineEvent,
+  OnDrawEvent,
+  OnMoveEvent,
+  OnResetEvent,
+  UserListEvent,
+} from "../liaison/events.ts";
 import { ClientState } from "../liaison/client.ts";
 
 export class Board {
@@ -14,7 +15,7 @@ export class Board {
   private clients: ClientStore = new ClientStore();
   private strokes: Line[] = [];
 
-  constructor(private io: SocketServer) { }
+  constructor(private io: SocketServer) {}
 
   public getUser(id: string) {
     return this.clients.getClient(id);

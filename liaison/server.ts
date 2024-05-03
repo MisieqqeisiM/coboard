@@ -1,13 +1,19 @@
-import { Server, Socket } from "$socketio/mod.ts";
+import { MongoClient, Server, ServerSocket as Socket, sleep } from "../deps.ts";
 import { CONNECTION_TIMEOUT } from "../config.ts";
 import { Board } from "../server/board.ts";
 import { Server as ServerLogic } from "../server/server.ts";
 import { Account } from "./liaison.ts";
 import { ClientToServerEvents } from "./liaison.ts";
-import { BoardEvent, BoardEventVisitor, OnDrawEvent, OnMoveEvent, OnResetEvent, UserListEvent, ConfirmLineEvent } from "../liaison/events.ts"
+import {
+  BoardEvent,
+  BoardEventVisitor,
+  ConfirmLineEvent,
+  OnDrawEvent,
+  OnMoveEvent,
+  OnResetEvent,
+  UserListEvent,
+} from "../liaison/events.ts";
 import { DATABASE_URL, SOCKET_PORT } from "../config.ts";
-import { MongoClient } from "https://deno.land/x/mongo@v0.33.0/mod.ts";
-import { sleep } from "https://deno.land/x/sleep/mod.ts"
 
 export interface SocketData {
   client: Client;
@@ -19,8 +25,9 @@ export class ClientStore {
   public addClient(c: Client) {
     this.clients.set(c.account.id, c);
     setTimeout(() => {
-      if (!c.hasSocket())
+      if (!c.hasSocket()) {
         c.disconnect();
+      }
     }, CONNECTION_TIMEOUT);
   }
 
@@ -33,13 +40,14 @@ export class ClientStore {
   }
 
   public emit(event: BoardEvent) {
-    for (const client of this.clients.values())
+    for (const client of this.clients.values()) {
       client.emit(event);
+    }
   }
 }
 
 class Emitter implements BoardEventVisitor {
-  constructor(readonly socket: ServerSocket) { }
+  constructor(readonly socket: ServerSocket) {}
 
   public onDraw(event: OnDrawEvent) {
     this.socket.emit("onDraw", event);
@@ -68,8 +76,8 @@ export class Client {
 
   constructor(
     readonly account: Account,
-    readonly board: Board
-  ) { }
+    readonly board: Board,
+  ) {}
 
   public hasSocket(): boolean {
     return this.emitter !== undefined;
@@ -82,8 +90,9 @@ export class Client {
     socket.on("reset", () => this.board.reset(this));
 
     this.emitter = new Emitter(socket);
-    for (const e of this.cachedEvents)
+    for (const e of this.cachedEvents) {
       e.accept(this.emitter);
+    }
     this.cachedEvents = []; // free up RAM
   }
 
@@ -123,7 +132,7 @@ export async function createServer(): Promise<ServerLogic> {
 
   const mongoClient = new MongoClient();
   while (true) {
-    console.log("connecting to database...")
+    console.log("connecting to database...");
     try {
       await mongoClient.connect(DATABASE_URL);
       break;
@@ -144,7 +153,7 @@ export async function createServer(): Promise<ServerLogic> {
           port: SOCKET_PORT,
         },
         remoteAddr: info.remoteAddr,
-      })
+      }),
   );
   return server;
 }

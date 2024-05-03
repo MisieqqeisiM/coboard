@@ -1,4 +1,4 @@
-import { defineConfig } from "$fresh/server.ts";
+import { defineConfig } from "../deps.ts";
 import { HTTP_PORT } from "../config.ts";
 
 export default defineConfig({

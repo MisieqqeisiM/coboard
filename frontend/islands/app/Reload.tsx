@@ -1,4 +1,4 @@
-import { useEffect } from "preact/hooks";
+import { useEffect } from "../../../deps_client.ts";
 
 export default function Reload() {
   useEffect(() => {

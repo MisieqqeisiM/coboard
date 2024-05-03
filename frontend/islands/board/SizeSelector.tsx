@@ -1,4 +1,4 @@
-import { useContext, useRef } from "preact/hooks";
+import { useContext, useRef } from "../../../deps_client.ts";
 import { SettingsContext } from "../../../client/settings.ts";
 
 export default function SizeSelector() {
