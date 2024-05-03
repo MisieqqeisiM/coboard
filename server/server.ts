@@ -3,7 +3,7 @@ import { ClientState } from "../liaison/client.ts"
 import { ALREADY_LOGGED_IN, BAD_TOKEN } from "../liaison/liaison.ts";
 import { Accounts } from "./accounts.ts"
 import { Boards } from "./boards.ts"
-
+import { MongoClient } from "https://deno.land/x/mongo@v0.33.0/mod.ts";
 
 export class Server {
   public readonly accounts: Accounts;
@@ -15,12 +15,13 @@ export class Server {
     if (board.hasUser(userID)) return null;
     return board.newUser(client);
   }
-
-  constructor(io: SocketServer) {
+  constructor(io: SocketServer, readonly mongoClient: MongoClient) {
+    this.mongoClient = mongoClient;
+    //get accounts and boards from mongodb in the future or something
     this.accounts = new Accounts();
     this.boards = new Boards(io);
 
-    io.use(async socket => {
+    io.use(async (socket) => {
       const token = socket.handshake.auth["token"] as string;
       if (!token) throw new Error(BAD_TOKEN);
       const boardID = socket.handshake.auth["board"] as string;
@@ -29,10 +30,9 @@ export class Server {
       if (!account) throw new Error(BAD_TOKEN);
 
       const board = await this.boards.getBoard(boardID);
-      if (!board)
-        throw new Error();
+      if (!board) throw new Error();
 
-      if (!await this.boards.userInBoard(account.id, boardID))
+      if (!(await this.boards.userInBoard(account.id, boardID)))
         throw new Error();
 
       if (board.getUser(account.id)?.hasSocket()) throw new Error(ALREADY_LOGGED_IN);

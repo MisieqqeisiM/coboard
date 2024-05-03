@@ -1,0 +1,20 @@
+version: '3'
+services:
+  server:
+    build: 
+      context: ../..
+      dockerfile: ./Dockerfile
+    volumes: 
+      - ../..:/app
+  database:
+    image: mongo:7.0.10-rc0
+    volumes:
+      - ../../.data:/data/db
+  nginx:
+    image: nginx:1.25.5
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../certificates:/certificates:ro
+    ports:
+      - 80:80
+      - 443:443
