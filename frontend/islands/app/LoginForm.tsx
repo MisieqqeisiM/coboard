@@ -85,6 +85,20 @@ export default function LoginForm({ redirectTo }: LoginFormProps) {
                 src="/icons/socketio.svg"
               />
             </a>
+            <a href="https://www.mongodb.com/">
+              <img
+                width={iconSize}
+                height={iconSize}
+                src="/icons/mongo.svg"
+              />
+            </a>
+            <a href="https://www.docker.com/">
+              <img
+                width={iconSize}
+                height={iconSize}
+                src="/icons/docker.svg"
+              />
+            </a>
             <a href="http://getskeleton.com/">
               <img
                 width={iconSize}
