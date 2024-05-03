@@ -1,9 +1,12 @@
-import { useEffect, useState } from "preact/hooks";
-import { ComponentChildren } from "preact";
+import {
+  ComponentChildren,
+  createContext,
+  useEffect,
+  useState,
+} from "../../../deps.ts";
 import { createClient } from "../../../liaison/client.ts";
 import { Client, SocketClient } from "../../../client/client.ts";
 import { UIClient } from "../../../client/client.ts";
-import { createContext } from "preact";
 import { Account, ALREADY_LOGGED_IN } from "../../../liaison/liaison.ts";
 import { ClientState } from "../../../liaison/client.ts";
 

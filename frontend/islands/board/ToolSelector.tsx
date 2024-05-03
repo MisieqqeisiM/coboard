@@ -1,4 +1,4 @@
-import { useContext } from "preact/hooks";
+import { useContext } from "../../../deps.ts";
 import IconCircle from "../../components/IconCircle.tsx";
 import { SettingsContext } from "../../../client/settings.ts";
 import { Tool } from "../../../client/settings.ts";

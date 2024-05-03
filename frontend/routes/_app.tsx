@@ -1,4 +1,4 @@
-import { type PageProps } from "$fresh/server.ts";
+import { type PageProps } from "../../deps.ts";
 import { server } from "../../liaison/server.ts";
 
 server;

@@ -1,8 +1,12 @@
+import {
+  ComponentChildren,
+  Signal,
+  useContext,
+  useEffect,
+  useRef,
+} from "../../../deps.ts";
 import { Camera } from "../../../client/camera.ts";
-import { ComponentChildren } from "preact";
-import { Signal } from "@preact/signals";
 import { CameraContext } from "../../../client/camera.ts";
-import { useContext, useEffect, useRef } from "preact/hooks";
 import { SettingsContext } from "../../../client/settings.ts";
 
 interface CameraViewProps {

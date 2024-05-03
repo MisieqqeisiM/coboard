@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "preact/hooks";
+import { useContext, useEffect } from "../../../deps.ts";
 import { Client } from "../../../client/client.ts";
 import { CameraContext } from "../../../client/camera.ts";
 

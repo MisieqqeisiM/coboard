@@ -1,8 +1,7 @@
-import { Socket, io } from "$socketio_client/";
+import { ClientSocket as Socket, getCookies, io } from "../deps.ts";
 import { ClientToServerEvents } from "./liaison.ts";
-import { BoardEventVisitor } from "./events.ts"
-import { Line, BoardUser } from "./liaison.ts";
-import { getCookies } from "$std/http/cookie.ts"
+import { BoardEventVisitor } from "./events.ts";
+import { BoardUser, Line } from "./liaison.ts";
 
 export type ClientSocket = Socket<BoardEventVisitor, ClientToServerEvents>;
 
@@ -10,7 +9,7 @@ export class ClientState {
   constructor(
     readonly lines: Line[],
     readonly users: BoardUser[],
-  ) { }
+  ) {}
 }
 
 export function createClient(board: string): ClientSocket {

@@ -1,23 +1,25 @@
-import { Signal, signal } from "@preact/signals";
-import { ClientSocket } from "../liaison/client.ts";
-import { Account, BoardUser, ClientToServerEvents } from "../liaison/liaison.ts";
-import { Line } from "../liaison/liaison.ts"
-import { ClientState } from "../liaison/client.ts";
+import { Signal, signal } from "../deps.ts";
+import { ClientSocket, ClientState } from "../liaison/client.ts";
+import {
+  Account,
+  BoardUser,
+  ClientToServerEvents,
+  Line,
+} from "../liaison/liaison.ts";
 
 export class Client {
   constructor(
     readonly socket: SocketClient,
     readonly ui: UIClient,
     readonly account: Account,
-    readonly allowed: boolean
-  ) { }
+    readonly allowed: boolean,
+  ) {}
 }
-
 
 export class UIClient {
   readonly users: Signal<Map<string, BoardUser>> = signal(new Map());
   readonly strokes: Signal<Line[]> = signal([]);
-  readonly local_strokes: Signal<Line[]> = signal([])
+  readonly local_strokes: Signal<Line[]> = signal([]);
   readonly clear: Signal<boolean> = signal(false);
 
   constructor(initialState: ClientState) {
@@ -55,7 +57,6 @@ export class SocketClient implements ClientToServerEvents {
       client.strokes.value = [];
       client.clear.value = true;
     });
-
   }
 
   public move(x: number, y: number) {

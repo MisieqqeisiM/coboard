@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "preact/hooks";
+import { useContext, useRef } from "../../../deps.ts";
 import { Color } from "../../../client/settings.ts";
 import { SettingsContext } from "../../../client/settings.ts";
 

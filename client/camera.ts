@@ -1,8 +1,7 @@
-import { Signal, signal } from "@preact/signals";
-import { Context, createContext } from "preact";
+import { Context, createContext, Signal, signal } from "../deps.ts";
 
 export class Camera {
-  constructor(public dx: number, public dy: number, public scale: number) { }
+  constructor(public dx: number, public dy: number, public scale: number) {}
   public toBoardCoords(x: number, y: number): [number, number] {
     return [x / this.scale - this.dx, y / this.scale - this.dy];
   }
@@ -12,7 +11,7 @@ export class Camera {
     return new Camera(
       (this.dx + x) / amount - x,
       (this.dy + y) / amount - y,
-      this.scale * amount
+      this.scale * amount,
     );
   }
 
@@ -20,7 +19,7 @@ export class Camera {
     return new Camera(
       this.dx + sdx / this.scale,
       this.dy + sdy / this.scale,
-      this.scale
+      this.scale,
     );
   }
 }

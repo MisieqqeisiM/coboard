@@ -1,6 +1,5 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef } from "../../../deps.ts";
 import { Client } from "../../../client/client.ts";
-import { Line } from "../../../liaison/liaison.ts";
 import { EraserColor } from "../../../client/settings.ts";
 
 interface CanvasProps {
