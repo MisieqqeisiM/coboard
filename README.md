@@ -2,8 +2,8 @@
 
 In development mode:
 
-`docker-compose -f docker-compose.dev.yml up`
+`./run-dev.sh`
 
 In production mode:
 
-`docker-compose -f docker-compose.prod.yml up`
+`./run-prod.sh`
