@@ -36,11 +36,13 @@ export default function CameraView(
     let touchY = 0;
     let touchDist = 1;
     let moving = false;
+    let mouseMoving = false;
 
     const move = (e: MouseEvent) => {
       if (e.buttons & 2) {
-        if (!moving) {
-          moving = true;
+        moving = false;
+        if (!mouseMoving) {
+          mouseMoving = true;
           prevX = e.clientX;
           prevY = e.clientY;
           return;
@@ -51,12 +53,12 @@ export default function CameraView(
         prevY = e.clientY;
         camera.value = camera.peek().move(dx, dy);
       } else {
-        moving = false;
+        mouseMoving = false;
       }
     };
 
     const endMove = (e: MouseEvent) => {
-      moving = false;
+      mouseMoving = false;
     };
 
     function getTouchData(a: Touch, b: Touch) {
@@ -70,6 +72,7 @@ export default function CameraView(
 
     const touchStart = (e: TouchEvent) => {
       e.preventDefault();
+      if (mouseMoving) return;
       moving = true;
       if (stylusMode.peek() && e.touches.length == 1) {
         touchX = e.touches[0].clientX;
