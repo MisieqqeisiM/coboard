@@ -28,6 +28,8 @@ export interface Settings {
   color: Signal<Color>;
   tool: Signal<Tool>;
   size: Signal<number>;
+  penSize: Signal<number>;
+  eraserSize: Signal<number>;
   stylusMode: Signal<boolean>;
 }
 
@@ -35,5 +37,7 @@ export const SettingsContext = createContext<Settings>({
   color: signal(Color.BLACK),
   tool: signal(Tool.PEN),
   size: signal(20),
+  penSize: signal(20),
+  eraserSize: signal(20),
   stylusMode: signal(false),
 });
