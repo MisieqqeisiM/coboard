@@ -17,6 +17,10 @@ export interface BoardDB {
   userIDs: string[];
 }
 
+export interface BoardUnloader {
+  unload(id: string): void;
+}
+
 export class Board {
   private users: Map<string, BoardUser> = new Map();
   private clients: ClientStore = new ClientStore();
@@ -24,6 +28,7 @@ export class Board {
   constructor(
     private mongoClient: MongoClient,
     private id: string,
+    private unloader: BoardUnloader,
   ) {}
 
   public getUser(id: string) {
@@ -54,6 +59,9 @@ export class Board {
     this.users.delete(client.account.id);
     this.clients.removeClient(client);
     this.updateUsers();
+    if (this.users.size === 0) {
+      this.unloader.unload(this.id);
+    }
   }
 
   public async reset(_client: Client) {

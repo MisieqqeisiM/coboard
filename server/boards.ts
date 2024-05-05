@@ -1,9 +1,9 @@
 import { MongoClient, nanoid } from "../deps.ts";
 import { Account } from "../liaison/liaison.ts";
 import { SocketServer } from "../liaison/server.ts";
-import { Board, BoardDB } from "./board.ts";
+import { Board, BoardDB, BoardUnloader } from "./board.ts";
 
-export class Boards {
+export class Boards implements BoardUnloader {
   private boards: Map<string, Board> = new Map();
 
   constructor(private io: SocketServer, private mongoClient: MongoClient) {}
@@ -12,6 +12,10 @@ export class Boards {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     if (await this.getBoard("general")) return;
     await boards.insertOne({ id: "general", lines: [], userIDs: [] });
+  }
+
+  public unload(id: string) {
+    this.boards.delete(id);
   }
 
   public async newBoard(): Promise<string> {
@@ -31,7 +35,7 @@ export class Boards {
     if (!board) {
       const boardDB = await boards.findOne({ id });
       if (!boardDB) return null;
-      board = new Board(this.mongoClient, id);
+      board = new Board(this.mongoClient, id, this);
       this.boards.set(id, board);
     }
     return board;
