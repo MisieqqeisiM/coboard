@@ -1,5 +1,5 @@
 import { useContext } from "../../../deps_client.ts";
-import IconCircle from "../../components/IconCircle.tsx";
+import IconCircle from "../app/IconCircle.tsx";
 import { SettingsContext } from "../../../client/settings.ts";
 import { Tool } from "../../../client/settings.ts";
 import SizeSelector from "./SizeSelector.tsx";

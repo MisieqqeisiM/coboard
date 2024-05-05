@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "../../../deps_client.ts";
-import IconCircle from "../../components/IconCircle.tsx";
+import IconCircle from "../app/IconCircle.tsx";
 import { SettingsContext } from "../../../client/settings.ts";
 
 export default function StylusModeSelector() {

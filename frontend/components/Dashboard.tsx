@@ -1,5 +1,8 @@
 import { Partial } from "../../deps_client.ts";
+import AccountMenu from "../islands/board/AccountMenu.tsx";
 import BoardTile from "./BoardTile.tsx";
+import IconCircle from "../islands/app/IconCircle.tsx";
+import DashboardMenu from "../islands/app/DashboardMenu.tsx";
 
 interface DashboardPars {
   boards: Array<string>;
@@ -8,22 +11,7 @@ interface DashboardPars {
 export default function Dashboard({ boards }: DashboardPars) {
   return (
     <>
-      <div class="container" style="height: 100%;">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-start",
-            flexDirection: "row",
-            marginTop: 50,
-            fontSize: 70,
-          }}
-        >
-          <img src="/icons/coboard.svg" style={{ height: 90 }}>
-          </img>
-          oboard
-        </div>
-        <hr />
+      <div class="container" style={{ height: "100%" }}>
         <div
           style={{
             display: "flex",
@@ -31,13 +19,14 @@ export default function Dashboard({ boards }: DashboardPars) {
             gap: 5,
             flexWrap: "wrap",
             overflowY: "scroll",
-            maxHeight: "calc(100% - 230px)",
+            maxHeight: "calc(100% - 40px)",
+            margin: 20,
           }}
           f-client-nav
         >
           <Partial name="boards">
             <a
-              class="button button-primary"
+              class="board-tile colored"
               href="/"
               f-partial="/api/new_board"
               key="new"
@@ -50,6 +39,7 @@ export default function Dashboard({ boards }: DashboardPars) {
           </Partial>
         </div>
       </div>
+      <DashboardMenu />
     </>
   );
 }
