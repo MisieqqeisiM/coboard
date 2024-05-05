@@ -16,7 +16,6 @@ export default function LoginForm({ redirectTo }: LoginFormProps) {
   );
   googleLoginURL.searchParams.append("response_type", "code");
   googleLoginURL.searchParams.append("access_type", "offline");
-  googleLoginURL.searchParams.append("prompt", "consent");
   googleLoginURL.searchParams.append(
     "scope",
     "https://www.googleapis.com/auth/userinfo.email",
