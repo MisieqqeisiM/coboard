@@ -1,6 +1,7 @@
 import { Handlers, setCookie } from "../../../../deps.ts";
 import { CLIENT_ID, TOKEN_LIFETIME } from "../../../../config.ts";
 import { server } from "../../../../liaison/server.ts";
+import { CLIENT_KEY } from "../../../../certificates/google.ts";
 
 function redirectToHome(): Response {
   const headers = new Headers();
@@ -20,7 +21,7 @@ export const handler: Handlers = {
     if (!code) return redirectToHome();
     const formData = new FormData();
     formData.append("client_id", CLIENT_ID);
-    formData.append("client_secret", "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");
+    formData.append("client_secret", CLIENT_KEY);
     formData.append("grant_type", "authorization_code");
     formData.append(
       "redirect_uri",
