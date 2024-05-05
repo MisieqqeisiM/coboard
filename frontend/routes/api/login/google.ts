@@ -36,6 +36,7 @@ export const handler: Handlers = {
       },
     );
     const json = await res.json();
+    console.log(json);
     const token = json.access_token;
     const data_res = await fetch(
       "https://www.googleapis.com/oauth2/v2/userinfo",
