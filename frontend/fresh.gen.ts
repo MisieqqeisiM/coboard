@@ -9,6 +9,8 @@ import * as $api_login from "./routes/api/login.ts";
 import * as $api_logout from "./routes/api/logout.ts";
 import * as $api_new_board from "./routes/api/new_board.tsx";
 import * as $index from "./routes/index.tsx";
+import * as $app_DashboardMenu from "./islands/app/DashboardMenu.tsx";
+import * as $app_IconCircle from "./islands/app/IconCircle.tsx";
 import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
 import * as $app_Reload from "./islands/app/Reload.tsx";
 import * as $app_WithClient from "./islands/app/WithClient.tsx";
@@ -37,6 +39,8 @@ const manifest = {
     "./routes/index.tsx": $index,
   },
   islands: {
+    "./islands/app/DashboardMenu.tsx": $app_DashboardMenu,
+    "./islands/app/IconCircle.tsx": $app_IconCircle,
     "./islands/app/LoginForm.tsx": $app_LoginForm,
     "./islands/app/Reload.tsx": $app_Reload,
     "./islands/app/WithClient.tsx": $app_WithClient,

@@ -15,7 +15,12 @@ export const handler: Handlers = {
     const account = await getAccount(req);
     if (account) {
       const boards = await server.boards.getUserBoards(account.id);
-      return await ctx.render!({ account, boards });
+      const res = await ctx.render!({ account, boards });
+      res.headers.append(
+        "Cache-Control",
+        "no-cache, no-store, must-revalidate",
+      );
+      return res;
     } else {
       const res = await ctx.render!({ account });
       return res;

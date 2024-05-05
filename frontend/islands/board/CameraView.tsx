@@ -21,12 +21,23 @@ export default function CameraView(
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let touchpad = false;
     const zoom = (e: WheelEvent) => {
-      const amount = e.deltaY;
-      if (amount > 0) {
-        camera.value = camera.peek().zoom(e.clientX, e.clientY, 1 / 1.1);
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.deltaX !== 0 || Math.abs(e.deltaY) < 50) {
+        touchpad = true;
+      }
+
+      if (!touchpad || e.ctrlKey) {
+        const amount = e.deltaY;
+        camera.value = camera.peek().zoom(
+          e.clientX,
+          e.clientY,
+          Math.pow(1.1, -Math.sign(amount)),
+        );
       } else {
-        camera.value = camera.peek().zoom(e.clientX, e.clientY, 1.1);
+        camera.value = camera.peek().move(e.deltaX, e.deltaY);
       }
     };
 
@@ -36,11 +47,13 @@ export default function CameraView(
     let touchY = 0;
     let touchDist = 1;
     let moving = false;
+    let mouseMoving = false;
 
     const move = (e: MouseEvent) => {
       if (e.buttons & 2) {
-        if (!moving) {
-          moving = true;
+        moving = false;
+        if (!mouseMoving) {
+          mouseMoving = true;
           prevX = e.clientX;
           prevY = e.clientY;
           return;
@@ -51,12 +64,12 @@ export default function CameraView(
         prevY = e.clientY;
         camera.value = camera.peek().move(dx, dy);
       } else {
-        moving = false;
+        mouseMoving = false;
       }
     };
 
     const endMove = (e: MouseEvent) => {
-      moving = false;
+      mouseMoving = false;
     };
 
     function getTouchData(a: Touch, b: Touch) {
@@ -70,6 +83,7 @@ export default function CameraView(
 
     const touchStart = (e: TouchEvent) => {
       e.preventDefault();
+      if (mouseMoving) return;
       moving = true;
       if (stylusMode.peek() && e.touches.length == 1) {
         touchX = e.touches[0].clientX;
@@ -125,7 +139,7 @@ export default function CameraView(
     globalThis.addEventListener("gesturestart", prevent);
     globalThis.addEventListener("contextmenu", prevent);
 
-    globalThis.addEventListener("wheel", zoom);
+    globalThis.addEventListener("wheel", zoom, { passive: false });
     globalThis.addEventListener("mousemove", move);
     globalThis.addEventListener("mouseup", endMove);
     ref.current?.addEventListener("touchstart", touchStart);
@@ -135,7 +149,6 @@ export default function CameraView(
     return () => {
       globalThis.removeEventListener("gesturestart", prevent);
       globalThis.removeEventListener("contextmenu", prevent);
-
       globalThis.removeEventListener("wheel", zoom);
       globalThis.removeEventListener("mousemove", move);
       globalThis.removeEventListener("mouseup", endMove);

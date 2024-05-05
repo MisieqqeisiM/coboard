@@ -1,8 +1,8 @@
 import { useContext, useRef } from "../../../deps_client.ts";
-import { SettingsContext } from "../../../client/settings.ts";
+import { SettingsContext, Tool } from "../../../client/settings.ts";
 
 export default function SizeSelector() {
-  const size = useContext(SettingsContext).size;
+  const settings = useContext(SettingsContext);
   const slider = useRef<HTMLInputElement>(null);
   const sliderBox = useRef<HTMLDivElement>(null);
   return (
@@ -16,8 +16,8 @@ export default function SizeSelector() {
         <div
           style={{
             border: "2px dashed #222222",
-            width: size.value,
-            height: size.value,
+            width: settings.size.value,
+            height: settings.size.value,
             borderRadius: "50%",
           }}
         >
@@ -34,9 +34,19 @@ export default function SizeSelector() {
           type="range"
           min="3"
           max="40"
+          value={settings.size.value}
           ref={slider}
           onInput={() => {
-            size.value = Number(slider.current?.value);
+            const value = Number(slider.current?.value);
+            switch (settings.tool.peek()) {
+              case Tool.PEN:
+                settings.penSize.value = value;
+                break;
+              case Tool.ERASER:
+                settings.eraserSize.value = value;
+                break;
+            }
+            settings.size.value = value;
           }}
         />
       </div>
