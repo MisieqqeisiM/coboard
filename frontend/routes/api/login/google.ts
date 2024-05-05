@@ -12,6 +12,11 @@ function redirectToHome(): Response {
   });
 }
 
+const urls: { [id: string]: string } = {
+  "coboard.pl": "https://coboard.pl/api/login/google",
+  "localhost": "http://localhost/api/login/google",
+};
+
 export const handler: Handlers = {
   async GET(req) {
     const url = new URL(req.url);
@@ -25,7 +30,7 @@ export const handler: Handlers = {
     formData.append("grant_type", "authorization_code");
     formData.append(
       "redirect_uri",
-      `${url.protocol}//${url.hostname}${url.pathname}`,
+      urls[url.host] ?? "/",
     );
     formData.append("code", code);
     const res = await fetch(
@@ -36,7 +41,6 @@ export const handler: Handlers = {
       },
     );
     const json = await res.json();
-    console.log(json);
     const token = json.access_token;
     const data_res = await fetch(
       "https://www.googleapis.com/oauth2/v2/userinfo",
