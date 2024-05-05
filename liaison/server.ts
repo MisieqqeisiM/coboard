@@ -130,11 +130,11 @@ export async function createServer(): Promise<ServerLogic> {
     pingInterval: 5000,
   });
 
-  const mongoClient = new MongoClient();
+  const mongoClient = new MongoClient(DATABASE_URL);
   while (true) {
     console.log("connecting to database...");
     try {
-      await mongoClient.connect(DATABASE_URL);
+      await mongoClient.connect();
       break;
     } catch {
       await sleep(3);

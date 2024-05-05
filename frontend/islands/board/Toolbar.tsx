@@ -31,6 +31,13 @@ export default function Toolbar() {
               globalThis.location.href = "/api/logout";
             }}
           />
+          <IconCircle
+            iconName="pencil-outline"
+            onClick={() => {
+              globalThis.location.href =
+                `/set_name?redirectTo=${window.location.pathname}`;
+            }}
+          />
         </AccountMenu>
         <ColorSelector />
         <SizeSelector />

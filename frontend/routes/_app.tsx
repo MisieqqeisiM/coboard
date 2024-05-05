@@ -51,6 +51,7 @@ export default function App({ Component }: PageProps) {
           src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
         >
         </script>
+        <script src="https://accounts.google.com/gsi/client" async></script>
       </body>
     </html>
   );

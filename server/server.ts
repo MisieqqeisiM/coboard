@@ -24,7 +24,7 @@ export class Server {
   constructor(io: SocketServer, readonly mongoClient: MongoClient) {
     this.mongoClient = mongoClient;
     //get accounts and boards from mongodb in the future or something
-    this.accounts = new Accounts();
+    this.accounts = new Accounts(mongoClient);
     this.boards = new Boards(io);
 
     io.use(async (socket) => {

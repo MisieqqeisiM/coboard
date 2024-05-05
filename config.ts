@@ -1,6 +1,8 @@
 export const SOCKET_PORT = 3000;
 export const HTTP_PORT = 8000;
-export const DATABASE_URL = "mongodb://database:27017"
+export const DATABASE_URL = "mongodb://database:27017";
+export const CLIENT_ID =
+  "545923615446-59db1eujj2cj2cacq3fe6cptdrpg6i1m.apps.googleusercontent.com";
 
 // lifetime of json web token (s)
 export const TOKEN_LIFETIME = 3600;

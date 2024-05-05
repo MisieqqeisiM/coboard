@@ -14,4 +14,4 @@ export {
   start,
 } from "$fresh/server.ts";
 export { Head, Partial } from "$fresh/runtime.ts";
-export { MongoClient } from "$mongo/mod.ts";
+export { MongoClient } from "$mongo";
