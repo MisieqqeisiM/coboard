@@ -23,7 +23,7 @@ export class Accounts {
       "accounts",
     );
     if (!(await accounts.findOne({ id }))) {
-      await accounts.insertOne({ id, name: "" });
+      await accounts.insertOne({ id, name: "", boards: [] });
     }
   }
 

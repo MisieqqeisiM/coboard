@@ -18,7 +18,9 @@ export const handler: Handlers = {
     let clientState: ClientState | null = null;
 
     if (account) {
-      await server.boards.addUserToBoard(account.id, boardID);
+      if (!(await server.boards.userInBoard(account.id, boardID))) {
+        await server.boards.addUserToBoard(account.id, boardID);
+      }
       clientState = await server.initClient(account.id, boardID);
     }
 
