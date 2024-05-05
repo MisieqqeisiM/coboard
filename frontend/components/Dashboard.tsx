@@ -19,8 +19,9 @@ export default function Dashboard({ boards }: DashboardPars) {
             gap: 5,
             flexWrap: "wrap",
             overflowY: "scroll",
-            maxHeight: "calc(100% - 40px)",
-            margin: 20,
+            maxHeight: "calc(100% - 110px)",
+            marginTop: 90,
+            marginBottom: 20,
           }}
           f-client-nav
         >
