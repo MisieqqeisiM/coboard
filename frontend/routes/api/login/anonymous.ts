@@ -1,6 +1,6 @@
-import { Handlers, setCookie } from "../../../deps.ts";
-import { TOKEN_LIFETIME } from "../../../config.ts";
-import { server } from "../../../liaison/server.ts";
+import { Handlers, setCookie } from "../../../../deps.ts";
+import { TOKEN_LIFETIME } from "../../../../config.ts";
+import { server } from "../../../../liaison/server.ts";
 
 function redirectToHome(): Response {
   const headers = new Headers();
@@ -12,14 +12,16 @@ function redirectToHome(): Response {
 }
 
 export const handler: Handlers = {
-  async POST(req) {
+  async GET(req) {
     const url = new URL(req.url);
-    const form = await req.formData();
+    const id = crypto.randomUUID();
+    let location = url.searchParams.get("redirectTo") ?? "/";
+    if (!(await server.accounts.getAccountById(id))) {
+      location = `/set_name?redirectTo=${location}`;
+    }
+    await server.accounts.newAccount(id);
 
-    const login = form.get("login");
-    if (!login) return redirectToHome();
-
-    const token = await server.accounts.getToken(login.toString(), "");
+    const token = await server.accounts.getToken(id);
     if (!token) return redirectToHome();
 
     const headers = new Headers();
@@ -33,7 +35,7 @@ export const handler: Handlers = {
       secure: true,
     });
 
-    headers.set("location", `${form.get("redirectTo") ?? "/"}`);
+    headers.set("location", location);
     return new Response(null, {
       status: 303,
       headers,

@@ -1,8 +1,27 @@
+import { IS_BROWSER } from "$fresh/runtime.ts";
+import { CLIENT_ID } from "../../../config.ts";
 interface LoginFormProps {
   redirectTo: string;
 }
 export default function LoginForm({ redirectTo }: LoginFormProps) {
+  if (!IS_BROWSER) return <></>;
   const iconSize = 40;
+  const googleLoginURL = new URL(
+    "https://accounts.google.com/o/oauth2/v2/auth",
+  );
+  googleLoginURL.searchParams.append("client_id", CLIENT_ID);
+  googleLoginURL.searchParams.append(
+    "redirect_uri",
+    `${window.location.protocol}//${window.location.hostname}/api/login/google`,
+  );
+  googleLoginURL.searchParams.append("response_type", "code");
+  googleLoginURL.searchParams.append("access_type", "offline");
+  googleLoginURL.searchParams.append(
+    "scope",
+    "https://www.googleapis.com/auth/userinfo.email",
+  );
+  googleLoginURL.searchParams.append("state", redirectTo);
+
   return (
     <div
       style={{
@@ -19,6 +38,7 @@ export default function LoginForm({ redirectTo }: LoginFormProps) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          zIndex: 0,
         }}
       >
         <div style="position: relative">
@@ -29,38 +49,25 @@ export default function LoginForm({ redirectTo }: LoginFormProps) {
               position: "absolute",
               zIndex: -1,
               left: -570,
-              top: -300,
+              top: -380,
               opacity: 0.3,
             }}
             src="/icons/coboard.svg"
           />
         </div>
         <h3>Welcome to Coboard</h3>
-        <form method="post" action="/api/login">
-          <input
-            type="hidden"
-            name="redirectTo"
-            id="redirectTo"
-            value={redirectTo}
-          />
-          <label for="login">Username</label>
-          <input class="u-full-width" type="text" name="login" id="login" />
-          <label for="password" style={{ color: "#eee" }}>Password</label>
-          <input
-            class="u-full-width"
-            disabled
-            style={{ backgroundColor: "#fafafa", borderColor: "#fcfcfc" }}
-            type="password"
-            name="password"
-            id="password"
-          />
-          {/* TODO: password */}
-          <input
-            class="u-full-width button-primary"
-            type="submit"
-            value="log in"
-          />
-        </form>
+        <a
+          class="u-full-width button button-primary"
+          href={googleLoginURL.toString()}
+        >
+          Log in with google
+        </a>
+        <a
+          class="u-full-width button button-primary"
+          href={`/api/login/anonymous?redirectTo=${redirectTo}`}
+        >
+          Log in anonymously
+        </a>
         <div style="display: flex; justify-content: center; flex-direction: column; align-items: center">
           Powered by:
           <div style="display: flex; gap: 3px">

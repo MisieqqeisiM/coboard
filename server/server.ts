@@ -24,8 +24,8 @@ export class Server {
   constructor(io: SocketServer, readonly mongoClient: MongoClient) {
     this.mongoClient = mongoClient;
     //get accounts and boards from mongodb in the future or something
-    this.accounts = new Accounts();
-    this.boards = new Boards(io);
+    this.accounts = new Accounts(mongoClient);
+    this.boards = new Boards(io, mongoClient);
 
     io.use(async (socket) => {
       const token = socket.handshake.auth["token"] as string;

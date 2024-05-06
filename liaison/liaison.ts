@@ -1,6 +1,7 @@
 export interface Account {
   id: string;
   name: string;
+  boards: string[];
 }
 
 export interface BoardUser {
@@ -18,11 +19,10 @@ export interface ClientToServerEvents {
 export const ALREADY_LOGGED_IN = "already logged in";
 export const BAD_TOKEN = "bad token";
 
-
 export class Line {
   constructor(
     readonly width: number,
     readonly color: string,
-    readonly coordinates: { x: number, y: number }[]
-  ) { }
+    readonly coordinates: { x: number; y: number }[],
+  ) {}
 }

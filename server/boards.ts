@@ -1,41 +1,71 @@
-import { nanoid } from "../deps.ts";
+import { MongoClient, nanoid } from "../deps.ts";
+import { Account } from "../liaison/liaison.ts";
 import { SocketServer } from "../liaison/server.ts";
-import { Board } from "./board.ts";
+import { Board, BoardDB, BoardUnloader } from "./board.ts";
 
-export class Boards {
+export class Boards implements BoardUnloader {
   private boards: Map<string, Board> = new Map();
-  private userBoards: Map<string, Array<string>> = new Map();
 
-  constructor(private io: SocketServer) {
-    this.boards.set("general", new Board(io));
+  constructor(private io: SocketServer, private mongoClient: MongoClient) {}
+
+  public async init() {
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    if (await this.getBoard("general")) return;
+    await boards.insertOne({ id: "general", lines: [], userIDs: [] });
   }
 
-  // deno-lint-ignore require-await
+  public unload(id: string) {
+    this.boards.delete(id);
+  }
+
   public async newBoard(): Promise<string> {
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     const id = nanoid(10);
-    this.boards.set(id, new Board(this.io));
+    await boards.insertOne({
+      id,
+      lines: [],
+      userIDs: [],
+    });
     return id;
   }
 
-  // deno-lint-ignore require-await
   public async getBoard(id: string): Promise<Board | null> {
-    return this.boards.get(id) ?? null;
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    let board = this.boards.get(id);
+    if (!board) {
+      const boardDB = await boards.findOne({ id });
+      if (!boardDB) return null;
+      board = new Board(this.mongoClient, id, this);
+      this.boards.set(id, board);
+    }
+    return board;
   }
 
   public async userInBoard(userID: string, boardID: string): Promise<boolean> {
-    return (await this.getUserBoards(userID)).indexOf(boardID) != -1;
+    if (boardID === "general") return true;
+    const accounts = this.mongoClient.db("main").collection<Account>(
+      "accounts",
+    );
+    return await accounts.findOne({
+      id: userID,
+      boards: { $all: [boardID] },
+    }) !== null;
   }
 
   public async addUserToBoard(userID: string, boardID: string) {
-    const boards = await this.getUserBoards(userID);
-    if (!await this.userInBoard(userID, boardID)) {
-      boards.push(boardID);
-    }
-    this.userBoards.set(userID, boards);
+    if (boardID === "general") return;
+    const accounts = this.mongoClient.db("main").collection<Account>(
+      "accounts",
+    );
+    await accounts.updateOne({ id: userID }, { $push: { boards: boardID } });
   }
 
-  // deno-lint-ignore require-await
   public async getUserBoards(id: string): Promise<Array<string>> {
-    return this.userBoards.get(id) ?? ["general"];
+    const accounts = this.mongoClient.db("main").collection<Account>(
+      "accounts",
+    );
+    const account = await accounts.findOne({ id });
+    account?.boards.unshift("general");
+    return account?.boards ?? [];
   }
 }

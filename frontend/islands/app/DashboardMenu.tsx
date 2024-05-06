@@ -1,5 +1,6 @@
 import AccountMenu from "../board/AccountMenu.tsx";
 import IconCircle from "./IconCircle.tsx";
+import ThemeSelector from "./ThemeSelector.tsx";
 
 export default function DashboardMenu() {
   return (
@@ -18,6 +19,14 @@ export default function DashboardMenu() {
             globalThis.location.href = "/api/logout";
           }}
         />
+        <IconCircle
+          iconName="pencil-outline"
+          onClick={() => {
+            globalThis.location.href =
+              `/set_name?redirectTo=${window.location.pathname}`;
+          }}
+        />
+        <ThemeSelector />
       </AccountMenu>
     </div>
   );

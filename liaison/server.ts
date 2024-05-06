@@ -85,9 +85,9 @@ export class Client {
 
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
-    socket.on("draw", (line) => this.board.draw(this, line));
+    socket.on("draw", async (line) => await this.board.draw(this, line));
     socket.on("move", (x, y) => this.board.move(this, x, y));
-    socket.on("reset", () => this.board.reset(this));
+    socket.on("reset", async () => await this.board.reset(this));
 
     this.emitter = new Emitter(socket);
     for (const e of this.cachedEvents) {
@@ -130,17 +130,18 @@ export async function createServer(): Promise<ServerLogic> {
     pingInterval: 5000,
   });
 
-  const mongoClient = new MongoClient();
+  const mongoClient = new MongoClient(DATABASE_URL);
   while (true) {
     console.log("connecting to database...");
     try {
-      await mongoClient.connect(DATABASE_URL);
+      await mongoClient.connect();
       break;
     } catch {
       await sleep(3);
     }
   }
   const server = new ServerLogic(io, mongoClient);
+  await server.boards.init();
   const handler = io.handler();
 
   Deno.serve(

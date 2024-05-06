@@ -1,5 +1,6 @@
 import { type PageProps } from "../../deps.ts";
 import { server } from "../../liaison/server.ts";
+import Themed from "../islands/app/Themed.tsx";
 
 server;
 
@@ -40,6 +41,7 @@ export default function App({ Component }: PageProps) {
         />
       </head>
       <body>
+        <Themed />
         <Component />
         <script
           type="module"
@@ -51,6 +53,7 @@ export default function App({ Component }: PageProps) {
           src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
         >
         </script>
+        <script src="https://accounts.google.com/gsi/client" async></script>
       </body>
     </html>
   );

@@ -1,4 +1,10 @@
-import { create, getNumericDate, Payload, verify } from "../deps.ts";
+import {
+  create,
+  getNumericDate,
+  MongoClient,
+  Payload,
+  verify,
+} from "../deps.ts";
 import { Account } from "../liaison/liaison.ts";
 import { TOKEN_LIFETIME } from "../config.ts";
 
@@ -10,14 +16,27 @@ export class Accounts {
   private accounts: Map<string, Account> = new Map();
   private key?: CryptoKey;
 
+  public constructor(private mongoClient: MongoClient) {}
+
+  public async newAccount(id: string) {
+    const accounts = this.mongoClient.db("main").collection<Account>(
+      "accounts",
+    );
+    if (!(await accounts.findOne({ id }))) {
+      await accounts.insertOne({ id, name: "", boards: [] });
+    }
+  }
+
+  public async setName(id: string, name: string) {
+    const accounts = this.mongoClient.db("main").collection<Account>(
+      "accounts",
+    );
+    await accounts.updateOne({ id }, { $set: { name } });
+  }
+
   public async getToken(
-    login: string,
-    _password: string,
+    id: string,
   ): Promise<string | null> {
-    if (!login || login.length > 64) return null;
-    console.log(`New user: ${login}`);
-    const id = crypto.randomUUID();
-    this.accounts.set(id, { id, name: login });
     return create({ alg: "HS256", typ: "JWT" }, {
       exp: getNumericDate(TOKEN_LIFETIME),
       id,
@@ -33,9 +52,9 @@ export class Accounts {
     }
   }
 
-  // deno-lint-ignore require-await
   public async getAccountById(id: string): Promise<Account | null> {
-    return this.accounts.get(id) ?? null;
+    return await this.mongoClient.db("main").collection<Account>("accounts")
+      .findOne({ id });
   }
 
   public async getAccount(jwt: string): Promise<Account | null> {
@@ -46,10 +65,32 @@ export class Accounts {
 
   private async getKey(): Promise<CryptoKey> {
     if (this.key) return this.key;
-    return this.key = await crypto.subtle.generateKey(
-      { name: "HMAC", hash: "SHA-256" },
-      true,
-      ["sign", "verify"],
-    );
+
+    const algorithm: HmacKeyGenParams = { name: "HMAC", hash: "SHA-256" };
+    const extractable = true;
+    const uses: KeyUsage[] = ["sign", "verify"];
+
+    const collection = this.mongoClient
+      .db("main")
+      .collection<JsonWebKey>("key");
+
+    const key = await collection.findOne();
+    if (key) {
+      this.key = await crypto.subtle.importKey(
+        "jwk",
+        key,
+        algorithm,
+        extractable,
+        uses,
+      );
+    }
+
+    if (!this.key) {
+      this.key = await crypto.subtle.generateKey(algorithm, extractable, uses);
+      await collection.insertOne(
+        await crypto.subtle.exportKey("jwk", this.key),
+      );
+    }
+    return this.key;
   }
 }

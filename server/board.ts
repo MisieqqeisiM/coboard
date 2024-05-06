@@ -1,4 +1,4 @@
-import { Client, SocketServer } from "../liaison/server.ts";
+import { Client } from "../liaison/server.ts";
 import { BoardUser, Line } from "../liaison/liaison.ts";
 import { ClientStore } from "../liaison/server.ts";
 import {
@@ -9,13 +9,27 @@ import {
   UserListEvent,
 } from "../liaison/events.ts";
 import { ClientState } from "../liaison/client.ts";
+import { MongoClient } from "../deps.ts";
+
+export interface BoardDB {
+  id: string;
+  lines: Line[];
+  userIDs: string[];
+}
+
+export interface BoardUnloader {
+  unload(id: string): void;
+}
 
 export class Board {
   private users: Map<string, BoardUser> = new Map();
   private clients: ClientStore = new ClientStore();
-  private strokes: Line[] = [];
 
-  constructor(private io: SocketServer) {}
+  constructor(
+    private mongoClient: MongoClient,
+    private id: string,
+    private unloader: BoardUnloader,
+  ) {}
 
   public getUser(id: string) {
     return this.clients.getClient(id);
@@ -25,7 +39,7 @@ export class Board {
     return this.users.has(id);
   }
 
-  public newUser(client: Client): ClientState {
+  public async newUser(client: Client): Promise<ClientState> {
     const user: BoardUser = {
       account: client.account,
       x: 0,
@@ -36,17 +50,23 @@ export class Board {
     this.clients.addClient(client);
     this.updateUsers();
 
-    return new ClientState(this.strokes, Array.from(this.users.values()));
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    const board = await boards.findOne({ id: this.id });
+    return new ClientState(board!.lines, Array.from(this.users.values()));
   }
 
   public disconnect(client: Client) {
     this.users.delete(client.account.id);
     this.clients.removeClient(client);
     this.updateUsers();
+    if (this.users.size === 0) {
+      this.unloader.unload(this.id);
+    }
   }
 
-  public reset(_client: Client) {
-    this.strokes = [];
+  public async reset(_client: Client) {
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    await boards.updateOne({ id: this.id }, { $set: { lines: [] } });
     this.clients.emit(new OnResetEvent());
   }
 
@@ -57,8 +77,9 @@ export class Board {
     this.clients.emit(new OnMoveEvent(client.account.id, x, y));
   }
 
-  public draw(client: Client, line: Line) {
-    this.strokes.push(line);
+  public async draw(client: Client, line: Line) {
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    await boards.updateOne({ id: this.id }, { $push: { lines: line } });
     this.clients.emit(new OnDrawEvent(client.account.id, line));
     client.emit(new ConfirmLineEvent());
   }
