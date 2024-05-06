@@ -1,5 +1,6 @@
 import AccountMenu from "../board/AccountMenu.tsx";
 import IconCircle from "./IconCircle.tsx";
+import ThemeSelector from "./ThemeSelector.tsx";
 
 export default function DashboardMenu() {
   return (
@@ -25,6 +26,7 @@ export default function DashboardMenu() {
               `/set_name?redirectTo=${window.location.pathname}`;
           }}
         />
+        <ThemeSelector />
       </AccountMenu>
     </div>
   );

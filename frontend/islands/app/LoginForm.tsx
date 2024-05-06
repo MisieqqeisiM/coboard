@@ -38,6 +38,7 @@ export default function LoginForm({ redirectTo }: LoginFormProps) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          zIndex: 0,
         }}
       >
         <div style="position: relative">

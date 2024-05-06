@@ -19,6 +19,7 @@ export default function SetName({ redirectTo, name }: SetNameProps) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          zIndex: 0,
         }}
       >
         <div style="position: relative">

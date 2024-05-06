@@ -17,6 +17,8 @@ import * as $app_IconCircle from "./islands/app/IconCircle.tsx";
 import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
 import * as $app_Reload from "./islands/app/Reload.tsx";
 import * as $app_SetName from "./islands/app/SetName.tsx";
+import * as $app_ThemeSelector from "./islands/app/ThemeSelector.tsx";
+import * as $app_Themed from "./islands/app/Themed.tsx";
 import * as $app_WithClient from "./islands/app/WithClient.tsx";
 import * as $board_AccountMenu from "./islands/board/AccountMenu.tsx";
 import * as $board_Board from "./islands/board/Board.tsx";
@@ -51,6 +53,8 @@ const manifest = {
     "./islands/app/LoginForm.tsx": $app_LoginForm,
     "./islands/app/Reload.tsx": $app_Reload,
     "./islands/app/SetName.tsx": $app_SetName,
+    "./islands/app/ThemeSelector.tsx": $app_ThemeSelector,
+    "./islands/app/Themed.tsx": $app_Themed,
     "./islands/app/WithClient.tsx": $app_WithClient,
     "./islands/board/AccountMenu.tsx": $board_AccountMenu,
     "./islands/board/Board.tsx": $board_Board,

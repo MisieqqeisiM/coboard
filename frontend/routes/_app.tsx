@@ -1,5 +1,6 @@
 import { type PageProps } from "../../deps.ts";
 import { server } from "../../liaison/server.ts";
+import Themed from "../islands/app/Themed.tsx";
 
 server;
 
@@ -40,6 +41,7 @@ export default function App({ Component }: PageProps) {
         />
       </head>
       <body>
+        <Themed />
         <Component />
         <script
           type="module"

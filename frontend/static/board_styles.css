@@ -1,3 +1,23 @@
+.dark {
+  --border-dark: #555;
+  --border-light: #444;
+  --background: #222;
+  --text-dark: #aaa;
+  --text-light: #222;
+  --color-light: #33C3F0;
+  --color-dark: #1EAEDB;
+}
+
+.light {
+  --background: #fff;
+  --text-dark: #333;
+  --text-light: #fff;
+  --border-dark: #333;
+  --border-light: #999;
+  --color-light: #33C3F0;
+  --color-dark: #1EAEDB;
+}
+
 html, body {
   overflow: hidden;
   width: 100%;
@@ -5,6 +25,7 @@ html, body {
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  background-color: var(--background);
 }
 
 .board-tile {
@@ -13,7 +34,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #555;
+  color: var(--text-dark);
   text-align: center;
   font-size: 11px;
   font-weight: 600;
@@ -24,26 +45,26 @@ html, body {
   white-space: nowrap;
   background-color: transparent;
   border-radius: 4px;
-  border: 1px solid #bbb;
+  border: 1px solid var(--border-dark);
   cursor: pointer;
   box-sizing: border-box;
 }
 
 .board-tile:hover  {
-  color: #333;
-  border-color: #888;
+  color: var(--color-light);
+  border-color: var(--border-light);
   outline: 0; 
 }
 .board-tile.colored {
-  color: #FFF;
-  background-color: #33C3F0;
-  border-color: #33C3F0; 
+  color: var(--text-light);
+  background-color: var(--color-light);
+  border-color: var(--color-light); 
 }
 
 .board-tile.colored:hover{
-  color: #FFF;
-  background-color: #1EAEDB;
-  border-color: #1EAEDB;
+  color: var(--text-light);
+  background-color: var(--color-dark);
+  border-color: var(--color-dark);
 }
 
 .toolbar {
@@ -73,6 +94,7 @@ html, body {
   height: 20px;
   cursor: pointer;
   transition: all 0.2s;
+  border-color: var(--border-dark);
 }
 
 .color-selector.active .color{
@@ -89,16 +111,20 @@ html, body {
   gap: 10px;
   align-items: center;
 }
+.size-indicator {
+  border: 2px dashed var(--border-dark);
+  border-radius: 50%;
+}
 
 .slider-box {
   pointer-events: auto;
   height: 20px;
-  border: 2px solid #222222;
+  border: 2px solid var(--border-dark);
   border-radius: 10px;
   padding-bottom: 1px;
   margin-left: -30px;
   padding-right: 7px;
-  background-color: white;
+  background-color: var(--background);
   transition: all 0.2s;
   width: 0px;
   pointer-events: none;
@@ -121,13 +147,14 @@ html, body {
   font-size: 30px;
   width: 50px;
   height: 50px;
-  border: 2px solid #222222;
+  border: 2px solid var(--border-dark);
+  color: var(--text-dark);
   border-radius: 50%;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: white;
+  background-color: var(--background);
   transition: transform 0.1s;
 }
 
@@ -176,6 +203,7 @@ html, body {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  border-color: var(--border-dark);
 }
 
 .color-box {
@@ -191,7 +219,8 @@ html, body {
   height: 50px;
   border: 2px solid;
   border-radius: 50%; 
-  background-color: white;
+  background-color: var(--background);
+  border-color: var(--border-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,11 +241,11 @@ html, body {
 }
 
 .button:not(.button-primary) {
-  background-color: white !important;
+  background-color: var(--background) !important;
 }
 
 .board {
-  border: 3px dashed;
+  border: 3px dashed var(--border-dark);
   box-sizing: border-box;
   width: fit-content;
   height: fit-content;
@@ -247,4 +276,5 @@ html, body {
   text-align: center;
   word-wrap: break-word;
   display: inline-block;
+  color: var(--text-dark);
 }

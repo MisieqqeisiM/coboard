@@ -14,11 +14,10 @@ export default function SizeSelector() {
         }}
       >
         <div
+          class="size-indicator"
           style={{
-            border: "2px dashed #222222",
             width: settings.size.value,
             height: settings.size.value,
-            borderRadius: "50%",
           }}
         >
         </div>
