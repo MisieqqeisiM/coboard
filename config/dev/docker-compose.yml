@@ -4,6 +4,7 @@ services:
     build: 
       context: ../..
       dockerfile: ./config/dev/Dockerfile
+    restart: always
     volumes: 
       - ../..:/app
   database:
