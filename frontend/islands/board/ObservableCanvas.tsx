@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "../../../deps_client.ts";
 import { Client } from "../../../client/client.ts";
 import { EraserColor } from "../../../client/settings.ts";
+import { createProgram, loadShader } from "./webgl-utils/index.ts"
 
 interface CanvasProps {
   client: Client;
@@ -30,26 +31,10 @@ export default function ObservableCanvas(props: CanvasProps) {
     }
   `;
 
-  // shader compiler function
-  function compileShader(gl: WebGLRenderingContext, source: string, type: number): WebGLShader {
-    const shader = gl.createShader(type);
-    if (!shader) {
-      throw new Error('Failed to create shader');
-    }
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (!success) {
-      console.error('Shader compile error:', gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      throw new Error('Failed to compile shader');
-    }
-    return shader;
-  }
-
   useEffect(() => {
     const subscription = props.client.ui.strokes.subscribe((strokes) => {
       const canvas = canvasRef.current;
+
       if (!canvas) {
         return;
       }
@@ -59,23 +44,9 @@ export default function ObservableCanvas(props: CanvasProps) {
         return;
       }
 
-      const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
-      const fragmentShader = compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
-
-      // linking the shaders
-      const program = gl.createProgram();
-      if (!program) {
-        throw new Error('Failed to create program');
-      }
-      gl.attachShader(program, vertexShader);
-      gl.attachShader(program, fragmentShader);
-      gl.linkProgram(program);
-      const linked = gl.getProgramParameter(program, gl.LINK_STATUS);
-      if (!linked) {
-        const error = gl.getProgramInfoLog(program);
-        gl.deleteProgram(program);
-        throw new Error(`Failed to link program: ${error}`);
-      }
+      const vertexShader = loadShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
+      const fragmentShader = loadShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+      const program = createProgram(gl, [vertexShader, fragmentShader]);
       gl.useProgram(program);
 
       const resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
