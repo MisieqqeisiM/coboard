@@ -94,8 +94,8 @@ export default function ObservableCanvas(props: CanvasProps) {
       gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
       // canvas resolution setup
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = props.width;
+      canvas.height = props.height;
       gl.viewport(0, 0, canvas.width, canvas.height);
 
       // Function to draw lines
