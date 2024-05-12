@@ -12,47 +12,40 @@ export default function ObservableCanvas(props: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const vertexShaderSource = `
-  attribute vec2 a_position;
-  uniform vec2 u_resolution;
-  void main() {
-    // Convert the position from pixels to 0.0 to 1.0
-    vec2 zeroToOne = a_position / u_resolution;
-
-    // Convert from 0->1 to 0->2
-    vec2 zeroToTwo = zeroToOne * 2.0;
-
-    // Convert from 0->2 to -1->+1 (clip space)
-    vec2 clipSpace = zeroToTwo - 1.0;
-
-    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
-  }
-`;
+    attribute vec2 a_position;
+    uniform vec2 u_resolution;
+    void main() {
+      vec2 zeroToOne = a_position / u_resolution;
+      vec2 zeroToTwo = zeroToOne * 2.0;
+      vec2 clipSpace = zeroToTwo - 1.0;
+      gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+    }
+  `;
 
   const fragmentShaderSource = `
-  precision mediump float;
-  uniform vec4 u_color;
-  void main() {
-    gl_FragColor = u_color;
-  }
-`;
-//shaders compiler
-function compileShader(gl: WebGLRenderingContext, source: string, type: number): WebGLShader {
-  const shader = gl.createShader(type);
-  if (!shader) {
-    throw new Error('Failed to create shader');
-  }
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-  if (!success) {
-    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
-    throw new Error('Failed to compile shader');
-  }
-  return shader;
-}
+    precision mediump float;
+    uniform vec4 u_color;
+    void main() {
+      gl_FragColor = u_color;
+    }
+  `;
 
-
+  // shader compiler function
+  function compileShader(gl: WebGLRenderingContext, source: string, type: number): WebGLShader {
+    const shader = gl.createShader(type);
+    if (!shader) {
+      throw new Error('Failed to create shader');
+    }
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    if (!success) {
+      console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      throw new Error('Failed to compile shader');
+    }
+    return shader;
+  }
 
   useEffect(() => {
     const subscription = props.client.ui.strokes.subscribe((strokes) => {
@@ -65,13 +58,11 @@ function compileShader(gl: WebGLRenderingContext, source: string, type: number):
         console.log("no context")
         return;
       }
-      else
-        console.log("webgl working")
 
       const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
       const fragmentShader = compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
 
-      //linking shaders
+      // linking the shaders
       const program = gl.createProgram();
       if (!program) {
         throw new Error('Failed to create program');
@@ -80,10 +71,10 @@ function compileShader(gl: WebGLRenderingContext, source: string, type: number):
       gl.attachShader(program, fragmentShader);
       gl.linkProgram(program);
       const linked = gl.getProgramParameter(program, gl.LINK_STATUS);
-      if(!linked) {
+      if (!linked) {
         const error = gl.getProgramInfoLog(program);
         gl.deleteProgram(program);
-        throw new Error('Failed to link program: ${error}');
+        throw new Error(`Failed to link program: ${error}`);
       }
       gl.useProgram(program);
 
@@ -91,91 +82,52 @@ function compileShader(gl: WebGLRenderingContext, source: string, type: number):
       const colorUniformLocation = gl.getUniformLocation(program, 'u_color');
       const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
 
-      //rectangle positions buffer
+      if (resolutionUniformLocation === null || colorUniformLocation === null || positionAttributeLocation === -1) {
+        console.warn("Failed to get necessary WebGL locations");
+        return;
+      }
+
+      // buffer setup
       const positionBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.enableVertexAttribArray(positionAttributeLocation);
       gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
-      //canvas resolution
+      // canvas resolution setup
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       gl.viewport(0, 0, canvas.width, canvas.height);
 
-      // Function to draw a rectangle
-      function drawRect(x: number, y: number, width: number, height: number, color: number[]) {
-        if(!resolutionUniformLocation) {
-          console.warn("failed to get resolution uniform location");
-          return;
-        }
-        const x1 = x;
-        const y1 = y;
-        const x2 = x + width;
-        const y2 = y + height;
-        const positions = [
-          x1, y1,
-          x2, y1,
-          x1, y2,
-          x1, y2,
-          x2, y1,
-          x2, y2,
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-        gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
-        gl.uniform4fv(colorUniformLocation, color);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-      }
+      // Function to draw lines
+      function drawLines(lines: any[]) {
+        for (const line of lines) {
+          if (line && line.coordinates && line.coordinates.length > 1) {
+            const color = line.color === EraserColor.TRANSPARENT ? [0, 0, 0, 0] : [
+              (line.color >> 16) / 255,
+              ((line.color >> 8) & 0xff) / 255,
+              (line.color & 0xff) / 255,
+              1,
+            ];
 
-      function randomColor(): number[] {
-        return [Math.random(), Math.random(), Math.random(), 1];
-      }
+            const positions: number[] = [];
+            for (const coord of line.coordinates) {
+              positions.push(coord.x, coord.y);
+            }
 
-
-      // Draw random rectangles
-      for (let i = 0; i < 10; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const width = Math.random() * 100 + 50;
-        const height = Math.random() * 100 + 50;
-        const color = randomColor();
-        drawRect(x, y, width, height, color);
-      }
-
-
-
-
-
-
-
-
-
-      for (const line of strokes) {
-        //inefficient, should be a proper queue
-        if (line && line.coordinates && line.coordinates.length > 1) {
-          //temporary solution
-          /*
-          if (line.color == EraserColor.TRANSPARENT) {
-            context.globalCompositeOperation = "destination-out";
-          } else {
-            context.globalCompositeOperation = "source-over";
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+            gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
+            gl.uniform4fv(colorUniformLocation, color);
+            gl.drawArrays(gl.LINE_STRIP, 0, line.coordinates.length);
           }
-
-          context.beginPath();
-          context.strokeStyle = line.color;
-          context.lineWidth = line.width;
-          context.moveTo(line.coordinates[0].x, line.coordinates[0].y);
-          for (let j = 1; j < line.coordinates.length; j++) {
-            context.lineTo(line.coordinates[j].x, line.coordinates[j].y);
-            context.stroke();
-          }
-          context.closePath();
-          */
         }
       }
-      //props.client.ui.strokes.peek().length = 0;
+
+      // Draw lines
+      drawLines(strokes);
     });
+
     return () => {
-      // TODO: unsubscribe
+      // TODO: Unsubscribe
     };
   }, []);
 
@@ -192,12 +144,10 @@ function compileShader(gl: WebGLRenderingContext, source: string, type: number):
           console.log("no webgl context")
           return;
         }
-
-        //context.clearRect(0, 0, canvas.width, canvas.height);
       }
     });
     return () => {
-      // TODO: unsubscribe
+      // TODO: Unsubscribe
     };
   }, []);
 
@@ -210,3 +160,4 @@ function compileShader(gl: WebGLRenderingContext, source: string, type: number):
     />
   );
 }
+
