@@ -153,7 +153,7 @@ export default function DrawableCanvas(props: CanvasProps) {
       if (!context) {
         return;
       }
-
+      
       context.clearRect(0, 0, canvas.width, canvas.height);
       const draw_line = (line: Line) => {
         if (line && line.coordinates && line.coordinates.length > 1) {

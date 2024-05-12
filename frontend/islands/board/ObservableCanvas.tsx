@@ -16,15 +16,19 @@ export default function ObservableCanvas(props: CanvasProps) {
       if (!canvas) {
         return;
       }
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext("webgl");
       if (!context) {
+        console.log("no context")
         return;
       }
+      else
+        console.log("webgl working")
 
       for (const line of strokes) {
         //inefficient, should be a proper queue
         if (line && line.coordinates && line.coordinates.length > 1) {
           //temporary solution
+          /*
           if (line.color == EraserColor.TRANSPARENT) {
             context.globalCompositeOperation = "destination-out";
           } else {
@@ -40,9 +44,10 @@ export default function ObservableCanvas(props: CanvasProps) {
             context.stroke();
           }
           context.closePath();
+          */
         }
       }
-      props.client.ui.strokes.peek().length = 0;
+      //props.client.ui.strokes.peek().length = 0;
     });
     return () => {
       // TODO: unsubscribe
@@ -57,12 +62,13 @@ export default function ObservableCanvas(props: CanvasProps) {
         if (!canvas) {
           return;
         }
-        const context = canvas.getContext("2d");
+        const context = canvas.getContext("webgl");
         if (!context) {
+          console.log("no webgl context")
           return;
         }
 
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        //context.clearRect(0, 0, canvas.width, canvas.height);
       }
     });
     return () => {
