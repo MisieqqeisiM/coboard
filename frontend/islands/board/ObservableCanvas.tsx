@@ -82,49 +82,6 @@ export default function ObservableCanvas(props: CanvasProps) {
 
   useEffect(() => {
     const subscription = props.client.ui.strokes.subscribe((strokes) => {
-
-      //TODO: i think the codes should be stored in hex form directly, this is just for now
-      function hexToRgb(hex: string): number[] | null {
-          hex = hex.replace(/^#/, '');
-
-          const bigint = parseInt(hex, 16);
-          const r = (bigint >> 16) & 255;
-          const g = (bigint >> 8) & 255;
-          const b = bigint & 255;
-
-          if (isNaN(r) || isNaN(g) || isNaN(b)) {
-              return null;
-          }
-
-          return [r / 255, g / 255, b / 255, 1];
-      }
-
-      function drawLines(lines: any[]) {
-        const canvas = canvasRef.current;
-        const gl = glRef.current;
-
-        for (const line of lines) {
-          if (line && line.coordinates && line.coordinates.length > 1) {
-             const color = line.color === EraserColor.TRANSPARENT ? [1, 1, 1, 1] : hexToRgb(line.color);
-
-
-            const positions: number[] = [];
-            for (const coord of line.coordinates) {
-              positions.push(coord.x, coord.y);
-            }
-
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-            //this assumes that resolution can change. For now it kinda does not
-            gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
-            console.log('line color:', line.color);
-            console.log('color:', color);
-            gl.uniform4fv(colorUniformLocation, color);
-            gl.drawArrays(gl.LINE_STRIP, 0, line.coordinates.length);
-          }
-        }
-      }
-
-      // Draw lines
       drawLines(strokes);
     });
 
@@ -132,6 +89,47 @@ export default function ObservableCanvas(props: CanvasProps) {
       // TODO: Unsubscribe
     };
   }, []);
+
+
+   //TODO: i think the codes should be stored in hex form directly, this is just for now
+  function hexToRgb(hex: string): number[] | null {
+    hex = hex.replace(/^#/, '');
+
+    const bigint = parseInt(hex, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+      return null;
+    }
+
+    return [r / 255, g / 255, b / 255, 1];
+  }
+
+  function drawLines(lines: any[]) {
+    const canvas = canvasRef.current;
+    const gl = glRef.current;
+
+    for (const line of lines) {
+      if (line && line.coordinates && line.coordinates.length > 1) {
+        const color = line.color === EraserColor.TRANSPARENT ? [1, 1, 1, 1] : hexToRgb(line.color);
+
+
+        const positions: number[] = [];
+        for (const coord of line.coordinates) {
+          positions.push(coord.x, coord.y);
+        }
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+        //this assumes that resolution can change. For now it kinda does not (it definitely should tho)
+        gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
+        gl.uniform4fv(colorUniformLocation, color);
+        gl.drawArrays(gl.LINE_STRIP, 0, line.coordinates.length);
+      }
+    }
+  }
+
 
   useEffect(() => {
     const subscription = props.client.ui.clear.subscribe((newValue) => {
@@ -152,6 +150,7 @@ export default function ObservableCanvas(props: CanvasProps) {
       // TODO: Unsubscribe
     };
   }, []);
+
 
   return (
     <canvas
