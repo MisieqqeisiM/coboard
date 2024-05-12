@@ -11,6 +11,9 @@ interface CanvasProps {
 
 export default function ObservableCanvas(props: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const glRef = useRef<WebGLRenderingContext | null>(null);
+  let resolutionUniformLocation: WebGLUniformLocation | null = null;
+  let colorUniformLocation: WebGLUniformLocation | null = null;
 
   const vertexShaderSource = `
     attribute vec2 a_position;
@@ -30,9 +33,7 @@ export default function ObservableCanvas(props: CanvasProps) {
       gl_FragColor = u_color;
     }
   `;
-
   useEffect(() => {
-    const subscription = props.client.ui.strokes.subscribe((strokes) => {
       const canvas = canvasRef.current;
 
       if (!canvas) {
@@ -43,14 +44,15 @@ export default function ObservableCanvas(props: CanvasProps) {
         console.log("no context")
         return;
       }
-
+      glRef.current = gl;
+      
       const vertexShader = loadShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
       const fragmentShader = loadShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
       const program = createProgram(gl, [vertexShader, fragmentShader]);
       gl.useProgram(program);
-
-      const resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
-      const colorUniformLocation = gl.getUniformLocation(program, 'u_color');
+      
+      resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
+      colorUniformLocation = gl.getUniformLocation(program, 'u_color');
       const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
 
       if (resolutionUniformLocation === null || colorUniformLocation === null || positionAttributeLocation === -1) {
@@ -69,6 +71,18 @@ export default function ObservableCanvas(props: CanvasProps) {
       canvas.height = props.height;
       gl.viewport(0, 0, canvas.width, canvas.height);
 
+      return() => {
+        gl.deleteShader(vertexShader);
+        gl.deleteShader(fragmentShader);
+        gl.deleteProgram(program);
+        gl.deleteBuffer(positionBuffer);
+      };
+
+  },[]);
+
+  useEffect(() => {
+    const subscription = props.client.ui.strokes.subscribe((strokes) => {
+
       //TODO: i think the codes should be stored in hex form directly, this is just for now
       function hexToRgb(hex: string): number[] | null {
           hex = hex.replace(/^#/, '');
@@ -86,6 +100,9 @@ export default function ObservableCanvas(props: CanvasProps) {
       }
 
       function drawLines(lines: any[]) {
+        const canvas = canvasRef.current;
+        const gl = glRef.current;
+
         for (const line of lines) {
           if (line && line.coordinates && line.coordinates.length > 1) {
              const color = line.color === EraserColor.TRANSPARENT ? [1, 1, 1, 1] : hexToRgb(line.color);
@@ -97,6 +114,7 @@ export default function ObservableCanvas(props: CanvasProps) {
             }
 
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+            //this assumes that resolution can change. For now it kinda does not
             gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
             console.log('line color:', line.color);
             console.log('color:', color);
