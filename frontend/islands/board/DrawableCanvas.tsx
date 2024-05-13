@@ -187,9 +187,7 @@ export default function DrawableCanvas(props: CanvasProps) {
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", left: 0, top: 0, background: "red" }}
-      width={`${props.width}px`}
-      height={`${props.height}px`}
+      style={{ position: "absolute", left: 0, top: 0, height:'100%', width:'100%'}}
     />
   );
 }

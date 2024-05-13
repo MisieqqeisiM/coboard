@@ -247,8 +247,6 @@ html, body {
 .board {
   border: 3px dashed var(--border-dark);
   box-sizing: border-box;
-  width: fit-content;
-  height: fit-content;
 }
 
 .cursor {

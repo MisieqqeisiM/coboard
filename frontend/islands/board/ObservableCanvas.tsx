@@ -1,4 +1,4 @@
-import { useContext,useEffect, useRef } from "../../../deps_client.ts";
+import { Signal, useContext,useEffect, useRef } from "../../../deps_client.ts";
 import { Client } from "../../../client/client.ts";
 import { EraserColor } from "../../../client/settings.ts";
 import { createProgram, loadShader, resizeCanvasToDisplaySize } from "./webgl-utils/index.ts"
@@ -11,17 +11,27 @@ interface CanvasProps {
 }
 
 export default function ObservableCanvas(props: CanvasProps) {
-  const camera = useContext(CameraContext);
+  const camera:Signal<Camera> = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
   let resolutionUniformLocation: WebGLUniformLocation | null = null;
   let colorUniformLocation: WebGLUniformLocation | null = null;
+  let scaleUniformLocation: WebGLUniformLocation | null = null;
+  let translationUniformLocation: WebGLUniformLocation | null = null;
 
   const vertexShaderSource = `
     attribute vec2 a_position;
     uniform vec2 u_resolution;
+    uniform vec2 u_translation;
+    uniform vec2 u_scale;
+
     void main() {
-      vec2 zeroToOne = a_position / u_resolution;
+      vec2 translatedPosition = a_position + u_translation;
+      //vec2 scaledPosition = a_position * u_scale;
+      //vec2 position = scaledPosition + u_translation;
+      vec2 position = translatedPosition*u_scale;
+
+      vec2 zeroToOne = position / u_resolution;
       vec2 zeroToTwo = zeroToOne * 2.0;
       vec2 clipSpace = zeroToTwo - 1.0;
       gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
@@ -56,9 +66,12 @@ export default function ObservableCanvas(props: CanvasProps) {
       
       resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
       colorUniformLocation = gl.getUniformLocation(program, 'u_color');
+      scaleUniformLocation = gl.getUniformLocation(program, 'u_scale');
+      translationUniformLocation = gl.getUniformLocation(program, 'u_translation');
+
       const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
 
-      if (resolutionUniformLocation === null || colorUniformLocation === null || positionAttributeLocation === -1) {
+      if (resolutionUniformLocation === null || colorUniformLocation === null || positionAttributeLocation === -1 || scaleUniformLocation == null || translationUniformLocation == null) {
         console.warn("Failed to get necessary WebGL locations");
         return;
       }
@@ -81,8 +94,7 @@ export default function ObservableCanvas(props: CanvasProps) {
   //handle resizing
   useEffect(()=> {
     const subscription = camera.subscribe((camera: Camera)=>{
-        
-
+       drawLines(props.client.ui.strokes.value);
     });
     return ()=> {
       //unsubscribe
@@ -133,6 +145,10 @@ export default function ObservableCanvas(props: CanvasProps) {
         }
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+      
+        gl.uniform2fv(scaleUniformLocation, [camera.peek().scale, camera.peek().scale]);
+        gl.uniform2fv(translationUniformLocation, [camera.peek().dx, camera.peek().dy]);
+        
         gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
         gl.uniform4fv(colorUniformLocation, color);
         gl.drawArrays(gl.LINE_STRIP, 0, line.coordinates.length);
