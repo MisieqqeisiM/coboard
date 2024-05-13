@@ -52,8 +52,6 @@ export default function ObservableCanvas(props: CanvasProps) {
         vec2 clipSpace2 = zeroToTwo2 - 1.0;
         gl_Position = vec4(clipSpace2 * vec2(1, -1), 0, 1);
     }
-
-
   `;
 
   const fragmentShaderSource = `
@@ -144,6 +142,7 @@ export default function ObservableCanvas(props: CanvasProps) {
   function drawLines(lines: any[]) {
     const canvas = canvasRef.current;
     const gl = glRef.current;
+    gl.clear(gl.COLOR_BUFFER_BIT);
     resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
