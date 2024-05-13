@@ -170,6 +170,7 @@ export default function ObservableCanvas(props: CanvasProps) {
           console.log("no webgl context")
           return;
         }
+        context.clear(context.COLOR_BUFFER_BIT);
       }
     });
     return () => {
