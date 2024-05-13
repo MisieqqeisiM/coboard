@@ -5,6 +5,9 @@ export class Camera {
   public toBoardCoords(x: number, y: number): [number, number] {
     return [x / this.scale - this.dx, y / this.scale - this.dy];
   }
+  public toScreenCoords(x: number, y: number): [number, number] {
+    return [(x+this.dx)*this.scale, (y+this.dy)*this.scale];
+  }
 
   public zoom(sx: number, sy: number, amount: number): Camera {
     const [x, y] = this.toBoardCoords(sx, sy);

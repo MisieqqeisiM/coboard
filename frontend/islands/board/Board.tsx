@@ -30,9 +30,9 @@ export default function Board() {
     <>
         <div class="board" style={{ position:'absolute', height:`${height}px`, width:`${width}px` }}  >
             <CameraView camera={camera}>
-           <ObservableCanvas client={client} width={width} height={height} />
+            <ObservableCanvas client={client} width={width} height={height} />
             <DrawableCanvas client={client} width={width} height={height} />
-          </CameraView>
+            </CameraView>
         </div>
         <CursorBox />
         <MouseTracker client={client} />

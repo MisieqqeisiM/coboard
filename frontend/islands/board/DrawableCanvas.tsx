@@ -29,6 +29,8 @@ export default function DrawableCanvas(props: CanvasProps) {
     if (!canvas) {
       return;
     }
+    canvas.height = canvas.clientHeight;
+    canvas.width = canvas.clientWidth;
 
     const context = canvas.getContext("2d");
     if (!context) {
@@ -48,14 +50,13 @@ export default function DrawableCanvas(props: CanvasProps) {
       } else {
         context.strokeStyle = EraserColor.WHITE;
       }
-
-      context.moveTo(x, y);
+      context.moveTo(...camera.peek().toScreenCoords(x,y));
     };
 
     const draw = (x: number, y: number) => {
       if (!drawing) return;
       points.push({ x: x, y: y });
-      context.lineTo(x, y);
+      context.lineTo(...camera.peek().toScreenCoords(x,y));
       context.stroke();
     };
 
@@ -85,7 +86,8 @@ export default function DrawableCanvas(props: CanvasProps) {
 
     const mouseDown = (event: MouseEvent) => {
       if (event.button != 0) return;
-      startDraw(event.offsetX, event.offsetY);
+       
+      startDraw(...camera.peek().toBoardCoords(event.clientX, event.clientY));
     };
 
     const mouseMove = (event: MouseEvent) => {
