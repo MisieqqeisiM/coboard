@@ -3,6 +3,7 @@ import { Client } from "../../../client/client.ts";
 import { EraserColor } from "../../../client/settings.ts";
 import { createProgram, loadShader, resizeCanvasToDisplaySize } from "./webgl-utils/index.ts"
 import { Camera, CameraContext } from "../../../client/camera.ts";
+import { Line } from "../../../liaison/liaison.ts";
 
 interface CanvasProps {
   client: Client;
@@ -139,7 +140,7 @@ export default function ObservableCanvas(props: CanvasProps) {
     return [r / 255, g / 255, b / 255, 1];
   }
 
-  function drawLines(lines: any[]) {
+  function drawLines(lines: Line[]) {
     const canvas = canvasRef.current;
     const gl = glRef.current;
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -149,7 +150,7 @@ export default function ObservableCanvas(props: CanvasProps) {
     for (const line of lines) {
       if (line && line.coordinates && line.coordinates.length > 1) {
         const color = line.color === EraserColor.TRANSPARENT ? [1, 1, 1, 1] : hexToRgb(line.color);
-        const thickness = 2; // Adjust thickness as needed
+        const thickness = line.width*0.3; // Adjust thickness as needed
 
         const positions: number[] = [];
         for (let i = 0; i < line.coordinates.length; i++) {
