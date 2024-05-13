@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "../../../deps_client.ts";
+import { useContext,useEffect, useRef } from "../../../deps_client.ts";
 import { Client } from "../../../client/client.ts";
 import { EraserColor } from "../../../client/settings.ts";
-import { createProgram, loadShader } from "./webgl-utils/index.ts"
+import { createProgram, loadShader, resizeCanvasToDisplaySize } from "./webgl-utils/index.ts"
+import { Camera, CameraContext } from "../../../client/camera.ts";
 
 interface CanvasProps {
   client: Client;
@@ -10,6 +11,7 @@ interface CanvasProps {
 }
 
 export default function ObservableCanvas(props: CanvasProps) {
+  const camera = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
   let resolutionUniformLocation: WebGLUniformLocation | null = null;
@@ -48,6 +50,7 @@ export default function ObservableCanvas(props: CanvasProps) {
       
       const vertexShader = loadShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
       const fragmentShader = loadShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+      //this can be even better if we add the attributes there
       const program = createProgram(gl, [vertexShader, fragmentShader]);
       gl.useProgram(program);
       
@@ -66,11 +69,6 @@ export default function ObservableCanvas(props: CanvasProps) {
       gl.enableVertexAttribArray(positionAttributeLocation);
       gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
-      // canvas resolution setup
-      canvas.width = props.width;
-      canvas.height = props.height;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-
       return() => {
         gl.deleteShader(vertexShader);
         gl.deleteShader(fragmentShader);
@@ -79,7 +77,19 @@ export default function ObservableCanvas(props: CanvasProps) {
       };
 
   },[]);
+  
+  //handle resizing
+  useEffect(()=> {
+    const subscription = camera.subscribe((camera: Camera)=>{
+        
 
+    });
+    return ()=> {
+      //unsubscribe
+    };
+  },[]);
+
+  //handle drawing lines
   useEffect(() => {
     const subscription = props.client.ui.strokes.subscribe((strokes) => {
       drawLines(strokes);
@@ -110,7 +120,8 @@ export default function ObservableCanvas(props: CanvasProps) {
   function drawLines(lines: any[]) {
     const canvas = canvasRef.current;
     const gl = glRef.current;
-
+    resizeCanvasToDisplaySize(gl.canvas);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     for (const line of lines) {
       if (line && line.coordinates && line.coordinates.length > 1) {
         const color = line.color === EraserColor.TRANSPARENT ? [1, 1, 1, 1] : hexToRgb(line.color);
@@ -122,8 +133,7 @@ export default function ObservableCanvas(props: CanvasProps) {
         }
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-        //this assumes that resolution can change. For now it kinda does not (it definitely should tho)
-        gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
+        gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
         gl.uniform4fv(colorUniformLocation, color);
         gl.drawArrays(gl.LINE_STRIP, 0, line.coordinates.length);
       }
@@ -155,9 +165,7 @@ export default function ObservableCanvas(props: CanvasProps) {
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", left: 0, top: 0 }}
-      width={`${props.width}px`}
-      height={`${props.height}px`}
+      style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", background: "blue" }}
     />
   );
 }
