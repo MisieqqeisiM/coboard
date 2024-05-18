@@ -121,8 +121,8 @@ export default function ObservableCanvas(props: CanvasProps) {
     for (const line of lines) {
       if (line && line.coordinates && line.coordinates.length > 0) {
 
-        setColorAndPoints(gl, program!, line);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 2*line.coordinates.length);
+        let length = setColorAndPoints(gl, program!, line);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, length);
         //TODO: remove the buffer maybe? i don't know how it works yet
 
       }
