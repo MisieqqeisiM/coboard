@@ -7,6 +7,8 @@ import {
   Tool,
 } from "../../../client/settings.ts";
 import { Line } from "../../../liaison/liaison.ts";
+import { createProgramFromSources, resizeCanvasToDisplaySize } from "./webgl-utils/index.ts";
+import { getPointsFromLine, setColorAndPoints, setUniforms } from "./webgl-utils/line_drawing.ts";
 
 interface CanvasProps {
   client: Client;
@@ -17,53 +19,99 @@ interface CanvasProps {
 export default function DrawableCanvas(props: CanvasProps) {
   const camera = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const glRef = useRef<WebGLRenderingContext | null>(null);
+  let program: WebGLProgram | null=null;
+  
+  const vertexShaderSource = `
+    //position on board
+    attribute vec2 a_position;
+
+    //dimensions of the board
+    uniform vec2 u_resolution;
+
+    //camera transformations
+    uniform vec2 u_translation;
+    uniform vec2 u_scale;
+
+    void main() {
+        vec2 translatedPosition = a_position + u_translation;
+        vec2 position = translatedPosition * u_scale;
+
+        vec2 vertex = position;
+        vec2 zeroToOne = vertex / u_resolution;
+        vec2 zeroToTwo = zeroToOne * 2.0;
+        vec2 clipSpace = zeroToTwo - 1.0;
+        gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+
+    }
+  `;
+
+  const fragmentShaderSource = `
+    precision mediump float;
+    uniform vec4 u_color;
+    void main() {
+      gl_FragColor = u_color;
+    }
+  `;
 
   const tool = useContext(SettingsContext).tool;
   const stroke_color = useContext(SettingsContext).color;
   const stroke_width = useContext(SettingsContext).size;
   const stylusMode = useContext(SettingsContext).stylusMode;
   let points: { x: number; y: number }[] = [];
-
-  useEffect(() => {
+  
+  const canvasInit = ()=> {
     const canvas = canvasRef.current;
+
     if (!canvas) {
       return;
     }
-    canvas.height = canvas.clientHeight;
-    canvas.width = canvas.clientWidth;
-
-    const context = canvas.getContext("2d");
-    if (!context) {
+    const gl = canvas.getContext("webgl");
+    if (!gl) {
+      console.log("no context")
       return;
     }
+    glRef.current = gl;
+
+    program = createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource], [], []);
+    gl.useProgram(program);
+  }
+
+  //drawing logic
+  useEffect(() => {
+    canvasInit();
+    
+    const canvas = canvasRef.current;
+    canvas.height = canvas.clientHeight;
+    canvas.width = canvas.clientWidth;
+    const context = glRef.current;
 
     let drawing = false;
 
-    const startDraw = (x: number, y: number) => {
+    const startDraw = (x: number, y: number) => {     
+      
+      resizeCanvasToDisplaySize(context.canvas);
+      context.viewport(0, 0, context.canvas.width, context.canvas.height);
+      setUniforms(context, program!, camera);
+
       drawing = true;
       points = [{ x: x, y: y }];
-      context.beginPath();
-      context.lineWidth = stroke_width.peek();
 
-      if (tool.peek() == Tool.PEN) {
-        context.strokeStyle = stroke_color.peek();
-      } else {
-        context.strokeStyle = EraserColor.WHITE;
-      }
-      context.moveTo(...camera.peek().toScreenCoords(x,y));
+      let len = setColorAndPoints(context, program!, new Line(stroke_width.peek(), stroke_color.peek(), points)); 
+      context.drawArrays(context.TRIANGLE_STRIP, 0, length);
+
     };
 
     const draw = (x: number, y: number) => {
       if (!drawing) return;
       points.push({ x: x, y: y });
-      context.lineTo(...camera.peek().toScreenCoords(x,y));
-      context.stroke();
+      let length = setColorAndPoints(context, program!, new Line(stroke_width.peek(), stroke_color.peek(), points));
+      context.drawArrays(context.TRIANGLE_STRIP, 0, length);
     };
 
     const endDraw = () => {
       if (drawing) {
         drawing = false;
-        context.closePath();
         if (tool.peek() == Tool.PEN) {
           const line: Line = new Line(
             stroke_width.peek(),
@@ -144,30 +192,23 @@ export default function DrawableCanvas(props: CanvasProps) {
     };
   }, []);
 
+  //redraw when strokes change
   useEffect(() => {
     const subscription = props.client.ui.local_strokes.subscribe((strokes) => {
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        return;
-      }
-
-      const context = canvas.getContext("2d");
+      const context = glRef.current;
       if (!context) {
         return;
       }
-      
-      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      resizeCanvasToDisplaySize(context.canvas);
+      context.viewport(0, 0, context.canvas.width, context.canvas.height);
+      setUniforms(context, program!, camera);
+      context.clear(context.COLOR_BUFFER_BIT);
+
       const draw_line = (line: Line) => {
-        if (line && line.coordinates && line.coordinates.length > 1) {
-          context.beginPath();
-          context.strokeStyle = line.color;
-          context.lineWidth = line.width;
-          context.moveTo(line.coordinates[0].x, line.coordinates[0].y);
-          for (let j = 1; j < line.coordinates.length; j++) {
-            context.lineTo(line.coordinates[j].x, line.coordinates[j].y);
-            context.stroke();
-          }
-          context.closePath();
+        if (line && line.coordinates && line.coordinates.length > 0) {
+          let length = setColorAndPoints(context, program!, line);
+          context.drawArrays(context.TRIANGLE_STRIP, 0, length);
         }
       };
 
