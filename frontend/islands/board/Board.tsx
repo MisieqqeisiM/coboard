@@ -28,7 +28,7 @@ export default function Board() {
 
   return (
     <>
-        <div class="board" style={{ position:'absolute', height:`${height}px`, width:`${width}px` }}  >
+        <div class="board" style={{ position:'absolute', height:`100%`, width:`100%` }}  >
             <CameraView camera={camera}>
             <ObservableCanvas client={client} width={width} height={height} />
             <DrawableCanvas client={client} width={width} height={height} />
