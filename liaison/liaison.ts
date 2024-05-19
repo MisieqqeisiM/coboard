@@ -21,7 +21,7 @@ export const BAD_TOKEN = "bad token";
 
 export class Line {
   constructor(
-    readonly id: number,
+    readonly id: number|null,
     readonly width: number,
     readonly color: string,
     readonly coordinates: { x: number; y: number }[],

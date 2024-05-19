@@ -16,7 +16,6 @@ export default function ObservableCanvas(props: CanvasProps) {
   const camera: Signal<Camera> = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
-  let colorUniformLocation: WebGLUniformLocation | null = null;
   let program: WebGLProgram | null=null;
 
   const vertexShaderSource = `

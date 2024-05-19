@@ -10,6 +10,7 @@ import {
   ConfirmLineEvent,
   OnDrawEvent,
   OnMoveEvent,
+  OnRemoveEvent,
   OnResetEvent,
   UserListEvent,
 } from "../liaison/events.ts";
@@ -52,6 +53,10 @@ class Emitter implements BoardEventVisitor {
   public onDraw(event: OnDrawEvent) {
     this.socket.emit("onDraw", event);
   }
+  public onRemove(event: OnRemoveEvent): void {
+    this.socket.emit("onRemove", event);
+    
+  }
 
   public onMove(event: OnMoveEvent) {
     this.socket.emit("onMove", event);
@@ -86,6 +91,7 @@ export class Client {
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
     socket.on("draw", async (line) => await this.board.draw(this, line));
+    socket.on("remove", async(lineId)=>await this.board.remove(this, lineId));
     socket.on("move", (x, y) => this.board.move(this, x, y));
     socket.on("reset", async () => await this.board.reset(this));
 

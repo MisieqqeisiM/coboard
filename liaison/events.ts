@@ -5,6 +5,7 @@ export interface BoardEventVisitor {
   confirmLine(event: ConfirmLineEvent): void
   onMove(event: OnMoveEvent): void;
   onDraw(event: OnDrawEvent): void;
+  onRemove(event: OnRemoveEvent): void;
   onReset(event: OnResetEvent): void;
 }
 
@@ -30,6 +31,13 @@ export class OnDrawEvent implements BoardEvent {
   constructor(readonly user: string, readonly line: Line) { }
   accept(visitor: BoardEventVisitor) {
     visitor.onDraw(this);
+  }
+}
+
+export class OnRemoveEvent implements BoardEvent {
+  constructor(readonly lineId: number) {}
+  accept(visitor: BoardEventVisitor) {
+    visitor.onRemove(this);
   }
 }
 

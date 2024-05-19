@@ -2,13 +2,14 @@ import { useContext, useEffect, useRef } from "../../../deps_client.ts";
 import { Client } from "../../../client/client.ts";
 import { CameraContext } from "../../../client/camera.ts";
 import {
+  Color,
   EraserColor,
   SettingsContext,
   Tool,
 } from "../../../client/settings.ts";
 import { Line } from "../../../liaison/liaison.ts";
 import { createProgramFromSources, resizeCanvasToDisplaySize } from "./webgl-utils/index.ts";
-import { getPointsFromLine, setColorAndPoints, setUniforms } from "./webgl-utils/line_drawing.ts";
+import { getPointsFromLine, linesIntersect, setColorAndPoints, setUniforms } from "./webgl-utils/line_drawing.ts";
 
 interface CanvasProps {
   client: Client;
@@ -105,7 +106,10 @@ export default function DrawableCanvas(props: CanvasProps) {
     const draw = (x: number, y: number) => {
       if (!drawing) return;
       points.push({ x: x, y: y });
-      let length = setColorAndPoints(context, program!, new Line(null, stroke_width.peek(), stroke_color.peek(), points));
+      const color = tool.peek() == Tool.PEN? stroke_color.peek() : Color.BLACK;
+      
+      let length = setColorAndPoints(context, program!, new Line(null, stroke_width.peek(), color, points));
+
       context.drawArrays(context.TRIANGLE_STRIP, 0, length);
     };
 
@@ -122,12 +126,18 @@ export default function DrawableCanvas(props: CanvasProps) {
           props.client.ui.local_strokes.value.push(line);
           props.client.socket.draw(line);
         } else {
-          props.client.ui.local_strokes.value.push(
-            new Line(null, stroke_width.peek(), EraserColor.WHITE, points),
-          );
-          props.client.socket.draw(
-            new Line(null,stroke_width.peek(), EraserColor.TRANSPARENT, points),
-          );
+          const lines:Line[] = props.client.ui.strokes.value;
+          const removeIds:number[] = [];
+          context.clear(context.COLOR_BUFFER_BIT);
+
+          for(const line of lines) {
+            if(linesIntersect(line.coordinates, points, stroke_width.peek())) {
+              removeIds.push(line.id!);
+            }
+          }
+
+          for(const id of removeIds)
+            props.client.socket.remove(id);
         }
         points = [];
       }
