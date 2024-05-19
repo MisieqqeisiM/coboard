@@ -25,6 +25,9 @@ export class Board {
   private users: Map<string, BoardUser> = new Map();
   private clients: ClientStore = new ClientStore();
 
+  //temporary
+  private lineIndex: number = 0;
+
   constructor(
     private mongoClient: MongoClient,
     private id: string,
@@ -79,8 +82,9 @@ export class Board {
 
   public async draw(client: Client, line: Line) {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
-    await boards.updateOne({ id: this.id }, { $push: { lines: line } });
-    this.clients.emit(new OnDrawEvent(client.account.id, line));
+    const confirmedLine = Line.changeId(line, this.lineIndex++);
+    await boards.updateOne({ id: this.id }, { $push: { lines: confirmedLine } });
+    this.clients.emit(new OnDrawEvent(client.account.id, confirmedLine));
     client.emit(new ConfirmLineEvent());
   }
 

@@ -97,7 +97,7 @@ export default function DrawableCanvas(props: CanvasProps) {
       drawing = true;
       points = [{ x: x, y: y }];
 
-      let len = setColorAndPoints(context, program!, new Line(stroke_width.peek(), stroke_color.peek(), points)); 
+      let len = setColorAndPoints(context, program!, new Line(null, stroke_width.peek(), stroke_color.peek(), points)); 
       context.drawArrays(context.TRIANGLE_STRIP, 0, length);
 
     };
@@ -105,7 +105,7 @@ export default function DrawableCanvas(props: CanvasProps) {
     const draw = (x: number, y: number) => {
       if (!drawing) return;
       points.push({ x: x, y: y });
-      let length = setColorAndPoints(context, program!, new Line(stroke_width.peek(), stroke_color.peek(), points));
+      let length = setColorAndPoints(context, program!, new Line(null, stroke_width.peek(), stroke_color.peek(), points));
       context.drawArrays(context.TRIANGLE_STRIP, 0, length);
     };
 
@@ -114,6 +114,7 @@ export default function DrawableCanvas(props: CanvasProps) {
         drawing = false;
         if (tool.peek() == Tool.PEN) {
           const line: Line = new Line(
+            null,
             stroke_width.peek(),
             stroke_color.peek(),
             points,
@@ -122,10 +123,10 @@ export default function DrawableCanvas(props: CanvasProps) {
           props.client.socket.draw(line);
         } else {
           props.client.ui.local_strokes.value.push(
-            new Line(stroke_width.peek(), EraserColor.WHITE, points),
+            new Line(null, stroke_width.peek(), EraserColor.WHITE, points),
           );
           props.client.socket.draw(
-            new Line(stroke_width.peek(), EraserColor.TRANSPARENT, points),
+            new Line(null,stroke_width.peek(), EraserColor.TRANSPARENT, points),
           );
         }
         points = [];
@@ -212,7 +213,7 @@ export default function DrawableCanvas(props: CanvasProps) {
         }
       };
 
-      draw_line(new Line(stroke_width.peek(), stroke_color.peek(), points));
+      draw_line(new Line(null, stroke_width.peek(), stroke_color.peek(), points));
       if (
         (!props.client.ui.local_strokes) ||
         (!props.client.ui.local_strokes.value)
