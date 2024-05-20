@@ -75,6 +75,10 @@ body {
   height: 30px;
 }
 
+.dark .board-image {
+  filter: invert(100%) !important;
+}
+
 .toolbar {
   pointer-events: none;
   position: absolute;
