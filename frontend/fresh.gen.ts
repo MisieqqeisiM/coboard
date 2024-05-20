@@ -9,9 +9,12 @@ import * as $api_login_anonymous from "./routes/api/login/anonymous.ts";
 import * as $api_login_google from "./routes/api/login/google.ts";
 import * as $api_logout from "./routes/api/logout.ts";
 import * as $api_new_board from "./routes/api/new_board.tsx";
+import * as $api_remove_user_from_board from "./routes/api/remove_user_from_board.tsx";
+import * as $api_rename_board from "./routes/api/rename_board.tsx";
 import * as $api_set_name from "./routes/api/set_name.ts";
 import * as $index from "./routes/index.tsx";
 import * as $set_name from "./routes/set_name.tsx";
+import * as $app_BoardTileToolbar from "./islands/app/BoardTileToolbar.tsx";
 import * as $app_DashboardMenu from "./islands/app/DashboardMenu.tsx";
 import * as $app_IconCircle from "./islands/app/IconCircle.tsx";
 import * as $app_LoginForm from "./islands/app/LoginForm.tsx";
@@ -43,11 +46,14 @@ const manifest = {
     "./routes/api/login/google.ts": $api_login_google,
     "./routes/api/logout.ts": $api_logout,
     "./routes/api/new_board.tsx": $api_new_board,
+    "./routes/api/remove_user_from_board.tsx": $api_remove_user_from_board,
+    "./routes/api/rename_board.tsx": $api_rename_board,
     "./routes/api/set_name.ts": $api_set_name,
     "./routes/index.tsx": $index,
     "./routes/set_name.tsx": $set_name,
   },
   islands: {
+    "./islands/app/BoardTileToolbar.tsx": $app_BoardTileToolbar,
     "./islands/app/DashboardMenu.tsx": $app_DashboardMenu,
     "./islands/app/IconCircle.tsx": $app_IconCircle,
     "./islands/app/LoginForm.tsx": $app_LoginForm,

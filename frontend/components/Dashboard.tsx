@@ -1,11 +1,10 @@
 import { Partial } from "../../deps_client.ts";
-import AccountMenu from "../islands/board/AccountMenu.tsx";
-import BoardTile from "./BoardTile.tsx";
-import IconCircle from "../islands/app/IconCircle.tsx";
 import DashboardMenu from "../islands/app/DashboardMenu.tsx";
+import BoardTile from "./BoardTile.tsx";
+import { BoardTileProps } from "./BoardTile.tsx";
 
 interface DashboardPars {
-  boards: Array<string>;
+  boards: Array<BoardTileProps>;
 }
 
 export default function Dashboard({ boards }: DashboardPars) {
@@ -35,7 +34,7 @@ export default function Dashboard({ boards }: DashboardPars) {
               new
             </a>
             {boards.map((board) => (
-              <BoardTile key={board} id={board} name={board} />
+              <BoardTile key={board.id} id={board.id} name={board.name} />
             ))}
           </Partial>
         </div>

@@ -4,10 +4,11 @@ import LoginForm from "../islands/app/LoginForm.tsx";
 import { Account } from "../../liaison/liaison.ts";
 import Dashboard from "../components/Dashboard.tsx";
 import { getAccount } from "../../server/utils.ts";
+import { BoardTileProps } from "../components/BoardTile.tsx";
 
 interface HomePars {
   account: Account | null;
-  boards: Array<string>;
+  boards: Array<BoardTileProps>;
 }
 
 export const handler: Handlers = {
@@ -18,7 +19,7 @@ export const handler: Handlers = {
       const res = await ctx.render!({ account, boards });
       res.headers.append(
         "Cache-Control",
-        "no-cache, no-store, must-revalidate",
+        "no-cache, no-store, must-revalidate"
       );
       return res;
     } else {
