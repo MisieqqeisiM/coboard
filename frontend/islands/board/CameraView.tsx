@@ -142,7 +142,7 @@ export default function CameraView(
     globalThis.addEventListener("wheel", zoom, { passive: false });
     globalThis.addEventListener("mousemove", move);
     globalThis.addEventListener("mouseup", endMove);
-    ref.current?.addEventListener("touchstart", touchStart);
+    globalThis.addEventListener("touchstart", touchStart);
     globalThis.addEventListener("touchmove", touchMove);
     globalThis.addEventListener("touchend", touchEnd);
 
@@ -164,7 +164,6 @@ export default function CameraView(
         width: "100%",
         height: "100%",
         position: "absolute",
-        pointerEvents: "none",
       }}
       ref={ref}
     >

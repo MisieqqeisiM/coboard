@@ -30,20 +30,15 @@ export default function Board() {
   return (
     <>
       <CameraContext.Provider value={camera}>
-        <div
-          class="board"
-          style={{ position: "absolute", height: `100%`, width: `100%` }}
-        >
-          <ObservableCanvas client={client} width={width} height={height} />
-          <DrawableCanvas client={client} width={width} height={height} />
-        </div>
+        <ObservableCanvas client={client} width={width} height={height} />
+        <DrawableCanvas client={client} width={width} height={height} />
       </CameraContext.Provider>
       <CameraView camera={camera}>
         <CursorBox />
         <MouseTracker client={client} />
       </CameraView>
       <Toolbar />
-      <div style={{ position: "absolute", right: 10, top: 10 }}>
+      <div style={{ position: "absolute", zIndex: 101, right: 10, top: 10 }}>
         <ThemeSelector />
       </div>
     </>

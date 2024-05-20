@@ -280,6 +280,7 @@ export default function DrawableCanvas(props: CanvasProps) {
         position: "absolute",
         left: 0,
         top: 0,
+        zIndex: 100,
         height: "100%",
         width: "100%",
       }}

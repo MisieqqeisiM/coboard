@@ -81,6 +81,7 @@ body {
 
 .toolbar {
   pointer-events: none;
+  z-index: 101;
   position: absolute;
   height: 100%;
   display: flex;
