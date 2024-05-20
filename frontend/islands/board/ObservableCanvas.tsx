@@ -1,6 +1,20 @@
-import { useEffect, useRef } from "../../../deps_client.ts";
+import { Signal, useContext, useEffect, useRef } from "../../../deps_client.ts";
 import { Client } from "../../../client/client.ts";
 import { EraserColor } from "../../../client/settings.ts";
+import {
+  createProgram,
+  createProgramFromSources,
+  loadShader,
+  resizeCanvasToDisplaySize,
+} from "./webgl-utils/index.ts";
+import { Camera, CameraContext } from "../../../client/camera.ts";
+import { Line } from "../../../liaison/liaison.ts";
+import {
+  getPointsFromLine,
+  setColorAndPoints,
+  setUniforms,
+} from "./webgl-utils/line_drawing.ts";
+import { ThemeContext } from "../app/Themed.tsx";
 
 interface CanvasProps {
   client: Client;
@@ -9,73 +23,146 @@ interface CanvasProps {
 }
 
 export default function ObservableCanvas(props: CanvasProps) {
+  const camera: Signal<Camera> = useContext(CameraContext);
+  const theme = useContext(ThemeContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const subscription = props.client.ui.strokes.subscribe((strokes) => {
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        return;
-      }
-      const context = canvas.getContext("2d");
-      if (!context) {
-        return;
-      }
+  const glRef = useRef<WebGLRenderingContext | null>(null);
+  let program: WebGLProgram | null = null;
 
-      for (const line of strokes) {
-        //inefficient, should be a proper queue
-        if (line && line.coordinates && line.coordinates.length > 1) {
-          //temporary solution
-          if (line.color == EraserColor.TRANSPARENT) {
-            context.globalCompositeOperation = "destination-out";
-          } else {
-            context.globalCompositeOperation = "source-over";
-          }
+  const vertexShaderSource = `
+    //position on board
+    attribute vec2 a_position;
 
-          context.beginPath();
-          context.strokeStyle = line.color;
-          context.lineWidth = line.width;
-          context.moveTo(line.coordinates[0].x, line.coordinates[0].y);
-          for (let j = 1; j < line.coordinates.length; j++) {
-            context.lineTo(line.coordinates[j].x, line.coordinates[j].y);
-            context.stroke();
-          }
-          context.closePath();
+    //dimensions of the board
+    uniform vec2 u_resolution;
+
+    //camera transformations
+    uniform vec2 u_translation;
+    uniform vec2 u_scale;
+
+    void main() {
+        vec2 translatedPosition = a_position + u_translation;
+        vec2 position = translatedPosition * u_scale;
+
+        vec2 vertex = position;
+        vec2 zeroToOne = vertex / u_resolution;
+        vec2 zeroToTwo = zeroToOne * 2.0;
+        vec2 clipSpace = zeroToTwo - 1.0;
+        gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+
+    }
+  `;
+
+  const fragmentShaderSource = `
+    precision mediump float;
+    uniform vec4 u_color;
+    uniform bool u_theme;
+    void main() {
+      vec4 color = u_color;
+      if(!u_theme) {
+        if(color.x <= 0.15 && color.y <= 0.15 && color.z <= 0.15) {
+          color = vec4(0.9, 0.9, 0.9, 1.0);
         }
-      }
-      props.client.ui.strokes.peek().length = 0;
+      } 
+      gl_FragColor = color;
+    }
+  `;
+
+  //create the program and stuff
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+    const gl = canvas.getContext("webgl");
+    if (!gl) {
+      console.log("no context");
+      return;
+    }
+    glRef.current = gl;
+
+    program = createProgramFromSources(
+      gl,
+      [vertexShaderSource, fragmentShaderSource],
+      [],
+      [],
+    );
+    gl.useProgram(program);
+
+    // Update theme
+    theme.subscribe((value) => {
+      setUniforms(gl, program!, camera, value);
+      drawLines(props.client.ui.strokes.value);
     });
+
     return () => {
-      // TODO: unsubscribe
+      gl.deleteProgram(program);
     };
   }, []);
 
+  //subscribe to camera
+  useEffect(() => {
+    const subscription = camera.subscribe((camera: Camera) => {
+      drawLines(props.client.ui.strokes.value);
+    });
+    return () => {
+      // unsubscribe
+    };
+  }, []);
+
+  //subscribe to the clear button
   useEffect(() => {
     const subscription = props.client.ui.clear.subscribe((newValue) => {
       if (newValue) {
-        props.client.ui.clear.value = false;
-        const canvas = canvasRef.current;
-        if (!canvas) {
-          return;
+        if (glRef.current != null) {
+          const gl = glRef.current;
+          gl.clear(gl.COLOR_BUFFER_BIT);
         }
-        const context = canvas.getContext("2d");
-        if (!context) {
-          return;
-        }
-
-        context.clearRect(0, 0, canvas.width, canvas.height);
       }
     });
     return () => {
-      // TODO: unsubscribe
+      // TODO: Unsubscribe
     };
   }, []);
+
+  //subscribe to see new strokes
+  useEffect(() => {
+    const subscription = props.client.ui.strokes.subscribe((strokes) => {
+      drawLines(strokes);
+    });
+
+    return () => {
+      // TODO: Unsubscribe
+    };
+  }, []);
+
+  function drawLines(lines: Line[]) {
+    const gl = glRef.current;
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    resizeCanvasToDisplaySize(gl.canvas);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    setUniforms(gl, program!, camera, theme.peek());
+
+    for (const line of lines) {
+      if (line && line.coordinates && line.coordinates.length > 0) {
+        let length = setColorAndPoints(gl, program!, line);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, length);
+        //TODO: remove the buffer maybe? i don't know how it works yet
+      }
+    }
+  }
 
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", left: 0, top: 0 }}
-      width={`${props.width}px`}
-      height={`${props.height}px`}
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        width: "100%",
+        height: "100%",
+      }}
     />
   );
 }

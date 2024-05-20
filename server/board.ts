@@ -5,6 +5,7 @@ import {
   ConfirmLineEvent,
   OnDrawEvent,
   OnMoveEvent,
+  OnRemoveEvent,
   OnResetEvent,
   UserListEvent,
 } from "../liaison/events.ts";
@@ -25,6 +26,9 @@ export interface BoardUnloader {
 export class Board {
   private users: Map<string, BoardUser> = new Map();
   private clients: ClientStore = new ClientStore();
+
+  //temporary
+  private lineId: number = 0;
 
   constructor(
     private mongoClient: MongoClient,
@@ -80,9 +84,18 @@ export class Board {
 
   public async draw(client: Client, line: Line) {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
-    await boards.updateOne({ id: this.id }, { $push: { lines: line } });
-    this.clients.emit(new OnDrawEvent(client.account.id, line));
+    //1000 is arbitrary
+    const id = (this.lineId++)%1000 + (new Date().getTime())*1000;
+    const confirmedLine = Line.changeId(line, id);
+    await boards.updateOne({ id: this.id }, { $push: { lines: confirmedLine } });
+    this.clients.emit(new OnDrawEvent(client.account.id, confirmedLine));
     client.emit(new ConfirmLineEvent());
+  }
+  public async remove(client: Client, lineId: number) {
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    //TODO: here actually remove the line
+    await boards.updateOne({ id: this.id }, { $pull: { lines: {id: lineId} } });
+    this.clients.emit(new OnRemoveEvent(lineId));
   }
 
   private updateUsers(): void {

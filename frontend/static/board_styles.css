@@ -75,6 +75,10 @@ body {
   height: 30px;
 }
 
+.dark .board-image {
+  filter: invert(100%) !important;
+}
+
 .toolbar {
   pointer-events: none;
   position: absolute;
@@ -250,10 +254,7 @@ body {
 }
 
 .board {
-  border: 3px dashed var(--border-dark);
-  box-sizing: border-box;
-  width: fit-content;
-  height: fit-content;
+  border: none
 }
 
 .cursor {

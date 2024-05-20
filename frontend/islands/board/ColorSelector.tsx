@@ -1,13 +1,16 @@
 import { useContext, useRef } from "../../../deps_client.ts";
 import { Color } from "../../../client/settings.ts";
 import { SettingsContext } from "../../../client/settings.ts";
+import { ThemeContext } from "../app/Themed.tsx";
 
 function ColorBar({
+  visibleColor,
   color,
   selectColor,
   rotation,
   selectColorTmp,
 }: {
+  visibleColor: string;
   color: Color;
   selectColor: (color: Color) => void;
   selectColorTmp: (color: Color) => void;
@@ -18,7 +21,10 @@ function ColorBar({
     <div
       ref={ref}
       class="color"
-      style={{ backgroundColor: color, transform: `rotate(${rotation}deg)` }}
+      style={{
+        backgroundColor: visibleColor,
+        transform: `rotate(${rotation}deg)`,
+      }}
       onClick={() => selectColor(color)}
       onPointerUp={() => selectColor(color)}
       onPointerEnter={(e) => {
@@ -36,6 +42,7 @@ function ColorBar({
 export default function ColorSelector() {
   const selector = useRef<HTMLDivElement | null>(null);
   const color = useContext(SettingsContext).color;
+  const theme = useContext(ThemeContext);
 
   const selectColor = (c: Color) => {
     color.value = c;
@@ -68,6 +75,7 @@ export default function ColorSelector() {
       <div class="color-box">
         {Array.from(Object.values(Color).entries()).map(([i, c]) => (
           <ColorBar
+            visibleColor={c == Color.BLACK && !theme.value ? "#dddddd" : c}
             color={c}
             selectColor={selectColor}
             rotation={start + i * d}
@@ -80,7 +88,14 @@ export default function ColorSelector() {
         onPointerDown={down}
         onPointerUp={up}
       >
-        <div class="color-circle" style={{ backgroundColor: color.value }}>
+        <div
+          class="color-circle"
+          style={{
+            backgroundColor: color.value == Color.BLACK && !theme.value
+              ? "#dddddd"
+              : color.value,
+          }}
+        >
         </div>
       </div>
     </div>

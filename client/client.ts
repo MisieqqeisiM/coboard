@@ -49,6 +49,11 @@ export class SocketClient implements ClientToServerEvents {
       client.strokes.value = [...client.strokes.value, e.line];
     });
 
+    io.on("onRemove", (e)=> {
+      client.strokes.value = client.strokes.value.filter(line=> line.id != e.lineId);
+
+    });
+
     io.on("confirmLine", (_e) => {
       client.local_strokes.value = [...client.local_strokes.value.slice(1)];
     });
@@ -65,6 +70,9 @@ export class SocketClient implements ClientToServerEvents {
 
   public draw(points: Line) {
     this.io.emit("draw", points);
+  }
+  public remove(id:number) {
+    this.io.emit("remove", id);
   }
 
   public reset() {

@@ -5,7 +5,7 @@ import ObservableCanvas from "./ObservableCanvas.tsx";
 import CursorBox from "./CursorBox.tsx";
 import MouseTracker from "./MouseTracker.tsx";
 import Loading from "../../components/Loading.tsx";
-import { Camera } from "../../../client/camera.ts";
+import { Camera, CameraContext } from "../../../client/camera.ts";
 import CameraView from "./CameraView.tsx";
 import AlreadyLoggedIn from "../../components/AlreadyLoggedIn.tsx";
 import Toolbar from "./Toolbar.tsx";
@@ -28,11 +28,16 @@ export default function Board() {
 
   return (
     <>
-      <CameraView camera={camera}>
-        <div class="board" style={{ width, height }}>
+      <CameraContext.Provider value={camera}>
+        <div
+          class="board"
+          style={{ position: "absolute", height: `100%`, width: `100%` }}
+        >
           <ObservableCanvas client={client} width={width} height={height} />
           <DrawableCanvas client={client} width={width} height={height} />
         </div>
+      </CameraContext.Provider>
+      <CameraView camera={camera}>
         <CursorBox />
         <MouseTracker client={client} />
       </CameraView>

@@ -35,6 +35,10 @@ import * as $board_SizeSelector from "./islands/board/SizeSelector.tsx";
 import * as $board_StylusModeSelector from "./islands/board/StylusModeSelector.tsx";
 import * as $board_ToolSelector from "./islands/board/ToolSelector.tsx";
 import * as $board_Toolbar from "./islands/board/Toolbar.tsx";
+import * as $board_webgl_utils_constants from "./islands/board/webgl-utils/constants.ts";
+import * as $board_webgl_utils_index from "./islands/board/webgl-utils/index.ts";
+import * as $board_webgl_utils_line_drawing from "./islands/board/webgl-utils/line_drawing.ts";
+import * as $board_webgl_utils_utils from "./islands/board/webgl-utils/utils.ts";
 import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -74,6 +78,11 @@ const manifest = {
     "./islands/board/StylusModeSelector.tsx": $board_StylusModeSelector,
     "./islands/board/ToolSelector.tsx": $board_ToolSelector,
     "./islands/board/Toolbar.tsx": $board_Toolbar,
+    "./islands/board/webgl-utils/constants.ts": $board_webgl_utils_constants,
+    "./islands/board/webgl-utils/index.ts": $board_webgl_utils_index,
+    "./islands/board/webgl-utils/line_drawing.ts":
+      $board_webgl_utils_line_drawing,
+    "./islands/board/webgl-utils/utils.ts": $board_webgl_utils_utils,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;
