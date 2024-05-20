@@ -250,8 +250,7 @@ body {
 }
 
 .board {
-  border: 3px dashed var(--border-dark);
-  box-sizing: border-box;
+  border: none
 }
 
 .cursor {

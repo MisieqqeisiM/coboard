@@ -164,13 +164,23 @@ export default function CameraView(
         width: "100%",
         height: "100%",
         position: "absolute",
+        pointerEvents: "none",
       }}
       ref={ref}
     >
-      
+      <div
+        style={{
+          position: "absolute",
+          width: "0px",
+          height: "0px",
+          transform:
+            `scale(${camera.value.scale}) translate(${camera.value.dx}px, ${camera.value.dy}px)`,
+        }}
+      >
         <CameraContext.Provider value={camera}>
           {children}
         </CameraContext.Provider>
       </div>
+    </div>
   );
 }
