@@ -9,18 +9,25 @@ export default defineRoute(async (req, ctx) => {
   const account = await getAccount(req);
   if (!account) {
     return (
-      <Partial name="boards" mode="append">
+      <Partial name="boards" mode="replace">
         <Reload />
       </Partial>
     );
   }
 
-  const board = await server.boards.newBoard();
-  await server.boards.addUserToBoard(account.id, board.id);
+  const searchParams = new URLSearchParams(
+    req.url.substring(req.url.indexOf("?") + 1)
+  );
 
+  const boardId = searchParams.get("boardId");
+  const newName = searchParams.get("name");
+
+  if (boardId && newName) {
+    await server.boards.RenameBoard(boardId, newName);
+  }
   return (
-    <Partial name="boards" mode="append">
-      <BoardTile key={board.id} id={board.id} name={board.name} />
+    <Partial name="boards" mode="replace">
+      <Reload />
     </Partial>
   );
 });

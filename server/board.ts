@@ -14,6 +14,7 @@ import { MongoClient } from "../deps.ts";
 
 export interface BoardDB {
   id: string;
+  name: string;
   lines: Line[];
   userIDs: string[];
 }
@@ -32,7 +33,7 @@ export class Board {
   constructor(
     private mongoClient: MongoClient,
     private id: string,
-    private unloader: BoardUnloader,
+    private unloader: BoardUnloader
   ) {}
 
   public getUser(id: string) {

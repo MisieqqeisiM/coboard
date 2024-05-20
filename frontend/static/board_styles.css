@@ -4,8 +4,8 @@
   --background: #222;
   --text-dark: #aaa;
   --text-light: #222;
-  --color-light: #33C3F0;
-  --color-dark: #1EAEDB;
+  --color-light: #33c3f0;
+  --color-dark: #1eaedb;
 }
 
 .light {
@@ -14,11 +14,12 @@
   --text-light: #fff;
   --border-dark: #333;
   --border-light: #999;
-  --color-light: #33C3F0;
-  --color-dark: #1EAEDB;
+  --color-light: #33c3f0;
+  --color-dark: #1eaedb;
 }
 
-html, body {
+html,
+body {
   overflow: hidden;
   width: 100%;
   height: 100%;
@@ -39,7 +40,7 @@ html, body {
   font-size: 11px;
   font-weight: 600;
   line-height: 38px;
-  letter-spacing: .1rem;
+  letter-spacing: 0.1rem;
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
@@ -50,21 +51,28 @@ html, body {
   box-sizing: border-box;
 }
 
-.board-tile:hover  {
+.board-tile:hover {
   color: var(--color-light);
   border-color: var(--border-light);
-  outline: 0; 
+  outline: 0;
 }
 .board-tile.colored {
   color: var(--text-light);
   background-color: var(--color-light);
-  border-color: var(--color-light); 
+  border-color: var(--color-light);
 }
 
-.board-tile.colored:hover{
+.board-tile.colored:hover {
   color: var(--text-light);
   background-color: var(--color-dark);
   border-color: var(--color-dark);
+}
+
+.board-image {
+  cursor: pointer;
+  opacity: 0.3;
+  width: 30px;
+  height: 30px;
 }
 
 .toolbar {
@@ -97,12 +105,11 @@ html, body {
   border-color: var(--border-dark);
 }
 
-.color-selector.active .color{
+.color-selector.active .color {
   width: 100px;
 }
 
-
-.color-selector.active .color.highlighted{
+.color-selector.active .color.highlighted {
   width: 120px;
 }
 
@@ -164,33 +171,31 @@ html, body {
   }
 }
 
-
 .slide-out {
   display: flex;
   align-items: center;
   justify-content: left;
   flex-direction: row-reverse;
 }
-.slide-out > *{
+.slide-out > * {
   transition: margin-right 0.2s, transform 0.1s;
 }
 
-.slide-out > :not(.cover)  {
+.slide-out > :not(.cover) {
   transform: scale(0.9);
 }
 
-
 @media (any-pointer: fine) {
-  .slide-out > :not(.cover):hover  {
-    transform: scale(1.0);
+  .slide-out > :not(.cover):hover {
+    transform: scale(1);
   }
 }
 
-.slide-out > *{
+.slide-out > * {
   margin-right: -53.5px;
 }
 
-.slide-out.active > *{
+.slide-out.active > * {
   margin-right: 3px;
 }
 .color-selector {
@@ -218,7 +223,7 @@ html, body {
   width: 50px;
   height: 50px;
   border: 2px solid;
-  border-radius: 50%; 
+  border-radius: 50%;
   background-color: var(--background);
   border-color: var(--border-dark);
   display: flex;
@@ -270,7 +275,7 @@ html, body {
 .cursor > .label {
   position: relative;
   top: 30px;
-  width:100%;
+  width: 100%;
   text-align: center;
   word-wrap: break-word;
   display: inline-block;
