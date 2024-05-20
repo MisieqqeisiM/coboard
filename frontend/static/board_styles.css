@@ -139,6 +139,8 @@ body {
   transition: all 0.2s;
   width: 0px;
   pointer-events: none;
+  display: flex;
+  align-items: center;
 }
 
 .slider-box > input {
