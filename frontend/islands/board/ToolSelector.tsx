@@ -6,7 +6,7 @@ import SizeSelector from "./SizeSelector.tsx";
 
 const toolIcons: Record<Tool, string> = {
   [Tool.PEN]: "pencil-outline",
-  [Tool.ERASER]: "ban-outline",
+  [Tool.ERASER]: "eraser",
 };
 
 export default function ToolSelector() {

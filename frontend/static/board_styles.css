@@ -145,6 +145,14 @@ body {
   margin-bottom: 0 !important;
 }
 
+.light .invertable {
+  filter: invert(10%);
+}
+
+.dark .invertable {
+  filter: invert(70%);
+}
+
 .slider-box.active {
   width: 150px;
   padding-left: 25px;
