@@ -8,8 +8,17 @@ import {
   Tool,
 } from "../../../client/settings.ts";
 import { Line } from "../../../liaison/liaison.ts";
-import { createProgramFromSources, resizeCanvasToDisplaySize } from "./webgl-utils/index.ts";
-import { getPointsFromLine, linesIntersect, setColorAndPoints, setUniforms } from "./webgl-utils/line_drawing.ts";
+import {
+  createProgramFromSources,
+  resizeCanvasToDisplaySize,
+} from "./webgl-utils/index.ts";
+import {
+  getPointsFromLine,
+  linesIntersect,
+  setColorAndPoints,
+  setUniforms,
+} from "./webgl-utils/line_drawing.ts";
+import { ThemeContext } from "../app/Themed.tsx";
 
 interface CanvasProps {
   client: Client;
@@ -21,8 +30,8 @@ export default function DrawableCanvas(props: CanvasProps) {
   const camera = useContext(CameraContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
-  let program: WebGLProgram | null=null;
-  
+  let program: WebGLProgram | null = null;
+
   const vertexShaderSource = `
     //position on board
     attribute vec2 a_position;
@@ -50,8 +59,16 @@ export default function DrawableCanvas(props: CanvasProps) {
   const fragmentShaderSource = `
     precision mediump float;
     uniform vec4 u_color;
+    uniform bool u_theme;
     void main() {
-      gl_FragColor = u_color;
+      vec4 color = u_color;
+
+      if(!u_theme) {
+        if(color.x <= 0.15 && color.y <= 0.15 && color.z <= 0.15) {
+          color = vec4(0.9, 0.9, 0.9, 1.0);
+        }
+      } 
+      gl_FragColor = color;
     }
   `;
 
@@ -59,9 +76,10 @@ export default function DrawableCanvas(props: CanvasProps) {
   const stroke_color = useContext(SettingsContext).color;
   const stroke_width = useContext(SettingsContext).size;
   const stylusMode = useContext(SettingsContext).stylusMode;
+  const theme = useContext(ThemeContext);
   let points: { x: number; y: number }[] = [];
-  
-  const canvasInit = ()=> {
+
+  const canvasInit = () => {
     const canvas = canvasRef.current;
 
     if (!canvas) {
@@ -69,19 +87,24 @@ export default function DrawableCanvas(props: CanvasProps) {
     }
     const gl = canvas.getContext("webgl");
     if (!gl) {
-      console.log("no context")
+      console.log("no context");
       return;
     }
     glRef.current = gl;
 
-    program = createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource], [], []);
+    program = createProgramFromSources(
+      gl,
+      [vertexShaderSource, fragmentShaderSource],
+      [],
+      [],
+    );
     gl.useProgram(program);
-  }
+  };
 
   //drawing logic
   useEffect(() => {
     canvasInit();
-    
+
     const canvas = canvasRef.current;
     canvas.height = canvas.clientHeight;
     canvas.width = canvas.clientWidth;
@@ -89,26 +112,32 @@ export default function DrawableCanvas(props: CanvasProps) {
 
     let drawing = false;
 
-    const startDraw = (x: number, y: number) => {     
-      
+    const startDraw = (x: number, y: number) => {
       resizeCanvasToDisplaySize(context.canvas);
       context.viewport(0, 0, context.canvas.width, context.canvas.height);
-      setUniforms(context, program!, camera);
+      setUniforms(context, program!, camera, theme.peek());
 
       drawing = true;
       points = [{ x: x, y: y }];
 
-      let len = setColorAndPoints(context, program!, new Line(null, stroke_width.peek(), stroke_color.peek(), points)); 
+      let len = setColorAndPoints(
+        context,
+        program!,
+        new Line(null, stroke_width.peek(), stroke_color.peek(), points),
+      );
       context.drawArrays(context.TRIANGLE_STRIP, 0, length);
-
     };
 
     const draw = (x: number, y: number) => {
       if (!drawing) return;
       points.push({ x: x, y: y });
-      const color = tool.peek() == Tool.PEN? stroke_color.peek() : Color.BLACK;
-      
-      let length = setColorAndPoints(context, program!, new Line(null, stroke_width.peek(), color, points));
+      const color = tool.peek() == Tool.PEN ? stroke_color.peek() : Color.BLACK;
+
+      let length = setColorAndPoints(
+        context,
+        program!,
+        new Line(null, stroke_width.peek(), color, points),
+      );
 
       context.drawArrays(context.TRIANGLE_STRIP, 0, length);
     };
@@ -126,18 +155,19 @@ export default function DrawableCanvas(props: CanvasProps) {
           props.client.ui.local_strokes.value.push(line);
           props.client.socket.draw(line);
         } else {
-          const lines:Line[] = props.client.ui.strokes.value;
-          const removeIds:number[] = [];
+          const lines: Line[] = props.client.ui.strokes.value;
+          const removeIds: number[] = [];
           context.clear(context.COLOR_BUFFER_BIT);
 
-          for(const line of lines) {
-            if(linesIntersect(line.coordinates, points, stroke_width.peek())) {
+          for (const line of lines) {
+            if (linesIntersect(line.coordinates, points, stroke_width.peek())) {
               removeIds.push(line.id!);
             }
           }
 
-          for(const id of removeIds)
+          for (const id of removeIds) {
             props.client.socket.remove(id);
+          }
         }
         points = [];
       }
@@ -145,7 +175,7 @@ export default function DrawableCanvas(props: CanvasProps) {
 
     const mouseDown = (event: MouseEvent) => {
       if (event.button != 0) return;
-       
+
       startDraw(...camera.peek().toBoardCoords(event.clientX, event.clientY));
     };
 
@@ -213,7 +243,7 @@ export default function DrawableCanvas(props: CanvasProps) {
 
       resizeCanvasToDisplaySize(context.canvas);
       context.viewport(0, 0, context.canvas.width, context.canvas.height);
-      setUniforms(context, program!, camera);
+      setUniforms(context, program!, camera, theme.peek());
       context.clear(context.COLOR_BUFFER_BIT);
 
       const draw_line = (line: Line) => {
@@ -223,7 +253,9 @@ export default function DrawableCanvas(props: CanvasProps) {
         }
       };
 
-      draw_line(new Line(null, stroke_width.peek(), stroke_color.peek(), points));
+      draw_line(
+        new Line(null, stroke_width.peek(), stroke_color.peek(), points),
+      );
       if (
         (!props.client.ui.local_strokes) ||
         (!props.client.ui.local_strokes.value)
@@ -233,6 +265,9 @@ export default function DrawableCanvas(props: CanvasProps) {
 
       props.client.ui.local_strokes.value.forEach(draw_line);
     });
+    theme.subscribe((value) => {
+      setUniforms(glRef.current!, program!, camera, value);
+    });
     return () => {
       // TODO: unsubscribe
     };
@@ -241,7 +276,13 @@ export default function DrawableCanvas(props: CanvasProps) {
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", left: 0, top: 0, height:'100%', width:'100%'}}
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        height: "100%",
+        width: "100%",
+      }}
     />
   );
 }

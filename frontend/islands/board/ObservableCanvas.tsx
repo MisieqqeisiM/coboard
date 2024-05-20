@@ -1,10 +1,20 @@
 import { Signal, useContext, useEffect, useRef } from "../../../deps_client.ts";
 import { Client } from "../../../client/client.ts";
 import { EraserColor } from "../../../client/settings.ts";
-import { createProgram, createProgramFromSources, loadShader, resizeCanvasToDisplaySize } from "./webgl-utils/index.ts"
+import {
+  createProgram,
+  createProgramFromSources,
+  loadShader,
+  resizeCanvasToDisplaySize,
+} from "./webgl-utils/index.ts";
 import { Camera, CameraContext } from "../../../client/camera.ts";
 import { Line } from "../../../liaison/liaison.ts";
-import { getPointsFromLine, setColorAndPoints, setUniforms } from "./webgl-utils/line_drawing.ts";
+import {
+  getPointsFromLine,
+  setColorAndPoints,
+  setUniforms,
+} from "./webgl-utils/line_drawing.ts";
+import { ThemeContext } from "../app/Themed.tsx";
 
 interface CanvasProps {
   client: Client;
@@ -14,9 +24,10 @@ interface CanvasProps {
 
 export default function ObservableCanvas(props: CanvasProps) {
   const camera: Signal<Camera> = useContext(CameraContext);
+  const theme = useContext(ThemeContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
-  let program: WebGLProgram | null=null;
+  let program: WebGLProgram | null = null;
 
   const vertexShaderSource = `
     //position on board
@@ -45,8 +56,15 @@ export default function ObservableCanvas(props: CanvasProps) {
   const fragmentShaderSource = `
     precision mediump float;
     uniform vec4 u_color;
+    uniform bool u_theme;
     void main() {
-      gl_FragColor = u_color;
+      vec4 color = u_color;
+      if(!u_theme) {
+        if(color.x <= 0.15 && color.y <= 0.15 && color.z <= 0.15) {
+          color = vec4(0.9, 0.9, 0.9, 1.0);
+        }
+      } 
+      gl_FragColor = color;
     }
   `;
 
@@ -59,18 +77,28 @@ export default function ObservableCanvas(props: CanvasProps) {
     }
     const gl = canvas.getContext("webgl");
     if (!gl) {
-      console.log("no context")
+      console.log("no context");
       return;
     }
     glRef.current = gl;
 
-    program = createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource], [], []);
+    program = createProgramFromSources(
+      gl,
+      [vertexShaderSource, fragmentShaderSource],
+      [],
+      [],
+    );
     gl.useProgram(program);
+
+    // Update theme
+    theme.subscribe((value) => {
+      setUniforms(gl, program!, camera, value);
+      drawLines(props.client.ui.strokes.value);
+    });
 
     return () => {
       gl.deleteProgram(program);
     };
-
   }, []);
 
   //subscribe to camera
@@ -87,7 +115,7 @@ export default function ObservableCanvas(props: CanvasProps) {
   useEffect(() => {
     const subscription = props.client.ui.clear.subscribe((newValue) => {
       if (newValue) {
-        if(glRef.current!=null) {
+        if (glRef.current != null) {
           const gl = glRef.current;
           gl.clear(gl.COLOR_BUFFER_BIT);
         }
@@ -97,7 +125,6 @@ export default function ObservableCanvas(props: CanvasProps) {
       // TODO: Unsubscribe
     };
   }, []);
-
 
   //subscribe to see new strokes
   useEffect(() => {
@@ -115,15 +142,13 @@ export default function ObservableCanvas(props: CanvasProps) {
     gl.clear(gl.COLOR_BUFFER_BIT);
     resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    setUniforms(gl, program!, camera);
+    setUniforms(gl, program!, camera, theme.peek());
 
     for (const line of lines) {
       if (line && line.coordinates && line.coordinates.length > 0) {
-
         let length = setColorAndPoints(gl, program!, line);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, length);
         //TODO: remove the buffer maybe? i don't know how it works yet
-
       }
     }
   }
@@ -131,8 +156,13 @@ export default function ObservableCanvas(props: CanvasProps) {
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }}
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        width: "100%",
+        height: "100%",
+      }}
     />
   );
 }
-
