@@ -189,7 +189,10 @@ export default function DrawableCanvas(props: CanvasProps) {
 
     const touchStart = (event: TouchEvent) => {
       if (stylusMode.peek()) return;
-      if (event.touches.length != 1) return;
+      if (event.touches.length != 1) {
+        drawing = false;
+        return;
+      }
       event.preventDefault();
       startDraw(
         ...camera.peek().toBoardCoords(
@@ -280,6 +283,7 @@ export default function DrawableCanvas(props: CanvasProps) {
         position: "absolute",
         left: 0,
         top: 0,
+        zIndex: 100,
         height: "100%",
         width: "100%",
       }}

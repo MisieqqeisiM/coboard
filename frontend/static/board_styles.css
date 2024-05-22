@@ -81,6 +81,7 @@ body {
 
 .toolbar {
   pointer-events: none;
+  z-index: 101;
   position: absolute;
   height: 100%;
   display: flex;
@@ -132,17 +133,27 @@ body {
   height: 20px;
   border: 2px solid var(--border-dark);
   border-radius: 10px;
-  padding-bottom: 1px;
   margin-left: -30px;
   padding-right: 7px;
   background-color: var(--background);
   transition: all 0.2s;
   width: 0px;
   pointer-events: none;
+  display: flex;
+  align-items: center;
 }
 
 .slider-box > input {
   width: 100% !important;
+  margin-bottom: 0 !important;
+}
+
+.light .invertable {
+  filter: invert(10%);
+}
+
+.dark .invertable {
+  filter: invert(70%);
 }
 
 .slider-box.active {

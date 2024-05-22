@@ -4,30 +4,41 @@ import ThemeSelector from "./ThemeSelector.tsx";
 
 export default function DashboardMenu() {
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: 20,
-        left: 20,
-        zIndex: 1000,
-      }}
-    >
-      <AccountMenu>
-        <IconCircle
-          iconName="exit-outline"
-          onClick={() => {
-            globalThis.location.href = "/api/logout";
-          }}
-        />
-        <IconCircle
-          iconName="pencil-outline"
-          onClick={() => {
-            globalThis.location.href =
-              `/set_name?redirectTo=${window.location.pathname}`;
-          }}
-        />
+    <>
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          left: 10,
+          zIndex: 1000,
+        }}
+      >
+        <AccountMenu>
+          <IconCircle
+            iconName="exit-outline"
+            onClick={() => {
+              globalThis.location.href = "/api/logout";
+            }}
+          />
+          <IconCircle
+            iconName="pencil-outline"
+            onClick={() => {
+              globalThis.location.href =
+                `/set_name?redirectTo=${window.location.pathname}`;
+            }}
+          />
+        </AccountMenu>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          zIndex: 1000,
+        }}
+      >
         <ThemeSelector />
-      </AccountMenu>
-    </div>
+      </div>
+    </>
   );
 }

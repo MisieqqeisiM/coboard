@@ -39,7 +39,6 @@ export default function Toolbar() {
                 `/set_name?redirectTo=${window.location.pathname}`;
             }}
           />
-          <ThemeSelector />
         </AccountMenu>
         <ColorSelector />
         <SizeSelector />
