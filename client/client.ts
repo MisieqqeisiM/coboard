@@ -18,12 +18,16 @@ export class Client {
 
 export class UIClient {
   readonly users: Signal<Map<string, BoardUser>> = signal(new Map());
-  readonly strokes: Signal<Line[]> = signal([]);
+  public lines: Map<number, Line> = new Map();
   readonly local_strokes: Signal<Line[]> = signal([]);
   readonly clear: Signal<boolean> = signal(false);
+  readonly newLine: Signal<Line | null> = signal(null);
+  readonly removeLine: Signal<number | null> = signal(null);
 
   constructor(initialState: ClientState) {
-    this.strokes.value = initialState.lines;
+    for (const line of initialState.lines) {
+      this.lines.set(line.id!, line);
+    }
     const newUsers = new Map<string, BoardUser>();
     for (const user of initialState.users) newUsers.set(user.account.id, user);
     this.users.value = newUsers;
@@ -46,12 +50,13 @@ export class SocketClient implements ClientToServerEvents {
     });
 
     io.on("onDraw", (e) => {
-      client.strokes.value = [...client.strokes.value, e.line];
+      client.lines.set(e.line.id!, e.line);
+      client.newLine.value = e.line;
     });
 
-    io.on("onRemove", (e)=> {
-      client.strokes.value = client.strokes.value.filter(line=> line.id != e.lineId);
-
+    io.on("onRemove", (e) => {
+      client.lines.delete(e.lineId!);
+      client.removeLine.value = e.lineId;
     });
 
     io.on("confirmLine", (_e) => {
@@ -59,7 +64,7 @@ export class SocketClient implements ClientToServerEvents {
     });
 
     io.on("onReset", (_e) => {
-      client.strokes.value = [];
+      client.lines = new Map();
       client.clear.value = true;
     });
   }
@@ -71,7 +76,7 @@ export class SocketClient implements ClientToServerEvents {
   public draw(points: Line) {
     this.io.emit("draw", points);
   }
-  public remove(id:number) {
+  public remove(id: number) {
     this.io.emit("remove", id);
   }
 

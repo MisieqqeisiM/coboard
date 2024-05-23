@@ -1,29 +1,32 @@
 import { Signal, useContext, useEffect, useRef } from "../../../deps_client.ts";
-import { Client } from "../../../client/client.ts";
-import { EraserColor } from "../../../client/settings.ts";
+import { Color, SettingsContext, Tool } from "../../../client/settings.ts";
 import {
-  createProgram,
   createProgramFromSources,
-  loadShader,
   resizeCanvasToDisplaySize,
 } from "./webgl-utils/index.ts";
 import { Camera, CameraContext } from "../../../client/camera.ts";
-import { Line } from "../../../liaison/liaison.ts";
-import {
-  getPointsFromLine,
-  setColorAndPoints,
-  setUniforms,
-} from "./webgl-utils/line_drawing.ts";
+import { Line, Point } from "../../../liaison/liaison.ts";
+import { linesIntersect, setUniforms } from "./webgl-utils/line_drawing.ts";
 import { ThemeContext } from "../app/Themed.tsx";
+import { LineBuffer } from "./webgl-utils/LineBuffer.ts";
+import { ClientContext } from "../app/WithClient.tsx";
+import { LineDrawer } from "./webgl-utils/LineDrawer.ts";
 
 interface CanvasProps {
-  client: Client;
   width: number;
   height: number;
+  startDraw: Signal<Point | null>;
+  draw: Signal<Point | null>;
+  endDraw: Signal<Point | null>;
 }
 
 export default function ObservableCanvas(props: CanvasProps) {
   const camera: Signal<Camera> = useContext(CameraContext);
+  const tool = useContext(SettingsContext).tool;
+  const strokeColor = useContext(SettingsContext).color;
+  const strokeWidth = useContext(SettingsContext).size;
+  const client = useContext(ClientContext);
+  if (!client) return <></>;
   const theme = useContext(ThemeContext);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
@@ -75,7 +78,7 @@ export default function ObservableCanvas(props: CanvasProps) {
     if (!canvas) {
       return;
     }
-    const gl = canvas.getContext("webgl");
+    const gl = canvas.getContext("webgl2")!;
     if (!gl) {
       console.log("no context");
       return;
@@ -89,69 +92,98 @@ export default function ObservableCanvas(props: CanvasProps) {
       [],
     );
     gl.useProgram(program);
+    const lineBuffer = new LineBuffer(gl);
 
-    // Update theme
-    theme.subscribe((value) => {
-      setUniforms(gl, program!, camera, value);
-      drawLines(props.client.ui.strokes.value);
+    let points: Point[] = [];
+    let drawing = false;
+
+    function draw() {
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      resizeCanvasToDisplaySize(gl.canvas);
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+      setUniforms(gl, program!, camera, theme.peek());
+      lineBuffer.draw(program!);
+      for (const line of client!.ui.local_strokes.peek()) {
+        lineDrawer.drawLine(program!, line);
+      }
+      if (drawing) {
+        const color = tool.peek() == Tool.PEN
+          ? strokeColor.peek()
+          : Color.BLACK;
+        lineDrawer.drawLine(
+          program!,
+          new Line(0, strokeWidth.peek(), color, points),
+        );
+      }
+    }
+
+    for (const line of client.ui.lines.values()) {
+      lineBuffer.addLine(line);
+    }
+
+    client.ui.newLine.subscribe((line) => {
+      if (!line) return;
+      lineBuffer.addLine(line);
+      draw();
     });
+    client.ui.removeLine.subscribe((id) => {
+      if (!id) return;
+      lineBuffer.removeLine(id);
+      draw();
+    });
+    client.ui.clear.subscribe((clear) => {
+      if (!clear) return;
+      lineBuffer.clear();
+      draw();
+    });
+
+    const lineDrawer = new LineDrawer(gl);
+    props.startDraw.subscribe((point) => {
+      if (!point) return;
+      drawing = true;
+      points = [point];
+      draw();
+    });
+
+    props.draw.subscribe((point) => {
+      if (!point) return;
+      if (!drawing) return;
+      points.push(point);
+      draw();
+    });
+
+    props.endDraw.subscribe((point) => {
+      if (!point) return;
+      if (drawing) {
+        drawing = false;
+        if (tool.peek() == Tool.PEN) {
+          const line: Line = new Line(
+            null,
+            strokeWidth.peek(),
+            strokeColor.peek(),
+            points,
+          );
+          client.ui.local_strokes.value.push(line);
+          client.socket.draw(line);
+        } else {
+          for (const line of client.ui.lines.values()) {
+            if (linesIntersect(line.coordinates, points, strokeWidth.peek())) {
+              client.socket.remove(line.id!);
+            }
+          }
+        }
+        points = [];
+      }
+    });
+
+    theme.subscribe((_) => draw());
+    camera.subscribe((_) => draw());
+    client.ui.local_strokes.subscribe((_) => draw());
 
     return () => {
       gl.deleteProgram(program);
     };
   }, []);
-
-  //subscribe to camera
-  useEffect(() => {
-    const subscription = camera.subscribe((camera: Camera) => {
-      drawLines(props.client.ui.strokes.value);
-    });
-    return () => {
-      // unsubscribe
-    };
-  }, []);
-
-  //subscribe to the clear button
-  useEffect(() => {
-    const subscription = props.client.ui.clear.subscribe((newValue) => {
-      if (newValue) {
-        if (glRef.current != null) {
-          const gl = glRef.current;
-          gl.clear(gl.COLOR_BUFFER_BIT);
-        }
-      }
-    });
-    return () => {
-      // TODO: Unsubscribe
-    };
-  }, []);
-
-  //subscribe to see new strokes
-  useEffect(() => {
-    const subscription = props.client.ui.strokes.subscribe((strokes) => {
-      drawLines(strokes);
-    });
-
-    return () => {
-      // TODO: Unsubscribe
-    };
-  }, []);
-
-  function drawLines(lines: Line[]) {
-    const gl = glRef.current;
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    resizeCanvasToDisplaySize(gl.canvas);
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    setUniforms(gl, program!, camera, theme.peek());
-
-    for (const line of lines) {
-      if (line && line.coordinates && line.coordinates.length > 0) {
-        let length = setColorAndPoints(gl, program!, line);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, length);
-        //TODO: remove the buffer maybe? i don't know how it works yet
-      }
-    }
-  }
 
   return (
     <canvas

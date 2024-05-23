@@ -28,13 +28,14 @@ import * as $board_Board from "./islands/board/Board.tsx";
 import * as $board_CameraView from "./islands/board/CameraView.tsx";
 import * as $board_ColorSelector from "./islands/board/ColorSelector.tsx";
 import * as $board_CursorBox from "./islands/board/CursorBox.tsx";
-import * as $board_DrawableCanvas from "./islands/board/DrawableCanvas.tsx";
 import * as $board_MouseTracker from "./islands/board/MouseTracker.tsx";
 import * as $board_ObservableCanvas from "./islands/board/ObservableCanvas.tsx";
 import * as $board_SizeSelector from "./islands/board/SizeSelector.tsx";
 import * as $board_StylusModeSelector from "./islands/board/StylusModeSelector.tsx";
 import * as $board_ToolSelector from "./islands/board/ToolSelector.tsx";
 import * as $board_Toolbar from "./islands/board/Toolbar.tsx";
+import * as $board_webgl_utils_LineBuffer from "./islands/board/webgl-utils/LineBuffer.ts";
+import * as $board_webgl_utils_LineDrawer from "./islands/board/webgl-utils/LineDrawer.ts";
 import * as $board_webgl_utils_constants from "./islands/board/webgl-utils/constants.ts";
 import * as $board_webgl_utils_index from "./islands/board/webgl-utils/index.ts";
 import * as $board_webgl_utils_line_drawing from "./islands/board/webgl-utils/line_drawing.ts";
@@ -71,13 +72,14 @@ const manifest = {
     "./islands/board/CameraView.tsx": $board_CameraView,
     "./islands/board/ColorSelector.tsx": $board_ColorSelector,
     "./islands/board/CursorBox.tsx": $board_CursorBox,
-    "./islands/board/DrawableCanvas.tsx": $board_DrawableCanvas,
     "./islands/board/MouseTracker.tsx": $board_MouseTracker,
     "./islands/board/ObservableCanvas.tsx": $board_ObservableCanvas,
     "./islands/board/SizeSelector.tsx": $board_SizeSelector,
     "./islands/board/StylusModeSelector.tsx": $board_StylusModeSelector,
     "./islands/board/ToolSelector.tsx": $board_ToolSelector,
     "./islands/board/Toolbar.tsx": $board_Toolbar,
+    "./islands/board/webgl-utils/LineBuffer.ts": $board_webgl_utils_LineBuffer,
+    "./islands/board/webgl-utils/LineDrawer.ts": $board_webgl_utils_LineDrawer,
     "./islands/board/webgl-utils/constants.ts": $board_webgl_utils_constants,
     "./islands/board/webgl-utils/index.ts": $board_webgl_utils_index,
     "./islands/board/webgl-utils/line_drawing.ts":

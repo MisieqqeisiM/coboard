@@ -140,7 +140,7 @@ export const setUniforms = (
   ]);
   gl.uniform1i(themeUniformLocation, theme ? 1 : 0);
 };
-function hexToRgb(hex: string): number[] | null {
+export function hexToRgb(hex: string): number[] | null {
   hex = hex.replace(/^#/, "");
 
   const bigint = parseInt(hex, 16);
