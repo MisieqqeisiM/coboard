@@ -7,15 +7,14 @@ import {
 import { Camera, CameraContext } from "../../../client/camera.ts";
 import { Line, Point } from "../../../liaison/liaison.ts";
 import {
-  getPointsFromLine,
   linesIntersect,
   setUniforms,
+  squaredDistanceToLine,
 } from "./webgl-utils/line_drawing.ts";
 import { ThemeContext } from "../app/Themed.tsx";
 import { LineBuffer } from "./webgl-utils/LineBuffer.ts";
 import { ClientContext } from "../app/WithClient.tsx";
 import { LineDrawer } from "./webgl-utils/LineDrawer.ts";
-import { Undoable } from "../../../liaison/actions.ts";
 
 interface CanvasProps {
   width: number;
@@ -103,6 +102,7 @@ export default function ObservableCanvas(props: CanvasProps) {
     let points: Point[] = [];
     let drawing = false;
     let lineId = -1;
+    let movedLine: Line | null = null;
 
     function draw() {
       gl.clear(gl.COLOR_BUFFER_BIT);
@@ -110,7 +110,9 @@ export default function ObservableCanvas(props: CanvasProps) {
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
       setUniforms(gl, program!, camera, theme.peek());
       lineBuffer.draw(program!);
-      if (drawing) {
+      if (movedLine) {
+        lineDrawer.drawLine(program!, movedLine);
+      } else if (drawing) {
         const color = tool.peek() == Tool.PEN
           ? strokeColor.peek()
           : Color.BLACK;
@@ -141,15 +143,57 @@ export default function ObservableCanvas(props: CanvasProps) {
       draw();
     });
 
+    function getIntersectedLineId(point: Point) {
+      let id: number | null = null;
+      for (const line of client!.ui.lines.values()) {
+        if (
+          squaredDistanceToLine(point, line.coordinates) <
+            line.width * line.width
+        ) {
+          id = line.id;
+          break;
+        }
+      }
+      return id;
+    }
+
     props.startDraw.subscribe((point) => {
       if (!point) return;
-      drawing = true;
       points = [point];
-      draw();
+      if (tool.peek() === Tool.MOVE) {
+        const id = getIntersectedLineId(point);
+        if (id) {
+          movedLine = client.ui.lines.get(id)!;
+          client.socket.remove(id);
+        }
+      } else {
+        drawing = true;
+        draw();
+      }
     });
+
+    function moveLine(line: Line, diff: Point): Line {
+      const coords = line.coordinates.map((point) => {
+        return {
+          x: point.x + diff.x,
+          y: point.y + diff.y,
+        };
+      });
+      return new Line(line.id, line.width, line.color, coords);
+    }
 
     props.draw.subscribe((point) => {
       if (!point) return;
+      if (movedLine) {
+        const prev = points.at(-1)!;
+        points.push(point);
+        const diff: Point = {
+          x: point.x - prev.x,
+          y: point.y - prev.y,
+        };
+        movedLine = moveLine(movedLine, diff);
+        draw();
+      }
       if (!drawing) return;
       if (tool.peek() === Tool.ERASER) {
         const segment = [points.at(-1)!, point];
@@ -165,7 +209,10 @@ export default function ObservableCanvas(props: CanvasProps) {
 
     props.endDraw.subscribe((point) => {
       if (!point) return;
-      if (drawing) {
+      if (movedLine) {
+        client.socket.draw(movedLine);
+        movedLine = null;
+      } else if (drawing) {
         if (tool.peek() == Tool.PEN) {
           const line: Line = new Line(
             lineId--,
@@ -173,7 +220,6 @@ export default function ObservableCanvas(props: CanvasProps) {
             strokeColor.peek(),
             points,
           );
-          lineBuffer.addLine(line);
           client.socket.draw(line);
         }
       }

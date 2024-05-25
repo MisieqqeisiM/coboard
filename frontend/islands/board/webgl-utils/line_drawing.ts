@@ -194,12 +194,20 @@ function squaredDistance(p: Point, q: Point): number {
 // Function to calculate the squared distance between a point and a line segment
 function squaredDistanceToSegment(p: Point, s1: Point, s2: Point): number {
   const dot = (p.x - s1.x) * (s2.x - s1.x) + (p.y - s1.y) * (s2.y - s1.y);
-  if (dot < 0) return squaredDistance(p, s1);
+  if (dot <= 0) return squaredDistance(p, s1);
   if (dot > squaredDistance(s2, s1)) return squaredDistance(p, s2);
   return Math.pow(
     (p.x - s1.x) * (s2.y - s1.y) - (p.y - s1.y) * (s2.x - s1.x),
     2,
   ) / squaredDistance(s2, s1);
+}
+
+export function squaredDistanceToLine(p: Point, line: Point[]): number {
+  let dist = squaredDistance(p, line[0]);
+  for (let i = 0; i < line.length - 1; i++) {
+    dist = Math.min(dist, squaredDistanceToSegment(p, line[i], line[i + 1]));
+  }
+  return dist;
 }
 
 //check if two lines intersect, helpfully written by chatgpt

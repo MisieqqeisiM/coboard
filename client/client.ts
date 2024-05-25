@@ -121,6 +121,7 @@ export class SocketClient {
   public draw(line: Line) {
     this.client.localIds.push(line.id!);
     this.client.lines.set(line.id!, line);
+    this.client.newLine.value = line;
     const action = new DrawAction(line);
     action.accept(this.emitter);
     this.actionStack.push(action);
@@ -130,6 +131,7 @@ export class SocketClient {
     const line = this.client.lines.get(id);
     if (!line) return;
     this.client.lines.delete(id);
+    this.client.removeLine.value = id;
     const action = new RemoveAction(line);
     action.accept(this.emitter);
     this.actionStack.push(action);

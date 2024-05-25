@@ -3,6 +3,7 @@ import { createContext, Signal, signal } from "../deps_client.ts";
 export enum Tool {
   PEN,
   ERASER,
+  MOVE,
 }
 
 export enum Color {

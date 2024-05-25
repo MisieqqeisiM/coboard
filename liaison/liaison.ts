@@ -10,13 +10,6 @@ export interface BoardUser {
   y: number;
 }
 
-export interface ClientToServerEvents {
-  move(x: number, y: number): void;
-  draw(line: Line): void;
-  remove(id: number): void;
-  reset(): void;
-}
-
 export interface Point {
   x: number;
   y: number;
