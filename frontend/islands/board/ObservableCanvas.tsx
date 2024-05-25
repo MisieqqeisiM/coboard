@@ -151,7 +151,6 @@ export default function ObservableCanvas(props: CanvasProps) {
             line.width * line.width
         ) {
           id = line.id;
-          break;
         }
       }
       return id;
