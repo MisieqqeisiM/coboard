@@ -55,7 +55,6 @@ class Emitter implements BoardEventVisitor {
   }
   public onRemove(event: OnRemoveEvent): void {
     this.socket.emit("onRemove", event);
-    
   }
 
   public onMove(event: OnMoveEvent) {
@@ -78,6 +77,7 @@ class Emitter implements BoardEventVisitor {
 export class Client {
   private emitter?: Emitter;
   private cachedEvents: BoardEvent[] = [];
+  private idMap: Map<number, number> = new Map();
 
   constructor(
     readonly account: Account,
@@ -90,8 +90,14 @@ export class Client {
 
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
-    socket.on("draw", async (line) => await this.board.draw(this, line));
-    socket.on("remove", async(lineId)=>await this.board.remove(this, lineId));
+    socket.on("draw", async (line) => {
+      const id = await this.board.draw(this, line);
+      this.idMap.set(line.id!, id);
+    });
+    socket.on("remove", async (lineId) => {
+      const id = this.idMap.get(lineId) ?? lineId;
+      await this.board.remove(this, id);
+    });
     socket.on("move", (x, y) => this.board.move(this, x, y));
     socket.on("reset", async () => await this.board.reset(this));
 

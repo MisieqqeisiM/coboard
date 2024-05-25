@@ -93,9 +93,11 @@ export default function ObservableCanvas(props: CanvasProps) {
     );
     gl.useProgram(program);
     const lineBuffer = new LineBuffer(gl);
+    const lineDrawer = new LineDrawer(gl);
 
     let points: Point[] = [];
     let drawing = false;
+    let lineId = -1;
 
     function draw() {
       gl.clear(gl.COLOR_BUFFER_BIT);
@@ -103,9 +105,6 @@ export default function ObservableCanvas(props: CanvasProps) {
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
       setUniforms(gl, program!, camera, theme.peek());
       lineBuffer.draw(program!);
-      for (const line of client!.ui.local_strokes.peek()) {
-        lineDrawer.drawLine(program!, line);
-      }
       if (drawing) {
         const color = tool.peek() == Tool.PEN
           ? strokeColor.peek()
@@ -137,7 +136,6 @@ export default function ObservableCanvas(props: CanvasProps) {
       draw();
     });
 
-    const lineDrawer = new LineDrawer(gl);
     props.startDraw.subscribe((point) => {
       if (!point) return;
       drawing = true;
@@ -158,12 +156,12 @@ export default function ObservableCanvas(props: CanvasProps) {
         drawing = false;
         if (tool.peek() == Tool.PEN) {
           const line: Line = new Line(
-            null,
+            lineId--,
             strokeWidth.peek(),
             strokeColor.peek(),
             points,
           );
-          client.ui.local_strokes.value.push(line);
+          lineBuffer.addLine(line);
           client.socket.draw(line);
         } else {
           for (const line of client.ui.lines.values()) {
@@ -178,7 +176,10 @@ export default function ObservableCanvas(props: CanvasProps) {
 
     theme.subscribe((_) => draw());
     camera.subscribe((_) => draw());
-    client.ui.local_strokes.subscribe((_) => draw());
+    client.ui.confirmLine.subscribe((e) => {
+      if (!e) return;
+      lineBuffer.changeId(e.localId, e.globalId);
+    });
 
     return () => {
       gl.deleteProgram(program);

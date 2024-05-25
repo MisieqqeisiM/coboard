@@ -13,6 +13,7 @@ export interface BoardUser {
 export interface ClientToServerEvents {
   move(x: number, y: number): void;
   draw(line: Line): void;
+  remove(id: number): void;
   reset(): void;
 }
 

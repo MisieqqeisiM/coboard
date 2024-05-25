@@ -88,14 +88,16 @@ export class Board {
     this.clients.emit(new OnMoveEvent(client.account.id, x, y));
   }
 
-  public async draw(client: Client, line: Line) {
+  public async draw(client: Client, line: Line): Promise<number> {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
-    const confirmedLine = Line.changeId(line, ++this.lineId);
+    const id = ++this.lineId;
+    const confirmedLine = Line.changeId(line, id);
     await boards.updateOne({ id: this.id }, {
       $push: { lines: confirmedLine },
     });
     this.clients.emit(new OnDrawEvent(client.account.id, confirmedLine));
-    client.emit(new ConfirmLineEvent());
+    client.emit(new ConfirmLineEvent(id));
+    return id;
   }
   public async remove(client: Client, lineId: number) {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");

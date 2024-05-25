@@ -1,4 +1,6 @@
+import { createLazyClient } from "$socketio/vendor/deno.land/x/redis@v0.27.1/redis.ts";
 import { Signal, signal } from "../deps_client.ts";
+import { linesIntersect } from "../frontend/islands/board/webgl-utils/line_drawing.ts";
 import { ClientSocket, ClientState } from "../liaison/client.ts";
 import {
   Account,
@@ -16,13 +18,19 @@ export class Client {
   ) {}
 }
 
+interface Confirmation {
+  localId: number;
+  globalId: number;
+}
+
 export class UIClient {
   readonly users: Signal<Map<string, BoardUser>> = signal(new Map());
   public lines: Map<number, Line> = new Map();
-  readonly local_strokes: Signal<Line[]> = signal([]);
+  readonly localIds: number[] = [];
   readonly clear: Signal<boolean> = signal(false);
   readonly newLine: Signal<Line | null> = signal(null);
   readonly removeLine: Signal<number | null> = signal(null);
+  readonly confirmLine: Signal<Confirmation | null> = signal(null);
 
   constructor(initialState: ClientState) {
     for (const line of initialState.lines) {
@@ -35,7 +43,7 @@ export class UIClient {
 }
 
 export class SocketClient implements ClientToServerEvents {
-  constructor(private io: ClientSocket, client: UIClient) {
+  constructor(private io: ClientSocket, private client: UIClient) {
     io.on("onMove", (e) => {
       const user = client.users.value.get(e.user)!;
       user.x = e.x;
@@ -59,8 +67,17 @@ export class SocketClient implements ClientToServerEvents {
       client.removeLine.value = e.lineId;
     });
 
-    io.on("confirmLine", (_e) => {
-      client.local_strokes.value = [...client.local_strokes.value.slice(1)];
+    io.on("confirmLine", (e) => {
+      const id = client.localIds.shift()!;
+      const line = client.lines.get(id);
+      if (!line) return;
+      client.lines.delete(id);
+      client.lines.set(e.lineId, Line.changeId(line, e.lineId));
+
+      client.confirmLine.value = {
+        localId: id,
+        globalId: e.lineId,
+      };
     });
 
     io.on("onReset", (_e) => {
@@ -73,10 +90,13 @@ export class SocketClient implements ClientToServerEvents {
     this.io.emit("move", x, y);
   }
 
-  public draw(points: Line) {
-    this.io.emit("draw", points);
+  public draw(line: Line) {
+    this.client.localIds.push(line.id!);
+    this.client.lines.set(line.id!, line);
+    this.io.emit("draw", line);
   }
   public remove(id: number) {
+    this.client.lines.delete(id);
     this.io.emit("remove", id);
   }
 

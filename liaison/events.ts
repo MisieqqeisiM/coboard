@@ -2,7 +2,7 @@ import { BoardUser, Line } from "./liaison.ts";
 
 export interface BoardEventVisitor {
   userList(event: UserListEvent): void;
-  confirmLine(event: ConfirmLineEvent): void
+  confirmLine(event: ConfirmLineEvent): void;
   onMove(event: OnMoveEvent): void;
   onDraw(event: OnDrawEvent): void;
   onRemove(event: OnRemoveEvent): void;
@@ -14,21 +14,21 @@ export interface BoardEvent {
 }
 
 export class UserListEvent implements BoardEvent {
-  constructor(readonly users: Array<BoardUser>) { }
+  constructor(readonly users: Array<BoardUser>) {}
   accept(visitor: BoardEventVisitor) {
     visitor.userList(this);
   }
 }
 
 export class OnMoveEvent implements BoardEvent {
-  constructor(readonly user: string, readonly x: number, readonly y: number) { }
+  constructor(readonly user: string, readonly x: number, readonly y: number) {}
   accept(visitor: BoardEventVisitor) {
     visitor.onMove(this);
   }
 }
 
 export class OnDrawEvent implements BoardEvent {
-  constructor(readonly user: string, readonly line: Line) { }
+  constructor(readonly user: string, readonly line: Line) {}
   accept(visitor: BoardEventVisitor) {
     visitor.onDraw(this);
   }
@@ -48,6 +48,7 @@ export class OnResetEvent implements BoardEvent {
 }
 
 export class ConfirmLineEvent implements BoardEvent {
+  constructor(readonly lineId: number) {}
   accept(visitor: BoardEventVisitor) {
     visitor.confirmLine(this);
   }

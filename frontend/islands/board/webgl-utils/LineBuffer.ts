@@ -92,6 +92,13 @@ export class LineBuffer {
     this.size -= location.size;
   }
 
+  public changeId(oldId: number, newId: number) {
+    const location = this.locations.get(oldId);
+    if (!location) return;
+    this.locations.delete(oldId);
+    this.locations.set(newId, location);
+  }
+
   public draw(program: WebGLProgram) {
     const postition = this.gl.getAttribLocation(
       program,
