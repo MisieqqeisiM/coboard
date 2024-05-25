@@ -6,7 +6,11 @@ import {
 } from "./webgl-utils/index.ts";
 import { Camera, CameraContext } from "../../../client/camera.ts";
 import { Line, Point } from "../../../liaison/liaison.ts";
-import { linesIntersect, setUniforms } from "./webgl-utils/line_drawing.ts";
+import {
+  getPointsFromLine,
+  linesIntersect,
+  setUniforms,
+} from "./webgl-utils/line_drawing.ts";
 import { ThemeContext } from "../app/Themed.tsx";
 import { LineBuffer } from "./webgl-utils/LineBuffer.ts";
 import { ClientContext } from "../app/WithClient.tsx";
@@ -147,6 +151,14 @@ export default function ObservableCanvas(props: CanvasProps) {
     props.draw.subscribe((point) => {
       if (!point) return;
       if (!drawing) return;
+      if (tool.peek() === Tool.ERASER) {
+        const segment = [points.at(-1)!, point];
+        for (const line of client.ui.lines.values()) {
+          if (linesIntersect(segment, line.coordinates, strokeWidth.peek())) {
+            client.socket.remove(line.id);
+          }
+        }
+      }
       points.push(point);
       draw();
     });
@@ -154,7 +166,6 @@ export default function ObservableCanvas(props: CanvasProps) {
     props.endDraw.subscribe((point) => {
       if (!point) return;
       if (drawing) {
-        drawing = false;
         if (tool.peek() == Tool.PEN) {
           const line: Line = new Line(
             lineId--,
@@ -164,15 +175,11 @@ export default function ObservableCanvas(props: CanvasProps) {
           );
           lineBuffer.addLine(line);
           client.socket.draw(line);
-        } else {
-          for (const line of client.ui.lines.values()) {
-            if (linesIntersect(line.coordinates, points, strokeWidth.peek())) {
-              client.socket.remove(line.id!);
-            }
-          }
         }
-        points = [];
       }
+      drawing = false;
+      points = [];
+      draw();
     });
 
     theme.subscribe((_) => draw());
