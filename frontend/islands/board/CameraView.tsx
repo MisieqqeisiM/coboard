@@ -184,11 +184,11 @@ export default function CameraView(
       endDraw.value = { x: 0, y: 0 };
     };
 
-    globalThis.addEventListener("touchstart", touchStart2); // TODO: ignore buttons
+    ref.current!.addEventListener("touchstart", touchStart2);
     globalThis.addEventListener("touchend", touchEnd2);
     globalThis.addEventListener("touchcancel", touchEnd2);
     globalThis.addEventListener("touchmove", touchMove2);
-    globalThis.addEventListener("mousedown", mouseDown); // TODO: ignore buttons
+    ref.current!.addEventListener("mousedown", mouseDown);
     globalThis.addEventListener("mouseup", mouseUp);
     globalThis.addEventListener("mousemove", mouseMove);
 

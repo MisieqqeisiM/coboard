@@ -33,8 +33,14 @@ export class Board {
   constructor(
     private mongoClient: MongoClient,
     private id: string,
-    private unloader: BoardUnloader
+    private unloader: BoardUnloader,
   ) {}
+
+  public async init() {
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    const board = await boards.findOne({ id: this.id });
+    this.lineId = board?.lines.at(-1)?.id ?? 0;
+  }
 
   public getUser(id: string) {
     return this.clients.getClient(id);
@@ -84,17 +90,19 @@ export class Board {
 
   public async draw(client: Client, line: Line) {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
-    //1000 is arbitrary
-    const id = (this.lineId++)%1000 + (new Date().getTime())*1000;
-    const confirmedLine = Line.changeId(line, id);
-    await boards.updateOne({ id: this.id }, { $push: { lines: confirmedLine } });
+    const confirmedLine = Line.changeId(line, ++this.lineId);
+    await boards.updateOne({ id: this.id }, {
+      $push: { lines: confirmedLine },
+    });
     this.clients.emit(new OnDrawEvent(client.account.id, confirmedLine));
     client.emit(new ConfirmLineEvent());
   }
   public async remove(client: Client, lineId: number) {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     //TODO: here actually remove the line
-    await boards.updateOne({ id: this.id }, { $pull: { lines: {id: lineId} } });
+    await boards.updateOne({ id: this.id }, {
+      $pull: { lines: { id: lineId } },
+    });
     this.clients.emit(new OnRemoveEvent(lineId));
   }
 
