@@ -95,8 +95,6 @@ export class Client {
       this.idMap.set(a.line.id, id);
     });
     socket.on("remove", async (a) => {
-      console.log(a.line.id);
-      console.log(this.idMap);
       let id = a.line.id;
       while (this.idMap.get(id)) {
         id = this.idMap.get(id)!;
