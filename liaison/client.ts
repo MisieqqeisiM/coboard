@@ -1,9 +1,9 @@
 import { ClientSocket as Socket, getCookies, io } from "../deps_client.ts";
-import { ClientToServerEvents } from "./liaison.ts";
+import { BoardActionVisitor } from "./actions.ts";
 import { BoardEventVisitor } from "./events.ts";
 import { BoardUser, Line } from "./liaison.ts";
 
-export type ClientSocket = Socket<BoardEventVisitor, ClientToServerEvents>;
+export type ClientSocket = Socket<BoardEventVisitor, BoardActionVisitor>;
 
 export class ClientState {
   constructor(

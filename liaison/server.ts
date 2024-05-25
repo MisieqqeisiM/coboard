@@ -3,7 +3,6 @@ import { CONNECTION_TIMEOUT } from "../config.ts";
 import { Board } from "../server/board.ts";
 import { Server as ServerLogic } from "../server/server.ts";
 import { Account } from "./liaison.ts";
-import { ClientToServerEvents } from "./liaison.ts";
 import {
   BoardEvent,
   BoardEventVisitor,
@@ -15,6 +14,7 @@ import {
   UserListEvent,
 } from "../liaison/events.ts";
 import { DATABASE_URL, SOCKET_PORT } from "../config.ts";
+import { BoardActionVisitor } from "./actions.ts";
 
 export interface SocketData {
   client: Client;
@@ -90,16 +90,21 @@ export class Client {
 
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
-    socket.on("draw", async (line) => {
-      const id = await this.board.draw(this, line);
-      this.idMap.set(line.id!, id);
+    socket.on("draw", async (a) => {
+      const id = await this.board.draw(this, a.line);
+      this.idMap.set(a.line.id, id);
     });
-    socket.on("remove", async (lineId) => {
-      const id = this.idMap.get(lineId) ?? lineId;
+    socket.on("remove", async (a) => {
+      console.log(a.line.id);
+      console.log(this.idMap);
+      let id = a.line.id;
+      while (this.idMap.get(id)) {
+        id = this.idMap.get(id)!;
+      }
       await this.board.remove(this, id);
     });
-    socket.on("move", (x, y) => this.board.move(this, x, y));
-    socket.on("reset", async () => await this.board.reset(this));
+    socket.on("move", (a) => this.board.move(this, a.x, a.y));
+    socket.on("reset", async (_) => await this.board.reset(this));
 
     this.emitter = new Emitter(socket);
     for (const e of this.cachedEvents) {
@@ -123,14 +128,14 @@ export class Client {
 }
 
 export type SocketServer = Server<
-  ClientToServerEvents,
+  BoardActionVisitor,
   BoardEventVisitor,
   Record<string | number | symbol, never>,
   SocketData
 >;
 
 export type ServerSocket = Socket<
-  ClientToServerEvents,
+  BoardActionVisitor,
   BoardEventVisitor,
   Record<string | number | symbol, never>,
   SocketData

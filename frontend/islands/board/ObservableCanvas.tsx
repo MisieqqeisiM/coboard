@@ -11,6 +11,7 @@ import { ThemeContext } from "../app/Themed.tsx";
 import { LineBuffer } from "./webgl-utils/LineBuffer.ts";
 import { ClientContext } from "../app/WithClient.tsx";
 import { LineDrawer } from "./webgl-utils/LineDrawer.ts";
+import { Undoable } from "../../../liaison/actions.ts";
 
 interface CanvasProps {
   width: number;
@@ -179,6 +180,12 @@ export default function ObservableCanvas(props: CanvasProps) {
     client.ui.confirmLine.subscribe((e) => {
       if (!e) return;
       lineBuffer.changeId(e.localId, e.globalId);
+    });
+
+    globalThis.addEventListener("keydown", (e) => {
+      if (e.key === "z" && e.ctrlKey) {
+        client.socket.undo();
+      }
     });
 
     return () => {

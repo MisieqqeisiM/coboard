@@ -99,7 +99,7 @@ export class Board {
     client.emit(new ConfirmLineEvent(id));
     return id;
   }
-  public async remove(client: Client, lineId: number) {
+  public async remove(_: Client, lineId: number) {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     //TODO: here actually remove the line
     await boards.updateOne({ id: this.id }, {

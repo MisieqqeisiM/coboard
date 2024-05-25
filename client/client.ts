@@ -1,13 +1,14 @@
-import { createLazyClient } from "$socketio/vendor/deno.land/x/redis@v0.27.1/redis.ts";
 import { Signal, signal } from "../deps_client.ts";
-import { linesIntersect } from "../frontend/islands/board/webgl-utils/line_drawing.ts";
-import { ClientSocket, ClientState } from "../liaison/client.ts";
 import {
-  Account,
-  BoardUser,
-  ClientToServerEvents,
-  Line,
-} from "../liaison/liaison.ts";
+  BoardActionVisitor,
+  DrawAction,
+  MoveAction,
+  RemoveAction,
+  ResetAction,
+  Undoable,
+} from "../liaison/actions.ts";
+import { ClientSocket, ClientState } from "../liaison/client.ts";
+import { Account, BoardUser, Line } from "../liaison/liaison.ts";
 
 export class Client {
   constructor(
@@ -42,8 +43,30 @@ export class UIClient {
   }
 }
 
-export class SocketClient implements ClientToServerEvents {
-  constructor(private io: ClientSocket, private client: UIClient) {
+class Emitter implements BoardActionVisitor {
+  constructor(private io: ClientSocket) {}
+  public move(action: MoveAction): void {
+    this.io.emit("move", action);
+  }
+  public draw(action: DrawAction): void {
+    this.io.emit("draw", action);
+  }
+  public remove(action: RemoveAction): void {
+    this.io.emit("remove", action);
+  }
+  public reset(action: ResetAction): void {
+    this.io.emit("reset", action);
+  }
+  public disconnect() {
+    this.io.disconnect();
+  }
+}
+
+export class SocketClient {
+  private actionStack: Undoable[] = [];
+  private emitter: Emitter;
+  constructor(io: ClientSocket, private client: UIClient) {
+    this.emitter = new Emitter(io);
     io.on("onMove", (e) => {
       const user = client.users.value.get(e.user)!;
       user.x = e.x;
@@ -86,25 +109,37 @@ export class SocketClient implements ClientToServerEvents {
     });
   }
 
+  public undo() {
+    const action = this.actionStack.pop();
+    action?.undo().accept(this.emitter);
+  }
+
   public move(x: number, y: number) {
-    this.io.emit("move", x, y);
+    (new MoveAction(x, y)).accept(this.emitter);
   }
 
   public draw(line: Line) {
     this.client.localIds.push(line.id!);
     this.client.lines.set(line.id!, line);
-    this.io.emit("draw", line);
+    const action = new DrawAction(line);
+    action.accept(this.emitter);
+    this.actionStack.push(action);
   }
+
   public remove(id: number) {
+    const line = this.client.lines.get(id);
+    if (!line) return;
     this.client.lines.delete(id);
-    this.io.emit("remove", id);
+    const action = new RemoveAction(line);
+    action.accept(this.emitter);
+    this.actionStack.push(action);
   }
 
   public reset() {
-    this.io.emit("reset");
+    (new ResetAction()).accept(this.emitter);
   }
 
   public disconnect(): void {
-    this.io.disconnect();
+    this.emitter.disconnect();
   }
 }
