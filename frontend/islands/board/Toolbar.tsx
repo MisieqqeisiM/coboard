@@ -6,13 +6,33 @@ import ToolSelector from "./ToolSelector.tsx";
 import { ClientContext } from "../app/WithClient.tsx";
 import StylusModeSelector from "./StylusModeSelector.tsx";
 import SizeSelector from "./SizeSelector.tsx";
-import ThemeSelector from "../app/ThemeSelector.tsx";
+import ShareSelector from "./ShareSelector.tsx";
+
 export default function Toolbar() {
   const client = useContext(ClientContext);
+
+  const editorTools = (
+    <>
+      <ColorSelector />
+      <SizeSelector />
+      <ToolSelector />
+      <StylusModeSelector />
+      <ShareSelector shareToken={client?.ui.shareToken} />
+    </>
+  );
   return (
     <div class="toolbar">
       <div class="toolbar-content">
         <AccountMenu>
+          {client?.ui.viewerOnly ? null : (
+            <IconCircle
+              iconName="refresh-circle-outline"
+              color="red"
+              onClick={() => {
+                client?.socket.reset();
+              }}
+            />
+          )}
           <IconCircle
             iconName="grid-outline"
             onClick={() => {
@@ -28,15 +48,11 @@ export default function Toolbar() {
           <IconCircle
             iconName="pencil-outline"
             onClick={() => {
-              globalThis.location.href =
-                `/set_name?redirectTo=${window.location.pathname}`;
+              globalThis.location.href = `/set_name?redirectTo=${window.location.pathname}`;
             }}
           />
         </AccountMenu>
-        <ColorSelector />
-        <SizeSelector />
-        <ToolSelector />
-        <StylusModeSelector />
+        {client?.ui.viewerOnly ? null : editorTools}
       </div>
     </div>
   );

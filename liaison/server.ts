@@ -82,6 +82,7 @@ export class Client {
   constructor(
     readonly account: Account,
     readonly board: Board,
+    readonly viewerOnly: boolean
   ) {}
 
   public hasSocket(): boolean {
@@ -90,20 +91,21 @@ export class Client {
 
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
-    socket.on("draw", async (a) => {
-      const id = await this.board.draw(this, a.line);
-      this.idMap.set(a.line.id, id);
-    });
-    socket.on("remove", async (a) => {
-      let id = a.line.id;
-      while (this.idMap.get(id)) {
-        id = this.idMap.get(id)!;
-      }
-      await this.board.remove(this, id);
-    });
     socket.on("move", (a) => this.board.move(this, a.x, a.y));
-    socket.on("reset", async (_) => await this.board.reset(this));
-
+    if (!this.viewerOnly) {
+      socket.on("draw", async (a) => {
+        const id = await this.board.draw(this, a.line);
+        this.idMap.set(a.line.id, id);
+      });
+      socket.on("remove", async (a) => {
+        let id = a.line.id;
+        while (this.idMap.get(id)) {
+          id = this.idMap.get(id)!;
+        }
+        await this.board.remove(this, id);
+      });
+      socket.on("reset", async (_) => await this.board.reset(this));
+    }
     this.emitter = new Emitter(socket);
     for (const e of this.cachedEvents) {
       e.accept(this.emitter);
@@ -159,17 +161,15 @@ export async function createServer(): Promise<ServerLogic> {
   await server.boards.init();
   const handler = io.handler();
 
-  Deno.serve(
-    { port: SOCKET_PORT },
-    (req, info) =>
-      handler(req, {
-        localAddr: {
-          transport: "tcp",
-          hostname: "localhost",
-          port: SOCKET_PORT,
-        },
-        remoteAddr: info.remoteAddr,
-      }),
+  Deno.serve({ port: SOCKET_PORT }, (req, info) =>
+    handler(req, {
+      localAddr: {
+        transport: "tcp",
+        hostname: "localhost",
+        port: SOCKET_PORT,
+      },
+      remoteAddr: info.remoteAddr,
+    })
   );
   return server;
 }

@@ -15,6 +15,7 @@ import { MongoClient } from "../deps.ts";
 export interface BoardDB {
   id: string;
   name: string;
+  shareToken: string;
   lines: Line[];
   userIDs: string[];
 }
@@ -33,7 +34,7 @@ export class Board {
   constructor(
     private mongoClient: MongoClient,
     private id: string,
-    private unloader: BoardUnloader,
+    private unloader: BoardUnloader
   ) {}
 
   public async init() {
@@ -63,7 +64,12 @@ export class Board {
 
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     const board = await boards.findOne({ id: this.id });
-    return new ClientState(board!.lines, Array.from(this.users.values()));
+    return new ClientState(
+      board!.lines,
+      Array.from(this.users.values()),
+      board.shareToken,
+      client.viewerOnly
+    );
   }
 
   public disconnect(client: Client) {
@@ -92,9 +98,12 @@ export class Board {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     const id = ++this.lineId;
     const confirmedLine = Line.changeId(line, id);
-    await boards.updateOne({ id: this.id }, {
-      $push: { lines: confirmedLine },
-    });
+    await boards.updateOne(
+      { id: this.id },
+      {
+        $push: { lines: confirmedLine },
+      }
+    );
     this.clients.emit(new OnDrawEvent(client.account.id, confirmedLine));
     client.emit(new ConfirmLineEvent(id));
     return id;
@@ -102,9 +111,12 @@ export class Board {
   public async remove(_: Client, lineId: number) {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     //TODO: here actually remove the line
-    await boards.updateOne({ id: this.id }, {
-      $pull: { lines: { id: lineId } },
-    });
+    await boards.updateOne(
+      { id: this.id },
+      {
+        $pull: { lines: { id: lineId } },
+      }
+    );
     this.clients.emit(new OnRemoveEvent(lineId));
   }
 

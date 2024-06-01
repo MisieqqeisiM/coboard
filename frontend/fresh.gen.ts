@@ -30,6 +30,7 @@ import * as $board_ColorSelector from "./islands/board/ColorSelector.tsx";
 import * as $board_CursorBox from "./islands/board/CursorBox.tsx";
 import * as $board_MouseTracker from "./islands/board/MouseTracker.tsx";
 import * as $board_ObservableCanvas from "./islands/board/ObservableCanvas.tsx";
+import * as $board_ShareSelector from "./islands/board/ShareSelector.tsx";
 import * as $board_SizeSelector from "./islands/board/SizeSelector.tsx";
 import * as $board_StylusModeSelector from "./islands/board/StylusModeSelector.tsx";
 import * as $board_ToolSelector from "./islands/board/ToolSelector.tsx";
@@ -74,6 +75,7 @@ const manifest = {
     "./islands/board/CursorBox.tsx": $board_CursorBox,
     "./islands/board/MouseTracker.tsx": $board_MouseTracker,
     "./islands/board/ObservableCanvas.tsx": $board_ObservableCanvas,
+    "./islands/board/ShareSelector.tsx": $board_ShareSelector,
     "./islands/board/SizeSelector.tsx": $board_SizeSelector,
     "./islands/board/StylusModeSelector.tsx": $board_StylusModeSelector,
     "./islands/board/ToolSelector.tsx": $board_ToolSelector,

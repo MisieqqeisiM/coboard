@@ -15,6 +15,7 @@ export class Boards implements BoardUnloader {
     await boards.insertOne({
       id: "general",
       name: "general",
+      shareToken: "",
       lines: [],
       userIDs: [],
     });
@@ -27,9 +28,12 @@ export class Boards implements BoardUnloader {
   public async newBoard(): Promise<BoardTileProps> {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     const id = nanoid(10);
+    const shareToken = nanoid(10);
+
     await boards.insertOne({
       id,
       name: "New board",
+      shareToken: shareToken,
       lines: [],
       userIDs: [],
     });
@@ -55,6 +59,12 @@ export class Boards implements BoardUnloader {
   public async RenameBoard(boardId: string, newName: string) {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     await boards.updateOne({ id: boardId }, { $set: { name: newName } });
+  }
+
+  public async matchingShareToken(boardId: string, shareToken: string) {
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    const board = await boards.findOne({ id: boardId });
+    return board.shareToken == shareToken;
   }
 
   public async userInBoard(userID: string, boardID: string): Promise<boolean> {

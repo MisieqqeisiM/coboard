@@ -1,3 +1,4 @@
+import init from "https://deno.land/x/denoflate@1.2.1/pkg/denoflate.js";
 import { Signal, signal } from "../deps_client.ts";
 import {
   BoardActionVisitor,
@@ -15,7 +16,7 @@ export class Client {
     readonly socket: SocketClient,
     readonly ui: UIClient,
     readonly account: Account,
-    readonly allowed: boolean,
+    readonly allowed: boolean
   ) {}
 }
 
@@ -29,6 +30,8 @@ export class UIClient {
   public lines: Map<number, Line> = new Map();
   readonly localIds: number[] = [];
   readonly clear: Signal<boolean> = signal(false);
+  readonly shareToken: string;
+  readonly viewerOnly: boolean;
   readonly newLine: Signal<Line | null> = signal(null);
   readonly removeLine: Signal<number | null> = signal(null);
   readonly confirmLine: Signal<Confirmation | null> = signal(null);
@@ -37,6 +40,8 @@ export class UIClient {
     for (const line of initialState.lines) {
       this.lines.set(line.id!, line);
     }
+    this.shareToken = initialState.shareToken;
+    this.viewerOnly = initialState.viewerOnly;
     const newUsers = new Map<string, BoardUser>();
     for (const user of initialState.users) newUsers.set(user.account.id, user);
     this.users.value = newUsers;
@@ -115,7 +120,7 @@ export class SocketClient {
   }
 
   public move(x: number, y: number) {
-    (new MoveAction(x, y)).accept(this.emitter);
+    new MoveAction(x, y).accept(this.emitter);
   }
 
   public draw(line: Line) {
@@ -138,7 +143,7 @@ export class SocketClient {
   }
 
   public reset() {
-    (new ResetAction()).accept(this.emitter);
+    new ResetAction().accept(this.emitter);
   }
 
   public disconnect(): void {

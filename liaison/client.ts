@@ -9,6 +9,8 @@ export class ClientState {
   constructor(
     readonly lines: Line[],
     readonly users: BoardUser[],
+    readonly shareToken: string,
+    readonly viewerOnly: boolean
   ) {}
 }
 
