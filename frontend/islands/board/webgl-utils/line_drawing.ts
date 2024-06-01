@@ -140,7 +140,7 @@ export const setUniforms = (
   ]);
   gl.uniform1i(themeUniformLocation, theme ? 1 : 0);
 };
-function hexToRgb(hex: string): number[] | null {
+export function hexToRgb(hex: string): number[] | null {
   hex = hex.replace(/^#/, "");
 
   const bigint = parseInt(hex, 16);
@@ -186,9 +186,32 @@ export const setColorAndPoints = (
   return vertices.length / 2;
 };
 
+// Function to calculate the squared distance between two points
+function squaredDistance(p: Point, q: Point): number {
+  return Math.pow(q.x - p.x, 2) + Math.pow(q.y - p.y, 2);
+}
+
+// Function to calculate the squared distance between a point and a line segment
+function squaredDistanceToSegment(p: Point, s1: Point, s2: Point): number {
+  const dot = (p.x - s1.x) * (s2.x - s1.x) + (p.y - s1.y) * (s2.y - s1.y);
+  if (dot <= 0) return squaredDistance(p, s1);
+  if (dot > squaredDistance(s2, s1)) return squaredDistance(p, s2);
+  return Math.pow(
+    (p.x - s1.x) * (s2.y - s1.y) - (p.y - s1.y) * (s2.x - s1.x),
+    2,
+  ) / squaredDistance(s2, s1);
+}
+
+export function squaredDistanceToLine(p: Point, line: Point[]): number {
+  let dist = squaredDistance(p, line[0]);
+  for (let i = 0; i < line.length - 1; i++) {
+    dist = Math.min(dist, squaredDistanceToSegment(p, line[i], line[i + 1]));
+  }
+  return dist;
+}
+
 //check if two lines intersect, helpfully written by chatgpt
 //this code runs in n^2; should be changed
-
 function doIntersect(
   p1: Point,
   q1: Point,
@@ -196,22 +219,6 @@ function doIntersect(
   q2: Point,
   width: number,
 ): boolean {
-  // Function to calculate the squared distance between two points
-  function squaredDistance(p: Point, q: Point): number {
-    return Math.pow(q.x - p.x, 2) + Math.pow(q.y - p.y, 2);
-  }
-
-  // Function to calculate the squared distance between a point and a line segment
-  function squaredDistanceToSegment(p: Point, s1: Point, s2: Point): number {
-    const dot = (p.x - s1.x) * (s2.x - s1.x) + (p.y - s1.y) * (s2.y - s1.y);
-    if (dot < 0) return squaredDistance(p, s1);
-    if (dot > squaredDistance(s2, s1)) return squaredDistance(p, s2);
-    return Math.pow(
-      (p.x - s1.x) * (s2.y - s1.y) - (p.y - s1.y) * (s2.x - s1.x),
-      2,
-    ) / squaredDistance(s2, s1);
-  }
-
   // Check if the distance between the segments is less than or equal to the width
   return squaredDistanceToSegment(p1, p2, q2) <= width * width ||
     squaredDistanceToSegment(q1, p2, q2) <= width * width ||

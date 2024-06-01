@@ -14,13 +14,6 @@ export default function Toolbar() {
       <div class="toolbar-content">
         <AccountMenu>
           <IconCircle
-            iconName="refresh-circle-outline"
-            color="red"
-            onClick={() => {
-              client?.socket.reset();
-            }}
-          />
-          <IconCircle
             iconName="grid-outline"
             onClick={() => {
               globalThis.location.href = "/";

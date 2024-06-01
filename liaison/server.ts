@@ -3,7 +3,6 @@ import { CONNECTION_TIMEOUT } from "../config.ts";
 import { Board } from "../server/board.ts";
 import { Server as ServerLogic } from "../server/server.ts";
 import { Account } from "./liaison.ts";
-import { ClientToServerEvents } from "./liaison.ts";
 import {
   BoardEvent,
   BoardEventVisitor,
@@ -15,6 +14,7 @@ import {
   UserListEvent,
 } from "../liaison/events.ts";
 import { DATABASE_URL, SOCKET_PORT } from "../config.ts";
+import { BoardActionVisitor } from "./actions.ts";
 
 export interface SocketData {
   client: Client;
@@ -55,7 +55,6 @@ class Emitter implements BoardEventVisitor {
   }
   public onRemove(event: OnRemoveEvent): void {
     this.socket.emit("onRemove", event);
-    
   }
 
   public onMove(event: OnMoveEvent) {
@@ -78,6 +77,7 @@ class Emitter implements BoardEventVisitor {
 export class Client {
   private emitter?: Emitter;
   private cachedEvents: BoardEvent[] = [];
+  private idMap: Map<number, number> = new Map();
 
   constructor(
     readonly account: Account,
@@ -90,10 +90,19 @@ export class Client {
 
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
-    socket.on("draw", async (line) => await this.board.draw(this, line));
-    socket.on("remove", async(lineId)=>await this.board.remove(this, lineId));
-    socket.on("move", (x, y) => this.board.move(this, x, y));
-    socket.on("reset", async () => await this.board.reset(this));
+    socket.on("draw", async (a) => {
+      const id = await this.board.draw(this, a.line);
+      this.idMap.set(a.line.id, id);
+    });
+    socket.on("remove", async (a) => {
+      let id = a.line.id;
+      while (this.idMap.get(id)) {
+        id = this.idMap.get(id)!;
+      }
+      await this.board.remove(this, id);
+    });
+    socket.on("move", (a) => this.board.move(this, a.x, a.y));
+    socket.on("reset", async (_) => await this.board.reset(this));
 
     this.emitter = new Emitter(socket);
     for (const e of this.cachedEvents) {
@@ -117,14 +126,14 @@ export class Client {
 }
 
 export type SocketServer = Server<
-  ClientToServerEvents,
+  BoardActionVisitor,
   BoardEventVisitor,
   Record<string | number | symbol, never>,
   SocketData
 >;
 
 export type ServerSocket = Socket<
-  ClientToServerEvents,
+  BoardActionVisitor,
   BoardEventVisitor,
   Record<string | number | symbol, never>,
   SocketData

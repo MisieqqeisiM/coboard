@@ -8,14 +8,18 @@ import {
 import { Camera } from "../../../client/camera.ts";
 import { CameraContext } from "../../../client/camera.ts";
 import { SettingsContext } from "../../../client/settings.ts";
+import { Point } from "../../../liaison/liaison.ts";
 
 interface CameraViewProps {
   camera: Signal<Camera>;
+  startDraw: Signal<Point | null>;
+  draw: Signal<Point | null>;
+  endDraw: Signal<Point | null>;
   children: ComponentChildren;
 }
 
 export default function CameraView(
-  { camera, children }: CameraViewProps,
+  { camera, children, startDraw, draw, endDraw }: CameraViewProps,
 ) {
   const stylusMode = useContext(SettingsContext).stylusMode;
   const ref = useRef<HTMLDivElement>(null);
@@ -135,6 +139,58 @@ export default function CameraView(
       e.preventDefault();
       e.stopPropagation();
     };
+
+    const mouseDown = (event: MouseEvent) => {
+      if (event.button != 0) return;
+
+      const [x, y] = camera.peek().toBoardCoords(event.clientX, event.clientY);
+      startDraw.value = { x, y };
+    };
+
+    const mouseMove = (event: MouseEvent) => {
+      const [x, y] = camera.peek().toBoardCoords(event.clientX, event.clientY);
+      draw.value = { x, y };
+    };
+
+    const mouseUp = () => {
+      endDraw.value = { x: 0, y: 0 };
+    };
+
+    const touchStart2 = (event: TouchEvent) => {
+      if (stylusMode.peek()) return;
+      if (event.touches.length != 1) {
+        endDraw.value = { x: 0, y: 0 };
+        return;
+      }
+      event.preventDefault();
+      const [x, y] = camera.peek().toBoardCoords(
+        event.touches[0].clientX,
+        event.touches[0].clientY,
+      );
+      startDraw.value = { x, y };
+    };
+
+    const touchMove2 = (event: TouchEvent) => {
+      if (event.touches.length != 1) return;
+      event.preventDefault();
+      const [x, y] = camera.peek().toBoardCoords(
+        event.touches[0].clientX,
+        event.touches[0].clientY,
+      );
+      draw.value = { x, y };
+    };
+
+    const touchEnd2 = () => {
+      endDraw.value = { x: 0, y: 0 };
+    };
+
+    ref.current!.addEventListener("touchstart", touchStart2);
+    globalThis.addEventListener("touchend", touchEnd2);
+    globalThis.addEventListener("touchcancel", touchEnd2);
+    globalThis.addEventListener("touchmove", touchMove2);
+    ref.current!.addEventListener("mousedown", mouseDown);
+    globalThis.addEventListener("mouseup", mouseUp);
+    globalThis.addEventListener("mousemove", mouseMove);
 
     globalThis.addEventListener("gesturestart", prevent);
     globalThis.addEventListener("contextmenu", prevent);

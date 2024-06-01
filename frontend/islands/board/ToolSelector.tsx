@@ -2,11 +2,11 @@ import { useContext } from "../../../deps_client.ts";
 import IconCircle from "../app/IconCircle.tsx";
 import { SettingsContext } from "../../../client/settings.ts";
 import { Tool } from "../../../client/settings.ts";
-import SizeSelector from "./SizeSelector.tsx";
 
 const toolIcons: Record<Tool, string> = {
   [Tool.PEN]: "pencil-outline",
   [Tool.ERASER]: "eraser",
+  [Tool.MOVE]: "hand-right-outline",
 };
 
 export default function ToolSelector() {
@@ -24,6 +24,9 @@ export default function ToolSelector() {
         size.value = eraserSize.peek();
         break;
       case Tool.ERASER:
+        tool.value = Tool.MOVE;
+        break;
+      case Tool.MOVE:
         tool.value = Tool.PEN;
         size.value = penSize.peek();
         break;

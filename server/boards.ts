@@ -47,6 +47,7 @@ export class Boards implements BoardUnloader {
       if (!boardDB) return null;
       board = new Board(this.mongoClient, id, this);
       this.boards.set(id, board);
+      await board.init();
     }
     return board;
   }
@@ -102,7 +103,7 @@ export class Boards implements BoardUnloader {
           id: id,
           name: temp!.name != undefined ? temp!.name : id,
         };
-      })
+      }),
     );
     return result;
   }
