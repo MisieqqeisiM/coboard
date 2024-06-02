@@ -34,7 +34,7 @@ export class Board {
   constructor(
     private mongoClient: MongoClient,
     private id: string,
-    private unloader: BoardUnloader
+    private unloader: BoardUnloader,
   ) {}
 
   public async init() {
@@ -68,7 +68,7 @@ export class Board {
       board!.lines,
       Array.from(this.users.values()),
       board.shareToken,
-      client.viewerOnly
+      client.viewerOnly,
     );
   }
 
@@ -102,7 +102,7 @@ export class Board {
       { id: this.id },
       {
         $push: { lines: confirmedLine },
-      }
+      },
     );
     this.clients.emit(new OnDrawEvent(client.account.id, confirmedLine));
     client.emit(new ConfirmLineEvent(id));
@@ -115,7 +115,7 @@ export class Board {
       { id: this.id },
       {
         $pull: { lines: { id: lineId } },
-      }
+      },
     );
     this.clients.emit(new OnRemoveEvent(lineId));
   }

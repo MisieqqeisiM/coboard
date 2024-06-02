@@ -10,14 +10,18 @@ import AlreadyLoggedIn from "../../components/AlreadyLoggedIn.tsx";
 import Toolbar from "./Toolbar.tsx";
 import ThemeSelector from "../app/ThemeSelector.tsx";
 import { Point } from "../../../liaison/liaison.ts";
+import { SettingsContext } from "../../../client/settings.ts";
 
 export default function Board() {
   const width = 2048;
   const height = 2048;
 
   const client = useContext(ClientContext);
+  const settings = useContext(SettingsContext);
+
   if (!client) return <Loading />;
   if (!client.allowed) return <AlreadyLoggedIn />;
+  if (client.ui.viewerOnly) settings.stylusMode.value = true;
 
   const camera = signal(
     new Camera(

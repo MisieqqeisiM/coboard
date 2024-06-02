@@ -36,7 +36,7 @@ export interface Settings {
 
 export const SettingsContext = createContext<Settings>({
   color: signal(Color.BLACK),
-  tool: signal(Tool.MOVE),
+  tool: signal(Tool.PEN),
   size: signal(20),
   penSize: signal(20),
   eraserSize: signal(20),

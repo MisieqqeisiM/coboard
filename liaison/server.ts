@@ -82,7 +82,7 @@ export class Client {
   constructor(
     readonly account: Account,
     readonly board: Board,
-    readonly viewerOnly: boolean
+    readonly viewerOnly: boolean,
   ) {}
 
   public hasSocket(): boolean {
@@ -169,8 +169,7 @@ export async function createServer(): Promise<ServerLogic> {
         port: SOCKET_PORT,
       },
       remoteAddr: info.remoteAddr,
-    })
-  );
+    }));
   return server;
 }
 
