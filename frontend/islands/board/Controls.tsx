@@ -16,8 +16,8 @@ import { DrawBehavior } from "./behaviors/DrawBehavior.ts";
 import { LineBehavior } from "./behaviors/LineBehaviour.ts";
 import { EllipseBehavior } from "./behaviors/EllipseBehaviour.ts";
 import { RectangleBehavior } from "./behaviors/RectangleBehaviour.ts";
-import { PolylineBehaviour } from "./behaviors/PolyLine.ts";
-import { PolygonBehavior } from "./behaviors/Polygon.ts";
+import { PolylineBehaviour } from "./behaviors/PolyLineBehaviour.ts";
+import { PolygonBehavior } from "./behaviors/PolygonBehaviour.ts";
 
 interface CameraViewProps {
   camera: Signal<Camera>;

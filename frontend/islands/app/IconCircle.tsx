@@ -5,7 +5,9 @@ export default function IconCircle(
     onClick?: () => void;
   },
 ) {
-  if (iconName == "eraser") {
+  const localIcons = ["eraser", "curve", "line", "polygon", "polyline", "rectangle"];
+  if (localIcons.includes(iconName)) {
+    const dir =`/icons/${iconName}.svg`;
     return (
       <div
         class="icon-circle"
@@ -15,7 +17,7 @@ export default function IconCircle(
         <img
           class="invertable"
           style={{ marginLeft: -0.5, marginTop: -1 }}
-          src="/icons/eraser.svg"
+          src={dir}
           width="33"
           height="33"
         />

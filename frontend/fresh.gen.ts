@@ -42,8 +42,8 @@ import * as $board_behaviors_EllipseBehaviour from "./islands/board/behaviors/El
 import * as $board_behaviors_EraseBehavior from "./islands/board/behaviors/EraseBehavior.ts";
 import * as $board_behaviors_LineBehaviour from "./islands/board/behaviors/LineBehaviour.ts";
 import * as $board_behaviors_MoveBehavior from "./islands/board/behaviors/MoveBehavior.ts";
-import * as $board_behaviors_PolyLine from "./islands/board/behaviors/PolyLine.ts";
-import * as $board_behaviors_Polygon from "./islands/board/behaviors/Polygon.ts";
+import * as $board_behaviors_PolyLineBehaviour from "./islands/board/behaviors/PolyLineBehaviour.ts";
+import * as $board_behaviors_PolygonBehaviour from "./islands/board/behaviors/PolygonBehaviour.ts";
 import * as $board_behaviors_RectangleBehaviour from "./islands/board/behaviors/RectangleBehaviour.ts";
 import * as $board_behaviors_geometry_utils from "./islands/board/behaviors/geometry_utils.ts";
 import * as $board_webgl_utils_LineBuffer from "./islands/board/webgl-utils/LineBuffer.ts";
@@ -101,8 +101,10 @@ const manifest = {
     "./islands/board/behaviors/LineBehaviour.ts":
       $board_behaviors_LineBehaviour,
     "./islands/board/behaviors/MoveBehavior.ts": $board_behaviors_MoveBehavior,
-    "./islands/board/behaviors/PolyLine.ts": $board_behaviors_PolyLine,
-    "./islands/board/behaviors/Polygon.ts": $board_behaviors_Polygon,
+    "./islands/board/behaviors/PolyLineBehaviour.ts":
+      $board_behaviors_PolyLineBehaviour,
+    "./islands/board/behaviors/PolygonBehaviour.ts":
+      $board_behaviors_PolygonBehaviour,
     "./islands/board/behaviors/RectangleBehaviour.ts":
       $board_behaviors_RectangleBehaviour,
     "./islands/board/behaviors/geometry_utils.ts":

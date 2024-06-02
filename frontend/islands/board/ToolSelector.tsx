@@ -5,10 +5,10 @@ import { Tool } from "../../../client/settings.ts";
 
 const toolIcons: Record<Tool, string> = {
   [Tool.PEN]: "pencil-outline",
-  [Tool.LINE]: "remove-outline",
-  [Tool.RECTANGLE]: "tablet-landscape-outline",
-  [Tool.POLYLINE]: "checkmark-outline",
-  [Tool.POLYGON]: "checkmark-outline",
+  [Tool.LINE]: "line",
+  [Tool.RECTANGLE]: "rectangle",
+  [Tool.POLYLINE]: "polyline",
+  [Tool.POLYGON]: "polygon",
   [Tool.ELLIPSE]: "radio-button-off-outline",
   [Tool.ERASER]: "eraser",
   [Tool.MOVE]: "hand-right-outline",
