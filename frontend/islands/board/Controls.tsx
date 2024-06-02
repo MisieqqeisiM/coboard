@@ -49,10 +49,7 @@ export default function Controls(
           behavior = new EllipseBehavior(behaviorContext);
           break;
         case Tool.RECTANGLE:
-          if(shift)
-            behavior = new SquareBehaviour(behaviorContext);
-          else
-            behavior = new RectangleBehavior(behaviorContext);
+          behavior = new RectangleBehavior(behaviorContext);
           break;
         case Tool.ERASER:
           behavior = new EraseBehavior(behaviorContext);
