@@ -1,4 +1,3 @@
-import init from "https://deno.land/x/denoflate@1.2.1/pkg/denoflate.js";
 import { Signal, signal } from "../deps_client.ts";
 import {
   BoardActionVisitor,
@@ -16,7 +15,7 @@ export class Client {
     readonly socket: SocketClient,
     readonly ui: UIClient,
     readonly account: Account,
-    readonly allowed: boolean
+    readonly allowed: boolean,
   ) {}
 }
 

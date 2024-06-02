@@ -24,15 +24,6 @@ export default function Toolbar() {
     <div class="toolbar">
       <div class="toolbar-content">
         <AccountMenu>
-          {client?.ui.viewerOnly ? null : (
-            <IconCircle
-              iconName="refresh-circle-outline"
-              color="red"
-              onClick={() => {
-                client?.socket.reset();
-              }}
-            />
-          )}
           <IconCircle
             iconName="grid-outline"
             onClick={() => {
@@ -48,7 +39,8 @@ export default function Toolbar() {
           <IconCircle
             iconName="pencil-outline"
             onClick={() => {
-              globalThis.location.href = `/set_name?redirectTo=${window.location.pathname}`;
+              globalThis.location.href =
+                `/set_name?redirectTo=${window.location.pathname}`;
             }}
           />
         </AccountMenu>
