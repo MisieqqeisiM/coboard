@@ -100,6 +100,7 @@ export default function ObservableCanvas(props: CanvasProps) {
     const lineDrawer = new LineDrawer(gl);
 
     let points: Point[] = [];
+    let startPoint: Point|null=null;
     let drawing = false;
     let lineId = -1;
     let movedLine: Line | null = null;
@@ -165,6 +166,37 @@ export default function ObservableCanvas(props: CanvasProps) {
         {x:point1.x, y:point1.y}
       ];
     }
+    function getEllipse(rectanglePoint1: Point, rectanglePoint2: Point): Point[] {
+      const centerX = (rectanglePoint1.x + rectanglePoint2.x) / 2;
+      const centerY = (rectanglePoint1.y + rectanglePoint2.y) / 2;
+
+      const radiusX = Math.abs(rectanglePoint1.x - rectanglePoint2.x) / 2;
+      const radiusY = Math.abs(rectanglePoint1.y - rectanglePoint2.y) / 2;
+
+      const perimeter = 2 * (radiusX + radiusY);
+      const numPoints = Math.max(48, Math.floor(perimeter / 10));
+
+      const result: Point[] = [];
+      const angleIncrement = (2 * Math.PI) / numPoints;
+
+      for (let i = 0; i < numPoints; i++) {
+          const angle = i * angleIncrement;
+          const x = centerX + radiusX * Math.cos(angle);
+          const y = centerY + radiusY * Math.sin(angle);
+          result.push({ x, y });
+      }
+      result.push(result[0]);
+      return result;
+    }
+    function setDrawingEnd() {
+      drawing = false;
+      points = [];
+      startPoint=null;
+    }
+    function setDrawingStart(point: Point) {
+      drawing =true;
+      startPoint=point;
+    }
 
     function submitLine() {
       const line: Line = new Line(
@@ -174,8 +206,7 @@ export default function ObservableCanvas(props: CanvasProps) {
         points,
       );
       client.socket.draw(line);
-      drawing = false;
-      points = [];
+      setDrawingEnd();
       draw();
     }
 
@@ -194,13 +225,18 @@ export default function ObservableCanvas(props: CanvasProps) {
         draw();
       }
       else if (tool.peek() == Tool.LINE) {
-        points = [point, point];
-        drawing = true;
+        points = [point];
+        setDrawingStart(point);
         draw();
       }
       else if(tool.peek() == Tool.RECTANGLE) {
-        points = [point, point, point, point];
-        drawing=true;
+        points = [point];
+        setDrawingStart(point);
+        draw();
+      }
+      else if(tool.peek() == Tool.ELLIPSE) {
+        points = [point];
+        setDrawingStart(point);
         draw();
       }
     });
@@ -244,10 +280,13 @@ export default function ObservableCanvas(props: CanvasProps) {
           points.push(point);
           break;
         case (Tool.LINE):
-          points[1] = point;
+          points = [startPoint, point];
           break;
         case(Tool.RECTANGLE):
-          points = getRectangle(points[0], point);
+          points = getRectangle(startPoint!, point);
+          break;
+        case(Tool.ELLIPSE):
+          points = getEllipse(startPoint!, point);
           break;
 
       }
@@ -260,11 +299,10 @@ export default function ObservableCanvas(props: CanvasProps) {
         client.socket.draw(movedLine);
         movedLine = null;
       } else if (drawing) {
-        if (tool.peek() == Tool.PEN || tool.peek() ==Tool.LINE || tool.peek() == Tool.RECTANGLE)
+        if (tool.peek() == Tool.PEN || tool.peek() ==Tool.LINE || tool.peek() == Tool.RECTANGLE || tool.peek() == Tool.ELLIPSE)
           submitLine();
         else if (tool.peek() == Tool.ERASER) {
-          drawing = false;
-          points = [];
+          setDrawingEnd();
           draw();
         }
       }
