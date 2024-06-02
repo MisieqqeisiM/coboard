@@ -156,6 +156,16 @@ export default function ObservableCanvas(props: CanvasProps) {
       return id;
     }
 
+    function getRectangle(point1: Point, point2: Point) {
+      return [
+        {x:point1.x, y:point1.y},
+        {x:point1.x, y:point2.y},
+        {x:point2.x, y:point2.y},
+        {x:point2.x, y:point1.y},
+        {x:point1.x, y:point1.y}
+      ];
+    }
+
     function submitLine() {
       const line: Line = new Line(
         lineId--,
@@ -178,9 +188,19 @@ export default function ObservableCanvas(props: CanvasProps) {
           movedLine = client.ui.lines.get(id)!;
           client.socket.remove(id);
         }
-      } else if (tool.peek() == Tool.ERASER || tool.peek() == Tool.PEN || tool.peek() ==Tool.LINE) {
+      } else if (tool.peek() == Tool.ERASER || tool.peek() == Tool.PEN) {
         points = [point];
         drawing = true;
+        draw();
+      }
+      else if (tool.peek() == Tool.LINE) {
+        points = [point, point];
+        drawing = true;
+        draw();
+      }
+      else if(tool.peek() == Tool.RECTANGLE) {
+        points = [point, point, point, point];
+        drawing=true;
         draw();
       }
     });
@@ -211,10 +231,7 @@ export default function ObservableCanvas(props: CanvasProps) {
       if (!drawing) return;
 
       switch (tool.peek()) {
-        case (Tool.LINE):
-          points[1] = point;
-          break;
-        case (Tool.ERASER):
+       case (Tool.ERASER):
           const segment = [points.at(-1)!, point];
           for (const line of client.ui.lines.values()) {
             if (linesIntersect(segment, line.coordinates, strokeWidth.peek())) {
@@ -225,6 +242,12 @@ export default function ObservableCanvas(props: CanvasProps) {
           break;
         case (Tool.PEN):
           points.push(point);
+          break;
+        case (Tool.LINE):
+          points[1] = point;
+          break;
+        case(Tool.RECTANGLE):
+          points = getRectangle(points[0], point);
           break;
 
       }
@@ -237,7 +260,7 @@ export default function ObservableCanvas(props: CanvasProps) {
         client.socket.draw(movedLine);
         movedLine = null;
       } else if (drawing) {
-        if (tool.peek() == Tool.PEN || tool.peek() ==Tool.LINE)
+        if (tool.peek() == Tool.PEN || tool.peek() ==Tool.LINE || tool.peek() == Tool.RECTANGLE)
           submitLine();
         else if (tool.peek() == Tool.ERASER) {
           drawing = false;
