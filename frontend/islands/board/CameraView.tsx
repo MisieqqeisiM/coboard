@@ -9,6 +9,7 @@ import { Camera } from "../../../client/camera.ts";
 import { CameraContext } from "../../../client/camera.ts";
 import { SettingsContext } from "../../../client/settings.ts";
 import { Point } from "../../../liaison/liaison.ts";
+import { ClientContext } from "../app/WithClient.tsx";
 
 interface CameraViewProps {
   camera: Signal<Camera>;
@@ -23,6 +24,7 @@ export default function CameraView(
 ) {
   const stylusMode = useContext(SettingsContext).stylusMode;
   const ref = useRef<HTMLDivElement>(null);
+  const client = useContext(ClientContext);
 
   useEffect(() => {
     let touchpad = false;
@@ -141,6 +143,7 @@ export default function CameraView(
     };
 
     const mouseDown = (event: MouseEvent) => {
+      if (client?.ui.viewerOnly) return;
       if (event.button != 0) return;
 
       const [x, y] = camera.peek().toBoardCoords(event.clientX, event.clientY);
@@ -148,15 +151,18 @@ export default function CameraView(
     };
 
     const mouseMove = (event: MouseEvent) => {
+      if (client?.ui.viewerOnly) return;
       const [x, y] = camera.peek().toBoardCoords(event.clientX, event.clientY);
       draw.value = { x, y };
     };
 
     const mouseUp = () => {
+      if (client?.ui.viewerOnly) return;
       endDraw.value = { x: 0, y: 0 };
     };
 
     const touchStart2 = (event: TouchEvent) => {
+      if (client?.ui.viewerOnly) return;
       if (stylusMode.peek()) return;
       if (event.touches.length != 1) {
         endDraw.value = { x: 0, y: 0 };
@@ -171,6 +177,7 @@ export default function CameraView(
     };
 
     const touchMove2 = (event: TouchEvent) => {
+      if (client?.ui.viewerOnly) return;
       if (event.touches.length != 1) return;
       event.preventDefault();
       const [x, y] = camera.peek().toBoardCoords(
@@ -181,6 +188,7 @@ export default function CameraView(
     };
 
     const touchEnd2 = () => {
+      if (client?.ui.viewerOnly) return;
       endDraw.value = { x: 0, y: 0 };
     };
 

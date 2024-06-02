@@ -12,11 +12,13 @@ export class Server {
   public async initClient(
     userID: string,
     boardID: string,
+    viewerOnly: boolean
   ): Promise<ClientState | null> {
     const board = (await this.boards.getBoard(boardID))!;
     const client = new Client(
       (await this.accounts.getAccountById(userID))!,
       board,
+      viewerOnly
     );
     if (board.hasUser(userID)) return null;
     return board.newUser(client);
@@ -37,10 +39,6 @@ export class Server {
 
       const board = await this.boards.getBoard(boardID);
       if (!board) throw new Error();
-
-      if (!(await this.boards.userInBoard(account.id, boardID))) {
-        throw new Error();
-      }
 
       if (board.getUser(account.id)?.hasSocket()) {
         throw new Error(ALREADY_LOGGED_IN);

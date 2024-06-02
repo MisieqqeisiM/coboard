@@ -23,7 +23,7 @@ export class Line {
     readonly id: number,
     readonly width: number,
     readonly color: string,
-    readonly coordinates: Point[],
+    readonly coordinates: Point[]
   ) {}
   static changeId(line: Line, newId: number): Line {
     return new Line(newId, line.width, line.color, line.coordinates);

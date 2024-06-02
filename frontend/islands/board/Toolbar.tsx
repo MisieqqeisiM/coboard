@@ -6,9 +6,20 @@ import ToolSelector from "./ToolSelector.tsx";
 import { ClientContext } from "../app/WithClient.tsx";
 import StylusModeSelector from "./StylusModeSelector.tsx";
 import SizeSelector from "./SizeSelector.tsx";
-import ThemeSelector from "../app/ThemeSelector.tsx";
+import ShareSelector from "./ShareSelector.tsx";
+
 export default function Toolbar() {
   const client = useContext(ClientContext);
+
+  const editorTools = (
+    <>
+      <ColorSelector />
+      <SizeSelector />
+      <ToolSelector />
+      <StylusModeSelector />
+      <ShareSelector shareToken={client?.ui.shareToken} />
+    </>
+  );
   return (
     <div class="toolbar">
       <div class="toolbar-content">
@@ -33,10 +44,7 @@ export default function Toolbar() {
             }}
           />
         </AccountMenu>
-        <ColorSelector />
-        <SizeSelector />
-        <ToolSelector />
-        <StylusModeSelector />
+        {client?.ui.viewerOnly ? null : editorTools}
       </div>
     </div>
   );

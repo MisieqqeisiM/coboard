@@ -10,7 +10,9 @@ import Board from "../islands/board/Board.tsx";
 
 export const handler: Handlers = {
   async GET(req: Request, ctx: FreshContext) {
-    const boardID = ctx.params["board"];
+    const boardID = ctx.params["board"].split("&")[0];
+    const shareToken = ctx.params["board"].split("shareToken=")[1];
+
     const board = await server.boards.getBoard(boardID);
     if (!board) return ctx.renderNotFound();
 
@@ -18,10 +20,15 @@ export const handler: Handlers = {
     let clientState: ClientState | null = null;
 
     if (account) {
+      let viewerOnly = false;
       if (!(await server.boards.userInBoard(account.id, boardID))) {
-        await server.boards.addUserToBoard(account.id, boardID);
+        if (await server.boards.matchingShareToken(boardID, shareToken)) {
+          await server.boards.addUserToBoard(account.id, boardID);
+        } else {
+          viewerOnly = true;
+        }
       }
-      clientState = await server.initClient(account.id, boardID);
+      clientState = await server.initClient(account.id, boardID, viewerOnly);
     }
 
     return ctx.render({ account, clientState, boardID });
