@@ -30,6 +30,7 @@ export class MoveBehavior implements Behavior {
     this.ctx.canvas.setTmpLine(this.movedLine);
   }
 
+  setShift(value:boolean): void { }
   toolEnd(): void {
     if (!this.movedLine) return;
     this.ctx.client.socket.draw(this.movedLine);

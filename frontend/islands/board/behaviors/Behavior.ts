@@ -8,8 +8,8 @@ export interface Behavior {
   toolMove(point: Point): void;
   toolEnd(): void;
   toolCancel(): void;
+  setShift(value: boolean): void;
 }
-
 export class BehaviorContext {
   constructor(
     readonly settings: Settings,

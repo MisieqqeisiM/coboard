@@ -38,8 +38,12 @@ import * as $board_ToolSelector from "./islands/board/ToolSelector.tsx";
 import * as $board_Toolbar from "./islands/board/Toolbar.tsx";
 import * as $board_behaviors_Behavior from "./islands/board/behaviors/Behavior.ts";
 import * as $board_behaviors_DrawBehavior from "./islands/board/behaviors/DrawBehavior.ts";
+import * as $board_behaviors_EllipseBehaviour from "./islands/board/behaviors/EllipseBehaviour.ts";
 import * as $board_behaviors_EraseBehavior from "./islands/board/behaviors/EraseBehavior.ts";
+import * as $board_behaviors_LineBehaviour from "./islands/board/behaviors/LineBehaviour.ts";
 import * as $board_behaviors_MoveBehavior from "./islands/board/behaviors/MoveBehavior.ts";
+import * as $board_behaviors_RectangleBehaviour from "./islands/board/behaviors/RectangleBehaviour.ts";
+import * as $board_behaviors_geometry_utils from "./islands/board/behaviors/geometry_utils.ts";
 import * as $board_webgl_utils_LineBuffer from "./islands/board/webgl-utils/LineBuffer.ts";
 import * as $board_webgl_utils_LineDrawer from "./islands/board/webgl-utils/LineDrawer.ts";
 import * as $board_webgl_utils_constants from "./islands/board/webgl-utils/constants.ts";
@@ -88,9 +92,17 @@ const manifest = {
     "./islands/board/Toolbar.tsx": $board_Toolbar,
     "./islands/board/behaviors/Behavior.ts": $board_behaviors_Behavior,
     "./islands/board/behaviors/DrawBehavior.ts": $board_behaviors_DrawBehavior,
+    "./islands/board/behaviors/EllipseBehaviour.ts":
+      $board_behaviors_EllipseBehaviour,
     "./islands/board/behaviors/EraseBehavior.ts":
       $board_behaviors_EraseBehavior,
+    "./islands/board/behaviors/LineBehaviour.ts":
+      $board_behaviors_LineBehaviour,
     "./islands/board/behaviors/MoveBehavior.ts": $board_behaviors_MoveBehavior,
+    "./islands/board/behaviors/RectangleBehaviour.ts":
+      $board_behaviors_RectangleBehaviour,
+    "./islands/board/behaviors/geometry_utils.ts":
+      $board_behaviors_geometry_utils,
     "./islands/board/webgl-utils/LineBuffer.ts": $board_webgl_utils_LineBuffer,
     "./islands/board/webgl-utils/LineDrawer.ts": $board_webgl_utils_LineDrawer,
     "./islands/board/webgl-utils/constants.ts": $board_webgl_utils_constants,

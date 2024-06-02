@@ -1,7 +1,12 @@
 import { createContext, Signal, signal } from "../deps_client.ts";
 
+//TODO: some of them are not like the others
 export enum Tool {
   PEN,
+  LINE,
+  POLYLINE,
+  RECTANGLE,
+  ELLIPSE,
   ERASER,
   MOVE,
 }

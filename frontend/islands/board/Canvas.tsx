@@ -145,7 +145,6 @@ export default function Canvas(
         client.socket.undo();
       }
     });
-
     return () => {
       gl.deleteProgram(program);
     };

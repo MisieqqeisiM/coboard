@@ -13,6 +13,9 @@ import { DrawableCanvas } from "../../../client/canvas.ts";
 import { EraseBehavior } from "./behaviors/EraseBehavior.ts";
 import { MoveBehavior } from "./behaviors/MoveBehavior.ts";
 import { DrawBehavior } from "./behaviors/DrawBehavior.ts";
+import { LineBehavior } from "./behaviors/LineBehaviour.ts";
+import { EllipseBehavior } from "./behaviors/EllipseBehaviour.ts";
+import { RectangleBehavior } from "./behaviors/RectangleBehaviour.ts";
 
 interface CameraViewProps {
   camera: Signal<Camera>;
@@ -29,6 +32,7 @@ export default function Controls(
   if (!client) return <></>;
 
   const behaviorContext = new BehaviorContext(settings, controls, client!);
+  let shift = false;
 
   useEffect(() => {
     let behavior: Behavior = new DrawBehavior(behaviorContext);
@@ -38,6 +42,18 @@ export default function Controls(
         case Tool.PEN:
           behavior = new DrawBehavior(behaviorContext);
           break;
+        case Tool.LINE:
+          behavior = new LineBehavior(behaviorContext);
+          break;
+        case Tool.ELLIPSE:
+          behavior = new EllipseBehavior(behaviorContext);
+          break;
+        case Tool.RECTANGLE:
+          if(shift)
+            behavior = new SquareBehaviour(behaviorContext);
+          else
+            behavior = new RectangleBehavior(behaviorContext);
+          break;
         case Tool.ERASER:
           behavior = new EraseBehavior(behaviorContext);
           break;
@@ -45,6 +61,7 @@ export default function Controls(
           behavior = new MoveBehavior(behaviorContext);
           break;
       }
+      behavior.setShift(shift);
     });
 
     let touchpad = false;
@@ -223,6 +240,19 @@ export default function Controls(
       toolDown = false;
       behavior.toolEnd();
     };
+    const keydown = (e : KeyboardEvent) => {
+      if(e.shiftKey) {
+        shift = true;
+        behavior.setShift(shift);
+      }
+    };
+
+    const keyup = (e : KeyboardEvent) => {
+      if(!e.shiftKey) {
+        shift = false;
+        behavior.setShift(shift);
+      }
+    };
 
     ref.current!.addEventListener("touchstart", touchStart2);
     globalThis.addEventListener("touchend", touchEnd2);
@@ -241,6 +271,9 @@ export default function Controls(
     globalThis.addEventListener("touchstart", touchStart);
     globalThis.addEventListener("touchmove", touchMove);
     globalThis.addEventListener("touchend", touchEnd);
+
+    globalThis.addEventListener('keydown', keydown);
+    globalThis.addEventListener('keyup', keyup);
 
     return () => {
       globalThis.removeEventListener("gesturestart", prevent);
