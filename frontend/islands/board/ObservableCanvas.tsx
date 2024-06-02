@@ -102,6 +102,7 @@ export default function ObservableCanvas(props: CanvasProps) {
     let points: Point[] = [];
     let startPoint: Point|null=null;
     let drawing = false;
+    let shiftPressed = false;
     let lineId = -1;
     let movedLine: Line | null = null;
 
@@ -188,6 +189,11 @@ export default function ObservableCanvas(props: CanvasProps) {
       result.push(result[0]);
       return result;
     }
+    function getSquarePoint(rectanglePoint1: Point, rectanglePoint2: Point) {
+      const sideLength = Math.abs(rectanglePoint2.y - rectanglePoint1.y);
+      const sgn = rectanglePoint1.x<rectanglePoint2.x ? 1 : -1;
+      return {x: rectanglePoint1.x+sgn*sideLength, y: rectanglePoint2.y};
+    }
     function setDrawingEnd() {
       drawing = false;
       points = [];
@@ -225,17 +231,14 @@ export default function ObservableCanvas(props: CanvasProps) {
         draw();
       }
       else if (tool.peek() == Tool.LINE) {
-        points = [point];
         setDrawingStart(point);
         draw();
       }
       else if(tool.peek() == Tool.RECTANGLE) {
-        points = [point];
         setDrawingStart(point);
         draw();
       }
       else if(tool.peek() == Tool.ELLIPSE) {
-        points = [point];
         setDrawingStart(point);
         draw();
       }
@@ -283,10 +286,17 @@ export default function ObservableCanvas(props: CanvasProps) {
           points = [startPoint, point];
           break;
         case(Tool.RECTANGLE):
-          points = getRectangle(startPoint!, point);
+          if(shiftPressed)
+            points = getRectangle(startPoint!, getSquarePoint(startPoint!, point));
+          else
+            points = getRectangle(startPoint!, point);
           break;
         case(Tool.ELLIPSE):
-          points = getEllipse(startPoint!, point);
+          if(shiftPressed)
+            points = getEllipse(startPoint!, getSquarePoint(startPoint!, point));
+          else
+            points = getEllipse(startPoint!, point);
+
           break;
 
       }
@@ -318,6 +328,14 @@ export default function ObservableCanvas(props: CanvasProps) {
     globalThis.addEventListener("keydown", (e) => {
       if (e.key === "z" && e.ctrlKey) {
         client.socket.undo();
+      }
+      else if(e.shiftKey) {
+        shiftPressed=true;
+      }
+    });
+    globalThis.addEventListener('keyup', (e)=> {
+      if(!e.shiftKey) {
+        shiftPressed=false;
       }
     });
 
