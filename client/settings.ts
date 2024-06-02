@@ -6,6 +6,7 @@ export enum Tool {
   LINE,
   POLYLINE,
   RECTANGLE,
+  POLYGON,
   ELLIPSE,
   ERASER,
   MOVE,

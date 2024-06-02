@@ -8,6 +8,7 @@ const toolIcons: Record<Tool, string> = {
   [Tool.LINE]: "remove-outline",
   [Tool.RECTANGLE]: "tablet-landscape-outline",
   [Tool.POLYLINE]: "checkmark-outline",
+  [Tool.POLYGON]: "checkmark-outline",
   [Tool.ELLIPSE]: "radio-button-off-outline",
   [Tool.ERASER]: "eraser",
   [Tool.MOVE]: "hand-right-outline",
@@ -33,6 +34,9 @@ export default function ToolSelector() {
         tool.value = Tool.POLYLINE;
         break;
       case Tool.POLYLINE:
+        tool.value = Tool.POLYGON;
+        break;
+      case Tool.POLYGON:
         tool.value = Tool.RECTANGLE;
         break;
       case Tool.RECTANGLE:

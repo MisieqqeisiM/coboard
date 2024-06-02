@@ -16,7 +16,8 @@ import { DrawBehavior } from "./behaviors/DrawBehavior.ts";
 import { LineBehavior } from "./behaviors/LineBehaviour.ts";
 import { EllipseBehavior } from "./behaviors/EllipseBehaviour.ts";
 import { RectangleBehavior } from "./behaviors/RectangleBehaviour.ts";
-import { PolyineBehavior } from "./behaviors/PolyLine.ts";
+import { PolylineBehaviour } from "./behaviors/PolyLine.ts";
+import { PolygonBehavior } from "./behaviors/Polygon.ts";
 
 interface CameraViewProps {
   camera: Signal<Camera>;
@@ -52,8 +53,11 @@ export default function Controls(
         case Tool.RECTANGLE:
           behavior = new RectangleBehavior(behaviorContext);
           break;
+        case Tool.POLYGON:
+          behavior = new PolygonBehavior(behaviorContext); 
+          break;
         case Tool.POLYLINE:
-          behavior = new PolyineBehavior(behaviorContext);
+          behavior = new PolylineBehaviour(behaviorContext);
           break;
         case Tool.ERASER:
           behavior = new EraseBehavior(behaviorContext);
@@ -192,7 +196,7 @@ export default function Controls(
 
     const mouseMove = (event: MouseEvent) => {
       if (client?.ui.viewerOnly) return;
-      if(settings.tool.peek()==Tool.POLYLINE) {
+      if(settings.tool.peek()==Tool.POLYLINE || settings.tool.peek()==Tool.POLYGON) {
         const [x, y] = camera.peek().toBoardCoords(
           event.clientX,
           event.clientY
