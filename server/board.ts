@@ -67,7 +67,7 @@ export class Board {
     return new ClientState(
       board!.lines,
       Array.from(this.users.values()),
-      board.shareToken,
+      board!.shareToken,
       client.viewerOnly,
     );
   }

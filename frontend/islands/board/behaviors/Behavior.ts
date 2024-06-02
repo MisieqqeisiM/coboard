@@ -1,0 +1,19 @@
+import { DrawableCanvas } from "../../../../client/canvas.ts";
+import { Client } from "../../../../client/client.ts";
+import { Settings } from "../../../../client/settings.ts";
+import { Point } from "../../../../liaison/liaison.ts";
+
+export interface Behavior {
+  toolStart(point: Point): void;
+  toolMove(point: Point): void;
+  toolEnd(): void;
+  toolCancel(): void;
+}
+
+export class BehaviorContext {
+  constructor(
+    readonly settings: Settings,
+    readonly canvas: DrawableCanvas,
+    readonly client: Client,
+  ) {}
+}

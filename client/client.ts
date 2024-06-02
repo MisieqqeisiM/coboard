@@ -9,6 +9,8 @@ import {
 } from "../liaison/actions.ts";
 import { ClientSocket, ClientState } from "../liaison/client.ts";
 import { Account, BoardUser, Line } from "../liaison/liaison.ts";
+import { LineCache } from "./LineCache.ts";
+import { ObservableCanvas } from "./canvas.ts";
 
 export class Client {
   constructor(
@@ -19,26 +21,34 @@ export class Client {
   ) {}
 }
 
-interface Confirmation {
-  localId: number;
-  globalId: number;
+export class SignalCanvas implements ObservableCanvas {
+  public readonly onAddLine = new Signal<Line | null>(null);
+  public readonly onRemoveLine = new Signal<number | null>(null);
+  public readonly onReset = new Signal<boolean>(false);
+
+  addLine(line: Line): void {
+    this.onAddLine.value = line;
+  }
+
+  removeLine(id: number): void {
+    this.onRemoveLine.value = id;
+  }
+
+  reset(): void {
+    this.onReset.value = true;
+  }
 }
 
 export class UIClient {
   readonly users: Signal<Map<string, BoardUser>> = signal(new Map());
-  public lines: Map<number, Line> = new Map();
-  readonly localIds: number[] = [];
   readonly clear: Signal<boolean> = signal(false);
   readonly shareToken: string;
   readonly viewerOnly: boolean;
-  readonly newLine: Signal<Line | null> = signal(null);
-  readonly removeLine: Signal<number | null> = signal(null);
-  readonly confirmLine: Signal<Confirmation | null> = signal(null);
+  readonly canvas = new SignalCanvas();
+  readonly cache: LineCache;
 
   constructor(initialState: ClientState) {
-    for (const line of initialState.lines) {
-      this.lines.set(line.id!, line);
-    }
+    this.cache = new LineCache(initialState.lines, this.canvas);
     this.shareToken = initialState.shareToken;
     this.viewerOnly = initialState.viewerOnly;
     const newUsers = new Map<string, BoardUser>();
@@ -84,33 +94,10 @@ export class SocketClient {
       client.users.value = newUsers;
     });
 
-    io.on("onDraw", (e) => {
-      client.lines.set(e.line.id!, e.line);
-      client.newLine.value = e.line;
-    });
-
-    io.on("onRemove", (e) => {
-      client.lines.delete(e.lineId!);
-      client.removeLine.value = e.lineId;
-    });
-
-    io.on("confirmLine", (e) => {
-      const id = client.localIds.shift()!;
-      const line = client.lines.get(id);
-      if (!line) return;
-      client.lines.delete(id);
-      client.lines.set(e.lineId, Line.changeId(line, e.lineId));
-
-      client.confirmLine.value = {
-        localId: id,
-        globalId: e.lineId,
-      };
-    });
-
-    io.on("onReset", (_e) => {
-      client.lines = new Map();
-      client.clear.value = true;
-    });
+    io.on("onDraw", (e) => client.cache.addRemoteLine(e.line));
+    io.on("onRemove", (e) => client.cache.removeLine(e.lineId));
+    io.on("confirmLine", (e) => client.cache.confirmLine(e.lineId));
+    io.on("onReset", (_) => client.cache.reset());
   }
 
   public undo() {
@@ -123,19 +110,15 @@ export class SocketClient {
   }
 
   public draw(line: Line) {
-    this.client.localIds.push(line.id!);
-    this.client.lines.set(line.id!, line);
-    this.client.newLine.value = line;
-    const action = new DrawAction(line);
+    const newLine = this.client.cache.addLocalLine(line);
+    const action = new DrawAction(newLine);
     action.accept(this.emitter);
     this.actionStack.push(action);
   }
 
   public remove(id: number) {
-    const line = this.client.lines.get(id);
+    const line = this.client.cache.removeLine(id);
     if (!line) return;
-    this.client.lines.delete(id);
-    this.client.removeLine.value = id;
     const action = new RemoveAction(line);
     action.accept(this.emitter);
     this.actionStack.push(action);

@@ -23,9 +23,20 @@ export class Line {
     readonly id: number,
     readonly width: number,
     readonly color: string,
-    readonly coordinates: Point[]
+    readonly coordinates: Point[],
   ) {}
+
   static changeId(line: Line, newId: number): Line {
     return new Line(newId, line.width, line.color, line.coordinates);
+  }
+
+  static move(line: Line, diff: Point): Line {
+    const coords = line.coordinates.map((point) => {
+      return {
+        x: point.x + diff.x,
+        y: point.y + diff.y,
+      };
+    });
+    return new Line(line.id, line.width, line.color, coords);
   }
 }
