@@ -16,6 +16,7 @@ import { DrawBehavior } from "./behaviors/DrawBehavior.ts";
 import { LineBehavior } from "./behaviors/LineBehaviour.ts";
 import { EllipseBehavior } from "./behaviors/EllipseBehaviour.ts";
 import { RectangleBehavior } from "./behaviors/RectangleBehaviour.ts";
+import { PolyineBehavior } from "./behaviors/PolyLine.ts";
 
 interface CameraViewProps {
   camera: Signal<Camera>;
@@ -50,6 +51,9 @@ export default function Controls(
           break;
         case Tool.RECTANGLE:
           behavior = new RectangleBehavior(behaviorContext);
+          break;
+        case Tool.POLYLINE:
+          behavior = new PolyineBehavior(behaviorContext);
           break;
         case Tool.ERASER:
           behavior = new EraseBehavior(behaviorContext);
@@ -188,6 +192,15 @@ export default function Controls(
 
     const mouseMove = (event: MouseEvent) => {
       if (client?.ui.viewerOnly) return;
+      if(settings.tool.peek()==Tool.POLYLINE) {
+        const [x, y] = camera.peek().toBoardCoords(
+          event.clientX,
+          event.clientY
+        );
+        
+        behavior.toolMove({ x, y });
+        return;
+      }
       if (!toolDown) return;
       const [x, y] = camera.peek().toBoardCoords(event.clientX, event.clientY);
       behavior.toolMove({ x, y });
@@ -251,6 +264,7 @@ export default function Controls(
       }
     };
 
+
     ref.current!.addEventListener("touchstart", touchStart2);
     globalThis.addEventListener("touchend", touchEnd2);
     globalThis.addEventListener("touchcancel", touchEnd2);
@@ -280,6 +294,8 @@ export default function Controls(
       globalThis.removeEventListener("mouseup", endMove);
       globalThis.removeEventListener("touchmove", touchMove);
       globalThis.removeEventListener("touchend", touchEnd);
+      globalThis.removeEventListener('keydown', keydown);
+      globalThis.removeEventListener('keyup', keyup);
     };
   }, []);
 

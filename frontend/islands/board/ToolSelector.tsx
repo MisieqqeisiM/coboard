@@ -25,16 +25,19 @@ export default function ToolSelector() {
     switch (tool.peek()) {
       case Tool.PEN:
         tool.value = Tool.LINE;
-        size.value = eraserSize.peek();
         break;
       case Tool.LINE:
         tool.value = Tool.ELLIPSE;
         break;
       case Tool.ELLIPSE:
+        tool.value = Tool.POLYLINE;
+        break;
+      case Tool.POLYLINE:
         tool.value = Tool.RECTANGLE;
         break;
       case Tool.RECTANGLE:
         tool.value = Tool.ERASER;
+        size.value = eraserSize.peek();
         break;
       case Tool.ERASER:
         tool.value = Tool.MOVE;
