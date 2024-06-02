@@ -5,6 +5,10 @@ import { Tool } from "../../../client/settings.ts";
 
 const toolIcons: Record<Tool, string> = {
   [Tool.PEN]: "pencil-outline",
+  [Tool.LINE]: "remove-outline",
+  [Tool.RECTANGLE]: "tablet-landscape-outline",
+  [Tool.POLYLINE]: "checkmark-outline",
+  [Tool.ELIPSE]: "radio-button-off-outline",
   [Tool.ERASER]: "eraser",
   [Tool.MOVE]: "hand-right-outline",
 };
@@ -20,8 +24,17 @@ export default function ToolSelector() {
   const nextTool = () => {
     switch (tool.peek()) {
       case Tool.PEN:
-        tool.value = Tool.ERASER;
+        tool.value = Tool.LINE;
         size.value = eraserSize.peek();
+        break;
+      case Tool.LINE:
+        tool.value = Tool.POLYLINE;
+        break;
+      case Tool.POLYLINE:
+        tool.value = Tool.RECTANGLE;
+        break;
+      case Tool.RECTANGLE:
+        tool.value = Tool.ERASER;
         break;
       case Tool.ERASER:
         tool.value = Tool.MOVE;

@@ -113,12 +113,12 @@ export default function ObservableCanvas(props: CanvasProps) {
       if (movedLine) {
         lineDrawer.drawLine(program!, movedLine);
       } else if (drawing) {
-        const color = tool.peek() == Tool.PEN
-          ? strokeColor.peek()
-          : Color.BLACK;
+        const color = tool.peek() == Tool.ERASER
+          ? Color.BLACK
+          : strokeColor.peek();
         lineDrawer.drawLine(
-          program!,
-          new Line(0, strokeWidth.peek(), color, points),
+          program!, 
+          new Line(0, strokeWidth.peek(), strokeColor.peek(), points)
         );
       }
     }
@@ -156,16 +156,30 @@ export default function ObservableCanvas(props: CanvasProps) {
       return id;
     }
 
+    function submitLine() {
+      const line: Line = new Line(
+        lineId--,
+        strokeWidth.peek(),
+        strokeColor.peek(),
+        points,
+      );
+      client.socket.draw(line);
+      drawing = false;
+      points = [];
+      draw();
+    }
+
     props.startDraw.subscribe((point) => {
       if (!point) return;
-      points = [point];
+
       if (tool.peek() === Tool.MOVE) {
         const id = getIntersectedLineId(point);
         if (id) {
           movedLine = client.ui.lines.get(id)!;
           client.socket.remove(id);
         }
-      } else {
+      } else if (tool.peek() == Tool.ERASER || tool.peek() == Tool.PEN || tool.peek() ==Tool.LINE) {
+        points = [point];
         drawing = true;
         draw();
       }
@@ -182,6 +196,7 @@ export default function ObservableCanvas(props: CanvasProps) {
     }
 
     props.draw.subscribe((point) => {
+      //called on each mousemove
       if (!point) return;
       if (movedLine) {
         const prev = points.at(-1)!;
@@ -194,15 +209,25 @@ export default function ObservableCanvas(props: CanvasProps) {
         draw();
       }
       if (!drawing) return;
-      if (tool.peek() === Tool.ERASER) {
-        const segment = [points.at(-1)!, point];
-        for (const line of client.ui.lines.values()) {
-          if (linesIntersect(segment, line.coordinates, strokeWidth.peek())) {
-            client.socket.remove(line.id);
+
+      switch (tool.peek()) {
+        case (Tool.LINE):
+          points[1] = point;
+          break;
+        case (Tool.ERASER):
+          const segment = [points.at(-1)!, point];
+          for (const line of client.ui.lines.values()) {
+            if (linesIntersect(segment, line.coordinates, strokeWidth.peek())) {
+              client.socket.remove(line.id);
+            }
           }
-        }
+          points.push(point);
+          break;
+        case (Tool.PEN):
+          points.push(point);
+          break;
+
       }
-      points.push(point);
       draw();
     });
 
@@ -212,19 +237,14 @@ export default function ObservableCanvas(props: CanvasProps) {
         client.socket.draw(movedLine);
         movedLine = null;
       } else if (drawing) {
-        if (tool.peek() == Tool.PEN) {
-          const line: Line = new Line(
-            lineId--,
-            strokeWidth.peek(),
-            strokeColor.peek(),
-            points,
-          );
-          client.socket.draw(line);
+        if (tool.peek() == Tool.PEN || tool.peek() ==Tool.LINE)
+          submitLine();
+        else if (tool.peek() == Tool.ERASER) {
+          drawing = false;
+          points = [];
+          draw();
         }
       }
-      drawing = false;
-      points = [];
-      draw();
     });
 
     theme.subscribe((_) => draw());
