@@ -14,6 +14,7 @@ import { EraseBehavior } from "./behaviors/EraseBehavior.ts";
 import { MoveBehavior } from "./behaviors/MoveBehavior.ts";
 import { DrawBehavior } from "./behaviors/DrawBehavior.ts";
 import { SelectBehavior } from "./behaviors/SelectBehavior.ts";
+import { Line, Point } from "../../../liaison/liaison.ts";
 
 interface CameraViewProps {
   controls: DrawableCanvas;
@@ -78,7 +79,12 @@ export default function Controls({ controls }: CameraViewProps) {
     let mouseMoving = false;
     let toolDown = false;
 
+    let mouseX = 0;
+    let mouseY = 0;
+
     const move = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
       if (e.buttons & 2) {
         moving = false;
         if (!mouseMoving) {
@@ -226,6 +232,64 @@ export default function Controls({ controls }: CameraViewProps) {
       behavior.toolEnd();
     };
 
+    globalThis.addEventListener("copy", (_) => {
+      if (controls.getSelected().length == 0) return;
+      navigator.clipboard.writeText(
+        `coboard:${JSON.stringify(controls.getSelected())}`,
+      );
+    });
+
+    globalThis.addEventListener("paste", (e) => {
+      console.log(e);
+      if (!e.clipboardData || !e.clipboardData.types) return;
+      const text = e.clipboardData.getData("Text");
+      if (!text.startsWith("coboard:")) return;
+      const data = JSON.parse(text.slice(8));
+      if (!Array.isArray(data)) return;
+      const lines: Line[] = [];
+      const middle = { x: 0, y: 0 };
+      let n = 0;
+
+      for (const obj of data) {
+        const id = obj["id"];
+        const width = obj["width"];
+        const color = obj["color"];
+        const coordinates = obj["coordinates"];
+        if (typeof id !== "number") return;
+        if (typeof width !== "number") return;
+        if (typeof color !== "string") return;
+        if (!color.match("#[0-9a-fA-F]{6}")) return;
+        if (!Array.isArray(coordinates)) return;
+        const newCoords: Point[] = [];
+        for (const point of coordinates) {
+          const x = point["x"];
+          const y = point["y"];
+          if (typeof x != "number") return;
+          if (typeof y != "number") return;
+          newCoords.push({ x, y });
+          n++;
+          middle.x += x;
+          middle.y += y;
+        }
+        lines.push(new Line(id, width, color, newCoords));
+      }
+
+      middle.x /= n;
+      middle.y /= n;
+
+      for (const line of controls.getSelected()) {
+        client.socket.draw(line);
+      }
+
+      const [mx, my] = camera.peek().toBoardCoords(mouseX, mouseY);
+      const diff = {
+        x: mx - middle.x,
+        y: my - middle.y,
+      };
+      controls.setSelected(lines.map((l) => Line.move(l, diff)));
+      settings.tool.value = Tool.MOVE;
+    });
+
     globalThis.addEventListener("keydown", (e) => {
       if (e.key === "Shift") {
         if (settings.tool.peek() === Tool.MOVE) {
@@ -240,6 +304,9 @@ export default function Controls({ controls }: CameraViewProps) {
           settings.tool.value = Tool.MOVE;
         }
       }
+    });
+    globalThis.addEventListener("resize", (_) => {
+      controls.redraw();
     });
 
     ref.current!.addEventListener("touchstart", touchStart2);

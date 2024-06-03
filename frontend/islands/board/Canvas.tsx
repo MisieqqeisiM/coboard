@@ -33,7 +33,7 @@ export class SignalCanvas implements DrawableCanvas {
   }
 
   redraw(): void {
-    this.redrawSig.value = true;
+    this.redrawSig.value = !this.redrawSig.peek();
   }
 }
 

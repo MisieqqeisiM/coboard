@@ -23,14 +23,12 @@ export class MoveBehavior implements Behavior {
         return;
       }
     }
-    this.movedLine = this.ctx.client.ui.cache.getLineAt(point);
-    if (!this.movedLine) {
-      for (const line of this.ctx.canvas.getSelected()) {
-        this.ctx.client.socket.draw(line);
-      }
-      this.ctx.canvas.setSelected([]);
-      return;
+    for (const line of this.ctx.canvas.getSelected()) {
+      this.ctx.client.socket.draw(line);
     }
+    this.ctx.canvas.setSelected([]);
+    this.movedLine = this.ctx.client.ui.cache.getLineAt(point);
+    if (!this.movedLine) return;
     this.ctx.client.socket.remove(this.movedLine.id);
     this.ctx.canvas.setTmpLine(this.movedLine);
   }
