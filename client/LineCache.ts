@@ -1,4 +1,7 @@
-import { squaredDistanceToLine } from "../frontend/islands/board/webgl-utils/line_drawing.ts";
+import {
+  lineIntersectsRect,
+  squaredDistanceToLine,
+} from "../frontend/islands/board/webgl-utils/line_drawing.ts";
 import { Line, Point } from "../liaison/liaison.ts";
 import { ObservableCanvas } from "./canvas.ts";
 
@@ -25,6 +28,16 @@ export class LineCache {
       }
     }
     return bestLine;
+  }
+
+  public getLinesInRect(r1: Point, r2: Point): Line[] {
+    let result: Line[] = [];
+    for (const line of this.lines.values()) {
+      if (lineIntersectsRect(line, r1, r2)) {
+        result.push(line);
+      }
+    }
+    return result;
   }
 
   public addLocalLine(line: Line): Line {

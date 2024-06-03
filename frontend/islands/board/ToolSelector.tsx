@@ -7,6 +7,7 @@ const toolIcons: Record<Tool, string> = {
   [Tool.PEN]: "pencil-outline",
   [Tool.ERASER]: "eraser",
   [Tool.MOVE]: "hand-right-outline",
+  [Tool.SELECT]: "crop-outline",
 };
 
 export default function ToolSelector() {
@@ -27,6 +28,10 @@ export default function ToolSelector() {
         tool.value = Tool.MOVE;
         break;
       case Tool.MOVE:
+        tool.value = Tool.PEN;
+        size.value = penSize.peek();
+        break;
+      case Tool.SELECT:
         tool.value = Tool.PEN;
         size.value = penSize.peek();
         break;

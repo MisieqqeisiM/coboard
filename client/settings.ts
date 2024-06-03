@@ -4,6 +4,7 @@ export enum Tool {
   PEN,
   ERASER,
   MOVE,
+  SELECT,
 }
 
 export enum Color {

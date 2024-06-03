@@ -1,5 +1,4 @@
 import { Signal, useContext, useEffect, useRef } from "../../../deps_client.ts";
-import { Color, Tool } from "../../../client/settings.ts";
 import {
   createProgramFromSources,
   resizeCanvasToDisplaySize,
@@ -19,10 +18,20 @@ interface CanvasProps {
 
 export class SignalCanvas implements DrawableCanvas {
   tmpLine = new Signal<Line | null>();
+  selected = new Signal<Line[]>([]);
   redrawSig = new Signal(false);
+
   setTmpLine(line: Line | null): void {
     this.tmpLine.value = line;
   }
+  setSelected(lines: Line[]): void {
+    this.selected.value = lines;
+  }
+
+  getSelected(): Line[] {
+    return this.selected.peek();
+  }
+
   redraw(): void {
     this.redrawSig.value = true;
   }
@@ -39,7 +48,7 @@ export default function Canvas(
   const glRef = useRef<WebGLRenderingContext | null>(null);
   let program: WebGLProgram | null = null;
 
-  const vertexShaderSource = `
+  const vertexShaderSource = `#
     //position on board
     attribute vec2 a_position;
 
@@ -49,8 +58,10 @@ export default function Canvas(
     //camera transformations
     uniform vec2 u_translation;
     uniform vec2 u_scale;
+    varying vec2 position;
 
     void main() {
+        position = a_position;
         vec2 translatedPosition = a_position + u_translation;
         vec2 position = translatedPosition * u_scale;
 
@@ -67,6 +78,8 @@ export default function Canvas(
     precision mediump float;
     uniform vec4 u_color;
     uniform bool u_theme;
+    uniform bool u_selected;
+    varying vec2 position;
     void main() {
       vec4 color = u_color;
       if(!u_theme) {
@@ -74,6 +87,8 @@ export default function Canvas(
           color = vec4(0.9, 0.9, 0.9, 1.0);
         }
       } 
+      if(u_selected)
+        color *= 0.5 + 0.5*sin((position.x + position.y)*0.3);
       gl_FragColor = color;
     }
   `;
@@ -100,16 +115,19 @@ export default function Canvas(
     );
     gl.useProgram(program);
     const lineBuffer = new LineBuffer(gl);
+    const selectBuffer = new LineBuffer(gl);
     const lineDrawer = new LineDrawer(gl);
 
     function draw() {
       gl.clear(gl.COLOR_BUFFER_BIT);
       resizeCanvasToDisplaySize(gl.canvas);
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-      setUniforms(gl, program!, camera, theme.peek());
+      setUniforms(gl, program!, camera, theme.peek(), false);
       lineBuffer.draw(program!);
       const line = controls.tmpLine.peek();
       if (line) lineDrawer.drawLine(program!, line);
+      setUniforms(gl, program!, camera, theme.peek(), true);
+      selectBuffer.draw(program!);
     }
 
     for (const line of client.ui.cache.getLines()) {
@@ -135,6 +153,13 @@ export default function Canvas(
     });
 
     controls.tmpLine.subscribe((_) => draw());
+    controls.selected.subscribe((lines) => {
+      selectBuffer.clear();
+      for (const line of lines) {
+        selectBuffer.addLine(line);
+      }
+      draw();
+    });
     controls.redrawSig.subscribe((_) => draw());
 
     theme.subscribe((_) => draw());

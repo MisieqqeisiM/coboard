@@ -5,7 +5,7 @@ import {
   useEffect,
   useRef,
 } from "../../../deps_client.ts";
-import { Camera } from "../../../client/camera.ts";
+import { Camera, CameraContext } from "../../../client/camera.ts";
 import { SettingsContext, Tool } from "../../../client/settings.ts";
 import { ClientContext } from "../app/WithClient.tsx";
 import { Behavior, BehaviorContext } from "./behaviors/Behavior.ts";
@@ -13,19 +13,18 @@ import { DrawableCanvas } from "../../../client/canvas.ts";
 import { EraseBehavior } from "./behaviors/EraseBehavior.ts";
 import { MoveBehavior } from "./behaviors/MoveBehavior.ts";
 import { DrawBehavior } from "./behaviors/DrawBehavior.ts";
+import { SelectBehavior } from "./behaviors/SelectBehavior.ts";
 
 interface CameraViewProps {
-  camera: Signal<Camera>;
   controls: DrawableCanvas;
 }
 
-export default function Controls(
-  { camera, controls }: CameraViewProps,
-) {
+export default function Controls({ controls }: CameraViewProps) {
   const stylusMode = useContext(SettingsContext).stylusMode;
   const ref = useRef<HTMLDivElement>(null);
   const client = useContext(ClientContext);
   const settings = useContext(SettingsContext);
+  const camera = useContext(CameraContext);
   if (!client) return <></>;
 
   const behaviorContext = new BehaviorContext(settings, controls, client!);
@@ -43,6 +42,9 @@ export default function Controls(
           break;
         case Tool.MOVE:
           behavior = new MoveBehavior(behaviorContext);
+          break;
+        case Tool.SELECT:
+          behavior = new SelectBehavior(behaviorContext);
           break;
       }
     });
@@ -223,6 +225,22 @@ export default function Controls(
       toolDown = false;
       behavior.toolEnd();
     };
+
+    globalThis.addEventListener("keydown", (e) => {
+      if (e.key === "Shift") {
+        if (settings.tool.peek() === Tool.MOVE) {
+          settings.tool.value = Tool.SELECT;
+        }
+      }
+    });
+
+    globalThis.addEventListener("keyup", (e) => {
+      if (e.key === "Shift") {
+        if (settings.tool.peek() === Tool.SELECT) {
+          settings.tool.value = Tool.MOVE;
+        }
+      }
+    });
 
     ref.current!.addEventListener("touchstart", touchStart2);
     globalThis.addEventListener("touchend", touchEnd2);

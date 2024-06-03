@@ -4,7 +4,12 @@ import { Behavior, BehaviorContext } from "./Behavior.ts";
 
 export class EraseBehavior implements Behavior {
   private points: Point[] = [];
-  constructor(private ctx: BehaviorContext) {}
+  constructor(private ctx: BehaviorContext) {
+    for (const line of this.ctx.canvas.getSelected()) {
+      this.ctx.client.socket.draw(line);
+    }
+    this.ctx.canvas.setSelected([]);
+  }
 
   toolCancel(): void {
     this.points = [];

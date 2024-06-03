@@ -23,32 +23,23 @@ export default function Board() {
   if (!client.allowed) return <AlreadyLoggedIn />;
   if (client.ui.viewerOnly) settings.stylusMode.value = true;
 
-  const camera = signal(
-    new Camera(
-      globalThis.window.innerWidth / 2 - width / 2,
-      globalThis.window.innerHeight / 2 - height / 2,
-      1,
-    ),
+  const camera = useContext(CameraContext);
+  camera.value = new Camera(
+    globalThis.window.innerWidth / 2 - width / 2,
+    globalThis.window.innerHeight / 2 - height / 2,
+    1,
   );
 
   const controls = new SignalCanvas();
 
   return (
     <>
-      <CameraContext.Provider value={camera}>
-        <Canvas
-          controls={controls}
-        />
-        <CameraView>
-          <CursorBox />
-          <MouseTracker client={client} />
-        </CameraView>
-      </CameraContext.Provider>
-      <Controls
-        camera={camera}
-        controls={controls}
-      >
-      </Controls>
+      <Canvas controls={controls} />
+      <CameraView>
+        <CursorBox />
+        <MouseTracker client={client} />
+      </CameraView>
+      <Controls controls={controls} />
       <Toolbar />
       <div style={{ position: "absolute", zIndex: 101, right: 10, top: 10 }}>
         <ThemeSelector />
