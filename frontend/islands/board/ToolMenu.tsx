@@ -19,7 +19,7 @@ export default function ToolMenu() {
   const settings = useContext(SettingsContext);
 
   const tool = settings.tool;
-  const tools = [Tool.POLYGON, Tool.POLYLINE, Tool.ELLIPSE, Tool.RECTANGLE, Tool.LINE, Tool.PEN, Tool.ERASER, Tool.MOVE];
+  const tools = [Tool.POLYGON, Tool.POLYLINE, Tool.ELLIPSE, Tool.RECTANGLE, Tool.LINE, Tool.PEN];
   const unchosen = tools.filter(item=> item!=tool);
 
   return (
@@ -39,14 +39,6 @@ export default function ToolMenu() {
           /> 
           <ToolIcon
             chosenTool={unchosen[4]}
-          /> 
-
-          <ToolIcon
-            chosenTool={unchosen[5]}
-          /> 
-
-          <ToolIcon
-            chosenTool={unchosen[6]}
           /> 
 
         <div class="cover" style={{ zIndex: 1001 }}>

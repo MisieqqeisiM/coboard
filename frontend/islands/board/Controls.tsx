@@ -6,7 +6,7 @@ import {
   useRef,
 } from "../../../deps_client.ts";
 import { Camera } from "../../../client/camera.ts";
-import { SettingsContext, Tool } from "../../../client/settings.ts";
+import { Mode, SettingsContext, Tool } from "../../../client/settings.ts";
 import { ClientContext } from "../app/WithClient.tsx";
 import { Behavior, BehaviorContext } from "./behaviors/Behavior.ts";
 import { DrawableCanvas } from "../../../client/canvas.ts";
@@ -35,38 +35,48 @@ export default function Controls(
 
   const behaviorContext = new BehaviorContext(settings, controls, client!);
   let shift = false;
-
+  
   useEffect(() => {
     let behavior: Behavior = new DrawBehavior(behaviorContext);
+    const getDrawBehaviour = (tool: Tool): Behavior => {
 
-    settings.tool.subscribe((tool) => {
       switch (tool) {
         case Tool.PEN:
-          behavior = new DrawBehavior(behaviorContext);
-          break;
+          return new DrawBehavior(behaviorContext);
         case Tool.LINE:
-          behavior = new LineBehavior(behaviorContext);
-          break;
+          return new LineBehavior(behaviorContext);
         case Tool.ELLIPSE:
-          behavior = new EllipseBehavior(behaviorContext);
-          break;
+          return new EllipseBehavior(behaviorContext);
         case Tool.RECTANGLE:
-          behavior = new RectangleBehavior(behaviorContext);
-          break;
+          return new RectangleBehavior(behaviorContext);
         case Tool.POLYGON:
-          behavior = new PolygonBehavior(behaviorContext); 
-          break;
+          return new PolygonBehavior(behaviorContext);
         case Tool.POLYLINE:
-          behavior = new PolylineBehaviour(behaviorContext);
+          return new PolylineBehaviour(behaviorContext);
+      }
+    };
+
+
+    settings.tool.subscribe((tool) => {
+      if(settings.mode == Mode.DRAW) {
+        behavior = getDrawBehaviour(tool);
+        behavior.setShift(shift);
+      }
+    });
+
+    settings.mode.subscribe((mode) => {
+      switch (mode) {
+        case Mode.DRAW:
+          behavior = getDrawBehaviour(settings.tool.value);
+          behavior.setShift(shift);
           break;
-        case Tool.ERASER:
+        case Mode.ERASE:
           behavior = new EraseBehavior(behaviorContext);
           break;
-        case Tool.MOVE:
+        case Mode.MOVE:
           behavior = new MoveBehavior(behaviorContext);
           break;
       }
-      behavior.setShift(shift);
     });
 
     let touchpad = false;
@@ -196,12 +206,12 @@ export default function Controls(
 
     const mouseMove = (event: MouseEvent) => {
       if (client?.ui.viewerOnly) return;
-      if(settings.tool.peek()==Tool.POLYLINE || settings.tool.peek()==Tool.POLYGON) {
+      if (settings.mode.peek()==Mode.DRAW &&(settings.tool.peek() == Tool.POLYLINE || settings.tool.peek() == Tool.POLYGON)){
         const [x, y] = camera.peek().toBoardCoords(
           event.clientX,
           event.clientY
         );
-        
+
         behavior.toolMove({ x, y });
         return;
       }
@@ -254,15 +264,15 @@ export default function Controls(
       toolDown = false;
       behavior.toolEnd();
     };
-    const keydown = (e : KeyboardEvent) => {
-      if(e.shiftKey) {
+    const keydown = (e: KeyboardEvent) => {
+      if (e.shiftKey) {
         shift = true;
         behavior.setShift(shift);
       }
     };
 
-    const keyup = (e : KeyboardEvent) => {
-      if(!e.shiftKey) {
+    const keyup = (e: KeyboardEvent) => {
+      if (!e.shiftKey) {
         shift = false;
         behavior.setShift(shift);
       }

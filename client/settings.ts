@@ -8,7 +8,10 @@ export enum Tool {
   RECTANGLE,
   POLYGON,
   ELLIPSE,
-  ERASER,
+}
+export enum Mode {
+  DRAW,
+  ERASE,
   MOVE,
 }
 
@@ -43,6 +46,7 @@ export interface Settings {
 export const SettingsContext = createContext<Settings>({
   color: signal(Color.BLACK),
   tool: signal(Tool.PEN),
+  mode: signal(Mode.DRAW),
   size: signal(20),
   penSize: signal(20),
   eraserSize: signal(20),

@@ -2,7 +2,7 @@ import { useContext } from "../../../deps_client.ts";
 import IconCircle from "../app/IconCircle.tsx";
 import AccountMenu from "./AccountMenu.tsx";
 import ColorSelector from "./ColorSelector.tsx";
-import ToolSelector from "./ToolSelector.tsx";
+import ModeSelector from "./ModeSelector.tsx";
 import { ClientContext } from "../app/WithClient.tsx";
 import StylusModeSelector from "./StylusModeSelector.tsx";
 import SizeSelector from "./SizeSelector.tsx";
@@ -16,6 +16,7 @@ export default function Toolbar() {
     <>
       <ColorSelector />
       <SizeSelector />
+      <ModeSelector/>
       <ToolMenu />
       <StylusModeSelector />
       <ShareSelector shareToken={client?.ui.shareToken} />

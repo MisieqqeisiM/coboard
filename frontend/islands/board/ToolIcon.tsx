@@ -10,23 +10,14 @@ export const toolIcons: Record<Tool, string> = {
   [Tool.POLYLINE]: "polyline",
   [Tool.POLYGON]: "polygon",
   [Tool.ELLIPSE]: "radio-button-off-outline",
-  [Tool.ERASER]: "eraser",
-  [Tool.MOVE]: "hand-right-outline",
 };
 
 export default function ToolIcon({chosenTool,}:{chosenTool: Tool;}) {
   const settings = useContext(SettingsContext);
 
   const tool = settings.tool;
-  const size = settings.size;
-  const penSize = settings.penSize;
-  const eraserSize = settings.eraserSize;
 
   const selectTool = () => {
-    if(chosenTool == Tool.ERASER)
-        size.value=eraserSize.value;
-    else 
-        size.value=penSize.value;
     tool.value = chosenTool;
   };
 
