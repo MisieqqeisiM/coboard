@@ -31,7 +31,7 @@ export class LineCache {
   }
 
   public getLinesInRect(r1: Point, r2: Point): Line[] {
-    let result: Line[] = [];
+    const result: Line[] = [];
     for (const line of this.lines.values()) {
       if (lineIntersectsRect(line, r1, r2)) {
         result.push(line);

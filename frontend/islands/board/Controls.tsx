@@ -240,7 +240,6 @@ export default function Controls({ controls }: CameraViewProps) {
     });
 
     globalThis.addEventListener("paste", (e) => {
-      console.log(e);
       if (!e.clipboardData || !e.clipboardData.types) return;
       const text = e.clipboardData.getData("Text");
       if (!text.startsWith("coboard:")) return;
@@ -295,6 +294,8 @@ export default function Controls({ controls }: CameraViewProps) {
         if (settings.tool.peek() === Tool.MOVE) {
           settings.tool.value = Tool.SELECT;
         }
+      } else if (e.key === "Delete") {
+        controls.setSelected([]);
       }
     });
 
