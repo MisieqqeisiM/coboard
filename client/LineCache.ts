@@ -1,5 +1,6 @@
 import {
   lineIntersectsRect,
+  linesIntersect,
   squaredDistanceToLine,
 } from "../frontend/islands/board/webgl-utils/line_drawing.ts";
 import { Line, Point } from "../liaison/liaison.ts";
@@ -28,6 +29,18 @@ export class LineCache {
       }
     }
     return bestLine;
+  }
+
+  public getLinesIntersecting(line: Line): Line[] {
+    let result: Line[] = [];
+    for (const other of this.lines.values()) {
+      if (
+        linesIntersect(line.coordinates, other.coordinates, line.width)
+      ) {
+        result.push(other);
+      }
+    }
+    return result;
   }
 
   public getLinesInRect(r1: Point, r2: Point): Line[] {

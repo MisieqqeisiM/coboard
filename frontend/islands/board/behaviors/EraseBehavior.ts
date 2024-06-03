@@ -22,9 +22,11 @@ export class EraseBehavior implements Behavior {
   }
 
   toolMove(point: Point): void {
+    const prev = this.points.at(-1)!;
     this.points.push(point);
-    const line = this.ctx.client.ui.cache.getLineAt(point);
-    if (line) this.ctx.client.socket.remove(line.id);
+    const lines = this.ctx.client.ui.cache.getLinesIntersecting(new Line(0, this.ctx.settings.size.peek(), Color.BLACK, [prev, point]));
+    for(const line of lines)
+      this.ctx.client.socket.remove(line.id);
     this.ctx.canvas.setTmpLine(this.getLine());
   }
 
