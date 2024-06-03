@@ -7,6 +7,7 @@ import { ClientContext } from "../app/WithClient.tsx";
 import StylusModeSelector from "./StylusModeSelector.tsx";
 import SizeSelector from "./SizeSelector.tsx";
 import ShareSelector from "./ShareSelector.tsx";
+import ToolMenu from "./ToolMenu.tsx";
 
 export default function Toolbar() {
   const client = useContext(ClientContext);
@@ -15,7 +16,7 @@ export default function Toolbar() {
     <>
       <ColorSelector />
       <SizeSelector />
-      <ToolSelector />
+      <ToolMenu />
       <StylusModeSelector />
       <ShareSelector shareToken={client?.ui.shareToken} />
     </>
