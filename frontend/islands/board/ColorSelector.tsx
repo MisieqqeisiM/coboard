@@ -64,6 +64,43 @@ export default function ColorSelector() {
     selector.current?.classList.add("active");
   };
 
+  useEffect(() => {
+    globalThis.addEventListener("keypress", (e) => {
+      switch (e.key) {
+        case "1":
+          color.value = Color.BLACK;
+          break;
+        case "2":
+          color.value = Color.DARK_BLUE;
+          break;
+        case "3":
+          color.value = Color.BLUE;
+          break;
+        case "4":
+          color.value = Color.CYAN;
+          break;
+        case "5":
+          color.value = Color.GREEN;
+          break;
+        case "6":
+          color.value = Color.YELLOW;
+          break;
+        case "7":
+          color.value = Color.ORANGE;
+          break;
+        case "8":
+          color.value = Color.RED;
+          break;
+        case "9":
+          color.value = Color.MAGENTA;
+          break;
+        case "0":
+          color.value = Color.VIOLET;
+          break;
+      }
+    });
+  }, []);
+
   const up = () => {
     if (Date.now() > downTime + 300) {
       selector.current?.classList.remove("active");

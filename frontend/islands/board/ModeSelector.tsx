@@ -1,4 +1,4 @@
-import { useContext } from "../../../deps_client.ts";
+import { useContext, useEffect } from "../../../deps_client.ts";
 import IconCircle from "../app/IconCircle.tsx";
 import { Mode, SettingsContext } from "../../../client/settings.ts";
 import { Tool } from "../../../client/settings.ts";
@@ -38,5 +38,23 @@ export default function ModeSelector() {
         break;
     }
   };
+
+  useEffect(() => {
+    globalThis.addEventListener("keypress", (e) => {
+      switch (e.key) {
+        case "q":
+          size.value = penSize.value;
+          mode.value = Mode.DRAW;
+          break;
+        case "w":
+          size.value = eraserSize.value;
+          mode.value = Mode.ERASE;
+          break;
+        case "e":
+          mode.value = Mode.MOVE;
+          break;
+      }
+    });
+  }, []);
   return <IconCircle iconName={modeIcons[mode.value]} onClick={nextTool} />;
 }
