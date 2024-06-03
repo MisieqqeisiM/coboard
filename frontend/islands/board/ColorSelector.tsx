@@ -1,7 +1,8 @@
-import { useContext, useRef } from "../../../deps_client.ts";
+import { useContext, useEffect, useRef } from "../../../deps_client.ts";
 import { Color } from "../../../client/settings.ts";
 import { SettingsContext } from "../../../client/settings.ts";
 import { ThemeContext } from "../app/Themed.tsx";
+import { HideContext } from "./Controls.tsx";
 
 function ColorBar({
   visibleColor,
@@ -70,6 +71,15 @@ export default function ColorSelector() {
       selector.current?.classList.remove("active");
     }
   };
+
+  const hide = useContext(HideContext);
+
+  useEffect(() => {
+    hide.subscribe((_) => {
+      selector.current?.classList.remove("active");
+    });
+  }, []);
+
   return (
     <div class="color-selector" ref={selector}>
       <div class="color-box">

@@ -1,10 +1,19 @@
-import { useContext, useRef } from "../../../deps_client.ts";
+import { useContext, useEffect, useRef } from "../../../deps_client.ts";
 import { Mode, SettingsContext, Tool } from "../../../client/settings.ts";
+import { HideContext } from "./Controls.tsx";
 
 export default function SizeSelector() {
   const settings = useContext(SettingsContext);
   const slider = useRef<HTMLInputElement>(null);
   const sliderBox = useRef<HTMLDivElement>(null);
+  const hide = useContext(HideContext);
+
+  useEffect(() => {
+    hide.subscribe((_) => {
+      sliderBox.current?.classList.remove("active");
+    });
+  }, []);
+
   return (
     <div class="size-selector">
       <div
@@ -37,7 +46,7 @@ export default function SizeSelector() {
           ref={slider}
           onInput={() => {
             const value = Number(slider.current?.value);
-            switch (settings.tool.peek()) {
+            switch (settings.mode.peek()) {
               case Mode.DRAW:
                 settings.penSize.value = value;
                 break;

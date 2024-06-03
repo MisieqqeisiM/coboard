@@ -1,4 +1,10 @@
-import { useContext, useEffect, useRef } from "../../../deps_client.ts";
+import {
+  createContext,
+  signal,
+  useContext,
+  useEffect,
+  useRef,
+} from "../../../deps_client.ts";
 import { CameraContext } from "../../../client/camera.ts";
 import { Mode, SettingsContext, Tool } from "../../../client/settings.ts";
 import { ClientContext } from "../app/WithClient.tsx";
@@ -15,6 +21,8 @@ import { PolygonBehavior } from "./behaviors/PolygonBehaviour.ts";
 import { SelectBehavior } from "./behaviors/SelectBehavior.ts";
 import { Line, Point } from "../../../liaison/liaison.ts";
 
+export const HideContext = createContext(signal(false));
+
 interface CameraViewProps {
   controls: DrawableCanvas;
 }
@@ -25,6 +33,7 @@ export default function Controls({ controls }: CameraViewProps) {
   const client = useContext(ClientContext);
   const settings = useContext(SettingsContext);
   const camera = useContext(CameraContext);
+  const hide = useContext(HideContext);
   if (!client) return <></>;
 
   const behaviorContext = new BehaviorContext(settings, controls, client!);
@@ -140,7 +149,12 @@ export default function Controls({ controls }: CameraViewProps) {
       return [touchX, touchY, touchDist];
     }
 
+    const hideMenus = () => {
+      hide.value = !hide.peek();
+    };
+
     const touchStart = (e: TouchEvent) => {
+      hideMenus();
       e.preventDefault();
       if (mouseMoving) return;
       moving = true;
@@ -196,6 +210,7 @@ export default function Controls({ controls }: CameraViewProps) {
     };
 
     const mouseDown = (event: MouseEvent) => {
+      hideMenus();
       if (client?.ui.viewerOnly) return;
       if (event.button != 0) return;
       if (toolDown) return;
