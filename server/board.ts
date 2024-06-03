@@ -40,7 +40,9 @@ export class Board {
   public async init() {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     const board = await boards.findOne({ id: this.id });
-    this.lineId = board?.lines.at(-1)?.id ?? 0;
+    for (const line of board!.lines) {
+      this.lineId = Math.max(this.lineId, line.id);
+    }
   }
 
   public getUser(id: string) {

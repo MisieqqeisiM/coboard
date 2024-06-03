@@ -1,15 +1,15 @@
-import { addLineNumberWithError, glEnumToString} from "./utils.ts";
-import { DEFAULT_SHADER_TYPE } from './constants.ts';
+import { addLineNumberWithError, glEnumToString } from "./utils.ts";
+import { DEFAULT_SHADER_TYPE } from "./constants.ts";
 
 export const loadShader = (
-    gl: WebGLRenderingContext,
-    shaderSource: string,
-    shaderType: GLenum,
+  gl: WebGLRenderingContext,
+  shaderSource: string,
+  shaderType: GLenum,
 ) => {
   const shader = gl.createShader(shaderType);
 
   if (!shader) {
-    throw new Error('Failed to create shader');
+    throw new Error("Failed to create shader");
   }
 
   gl.shaderSource(shader, shaderSource);
@@ -17,24 +17,28 @@ export const loadShader = (
 
   const compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
   if (!compiled) {
-    const error = gl.getShaderInfoLog(shader) ?? '';
+    const error = gl.getShaderInfoLog(shader) ?? "";
     gl.deleteShader(shader);
-    throw new Error(`Failed to compile shader: ${error}\n${addLineNumberWithError(shaderSource, error)}`);
+    throw new Error(
+      `Failed to compile shader: ${error}\n${
+        addLineNumberWithError(shaderSource, error)
+      }`,
+    );
   }
 
   return shader;
 };
 
 export const createProgram = (
-    gl: WebGLRenderingContext,
-    shaders: WebGLShader[],
-    attributes?: string[],
-    locations?: number[],
+  gl: WebGLRenderingContext,
+  shaders: WebGLShader[],
+  attributes?: string[],
+  locations?: number[],
 ) => {
   const program = gl.createProgram();
 
   if (!program) {
-    throw new Error('Failed to create program');
+    throw new Error("Failed to create program");
   }
 
   shaders.forEach((shader) => {
@@ -44,9 +48,9 @@ export const createProgram = (
   if (attributes) {
     attributes.forEach((attribute, index) => {
       gl.bindAttribLocation(
-          program,
-          locations ? locations[index] : index,
-          attribute,
+        program,
+        locations ? locations[index] : index,
+        attribute,
       );
     });
   }
@@ -58,14 +62,16 @@ export const createProgram = (
     const error = gl.getProgramInfoLog(program);
     gl.deleteProgram(program);
 
-    throw new Error(`Error in program linking: ${error}\n${
-      shaders.map((shader) => {
-        const src = addLineNumberWithError(gl.getShaderSource(shader) ?? '');
-        const type = gl.getShaderParameter(shader, gl.SHADER_TYPE);
+    throw new Error(
+      `Error in program linking: ${error}\n${
+        shaders.map((shader) => {
+          const src = addLineNumberWithError(gl.getShaderSource(shader) ?? "");
+          const type = gl.getShaderParameter(shader, gl.SHADER_TYPE);
 
-        return `${glEnumToString(gl, type)}:\n${src}`
-      }).join('\n')
-    }`);
+          return `${glEnumToString(gl, type)}:\n${src}`;
+        }).join("\n")
+      }`,
+    );
   }
 
   return program;
@@ -82,12 +88,12 @@ export const createShaderFromScript = (
   }
 
   if (shaderType === undefined) {
-    if (shaderScript.type === 'x-shader/x-vertex') {
+    if (shaderScript.type === "x-shader/x-vertex") {
       shaderType = gl.VERTEX_SHADER;
-    } else if (shaderScript.type === 'x-shader/x-fragment') {
+    } else if (shaderScript.type === "x-shader/x-fragment") {
       shaderType = gl.FRAGMENT_SHADER;
     } else {
-      throw new Error('*** Error: unknown shader type');
+      throw new Error("*** Error: unknown shader type");
     }
   }
 
@@ -126,22 +132,22 @@ export const createProgramFromSources = (
   return createProgram(gl, shaders, attributes, locations);
 };
 export function resizeCanvasToDisplaySize(canvas) {
-    // Lookup the size the browser is displaying the canvas in CSS pixels.
-    const displayWidth  = canvas.clientWidth;
-    const displayHeight = canvas.clientHeight;
+  // Lookup the size the browser is displaying the canvas in CSS pixels.
+  const displayWidth = canvas.clientWidth;
+  const displayHeight = canvas.clientHeight;
 
-    // Check if the canvas is not the same size.
-    const needResize = canvas.width  !== displayWidth ||
-                       canvas.height !== displayHeight;
+  // Check if the canvas is not the same size.
+  const needResize = canvas.width !== displayWidth ||
+    canvas.height !== displayHeight;
 
-    if (needResize) {
-      // Make the canvas the same size
-      canvas.width  = displayWidth;
-      canvas.height = displayHeight;
-    }
-
-    return needResize;
+  if (needResize) {
+    // Make the canvas the same size
+    canvas.width = displayWidth;
+    canvas.height = displayHeight;
   }
+
+  return needResize;
+}
 export const resizeCanvasToDisplaySize1 = (
   canvas: HTMLCanvasElement,
   multiplier: number,

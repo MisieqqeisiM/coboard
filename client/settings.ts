@@ -13,6 +13,7 @@ export enum Mode {
   DRAW,
   ERASE,
   MOVE,
+  SELECT,
 }
 
 export enum Color {
@@ -37,6 +38,7 @@ export enum EraserColor {
 export interface Settings {
   color: Signal<Color>;
   tool: Signal<Tool>;
+  mode: Signal<Mode>;
   size: Signal<number>;
   penSize: Signal<number>;
   eraserSize: Signal<number>;

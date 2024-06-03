@@ -1,11 +1,5 @@
-import {
-  ComponentChildren,
-  Signal,
-  useContext,
-  useEffect,
-  useRef,
-} from "../../../deps_client.ts";
-import { Camera } from "../../../client/camera.ts";
+import { useContext, useEffect, useRef } from "../../../deps_client.ts";
+import { CameraContext } from "../../../client/camera.ts";
 import { Mode, SettingsContext, Tool } from "../../../client/settings.ts";
 import { ClientContext } from "../app/WithClient.tsx";
 import { Behavior, BehaviorContext } from "./behaviors/Behavior.ts";
@@ -18,28 +12,27 @@ import { EllipseBehavior } from "./behaviors/EllipseBehaviour.ts";
 import { RectangleBehavior } from "./behaviors/RectangleBehaviour.ts";
 import { PolylineBehaviour } from "./behaviors/PolyLineBehaviour.ts";
 import { PolygonBehavior } from "./behaviors/PolygonBehaviour.ts";
+import { SelectBehavior } from "./behaviors/SelectBehavior.ts";
+import { Line, Point } from "../../../liaison/liaison.ts";
 
 interface CameraViewProps {
-  camera: Signal<Camera>;
   controls: DrawableCanvas;
 }
 
-export default function Controls(
-  { camera, controls }: CameraViewProps,
-) {
+export default function Controls({ controls }: CameraViewProps) {
   const stylusMode = useContext(SettingsContext).stylusMode;
   const ref = useRef<HTMLDivElement>(null);
   const client = useContext(ClientContext);
   const settings = useContext(SettingsContext);
+  const camera = useContext(CameraContext);
   if (!client) return <></>;
 
   const behaviorContext = new BehaviorContext(settings, controls, client!);
   let shift = false;
-  
+
   useEffect(() => {
     let behavior: Behavior = new DrawBehavior(behaviorContext);
     const getDrawBehaviour = (tool: Tool): Behavior => {
-
       switch (tool) {
         case Tool.PEN:
           return new DrawBehavior(behaviorContext);
@@ -56,9 +49,8 @@ export default function Controls(
       }
     };
 
-
     settings.tool.subscribe((tool) => {
-      if(settings.mode == Mode.DRAW) {
+      if (settings.mode.peek() == Mode.DRAW) {
         behavior = getDrawBehaviour(tool);
         behavior.setShift(shift);
       }
@@ -75,6 +67,9 @@ export default function Controls(
           break;
         case Mode.MOVE:
           behavior = new MoveBehavior(behaviorContext);
+          break;
+        case Mode.SELECT:
+          behavior = new SelectBehavior(behaviorContext);
           break;
       }
     });
@@ -108,7 +103,12 @@ export default function Controls(
     let mouseMoving = false;
     let toolDown = false;
 
+    let mouseX = 0;
+    let mouseY = 0;
+
     const move = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
       if (e.buttons & 2) {
         moving = false;
         if (!mouseMoving) {
@@ -206,10 +206,14 @@ export default function Controls(
 
     const mouseMove = (event: MouseEvent) => {
       if (client?.ui.viewerOnly) return;
-      if (settings.mode.peek()==Mode.DRAW &&(settings.tool.peek() == Tool.POLYLINE || settings.tool.peek() == Tool.POLYGON)){
+      if (
+        settings.mode.peek() == Mode.DRAW &&
+        (settings.tool.peek() == Tool.POLYLINE ||
+          settings.tool.peek() == Tool.POLYGON)
+      ) {
         const [x, y] = camera.peek().toBoardCoords(
           event.clientX,
-          event.clientY
+          event.clientY,
         );
 
         behavior.toolMove({ x, y });
@@ -278,6 +282,83 @@ export default function Controls(
       }
     };
 
+    globalThis.addEventListener("copy", (_) => {
+      if (controls.getSelected().length == 0) return;
+      navigator.clipboard.writeText(
+        `coboard:${JSON.stringify(controls.getSelected())}`,
+      );
+    });
+
+    globalThis.addEventListener("paste", (e) => {
+      if (!e.clipboardData || !e.clipboardData.types) return;
+      const text = e.clipboardData.getData("Text");
+      if (!text.startsWith("coboard:")) return;
+      const data = JSON.parse(text.slice(8));
+      if (!Array.isArray(data)) return;
+      const lines: Line[] = [];
+      const middle = { x: 0, y: 0 };
+      let n = 0;
+
+      for (const obj of data) {
+        const id = obj["id"];
+        const width = obj["width"];
+        const color = obj["color"];
+        const coordinates = obj["coordinates"];
+        if (typeof id !== "number") return;
+        if (typeof width !== "number") return;
+        if (typeof color !== "string") return;
+        if (!color.match("#[0-9a-fA-F]{6}")) return;
+        if (!Array.isArray(coordinates)) return;
+        const newCoords: Point[] = [];
+        for (const point of coordinates) {
+          const x = point["x"];
+          const y = point["y"];
+          if (typeof x != "number") return;
+          if (typeof y != "number") return;
+          newCoords.push({ x, y });
+          n++;
+          middle.x += x;
+          middle.y += y;
+        }
+        lines.push(new Line(id, width, color, newCoords));
+      }
+
+      middle.x /= n;
+      middle.y /= n;
+
+      for (const line of controls.getSelected()) {
+        client.socket.draw(line);
+      }
+
+      const [mx, my] = camera.peek().toBoardCoords(mouseX, mouseY);
+      const diff = {
+        x: mx - middle.x,
+        y: my - middle.y,
+      };
+      controls.setSelected(lines.map((l) => Line.move(l, diff)));
+      settings.mode.value = Mode.MOVE;
+    });
+
+    globalThis.addEventListener("keydown", (e) => {
+      if (e.key === "Shift") {
+        if (settings.mode.peek() === Mode.MOVE) {
+          settings.mode.value = Mode.SELECT;
+        }
+      } else if (e.key === "Delete") {
+        controls.setSelected([]);
+      }
+    });
+
+    globalThis.addEventListener("keyup", (e) => {
+      if (e.key === "Shift") {
+        if (settings.mode.peek() === Mode.SELECT) {
+          settings.mode.value = Mode.MOVE;
+        }
+      }
+    });
+    globalThis.addEventListener("resize", (_) => {
+      controls.redraw();
+    });
 
     ref.current!.addEventListener("touchstart", touchStart2);
     globalThis.addEventListener("touchend", touchEnd2);
@@ -297,8 +378,8 @@ export default function Controls(
     globalThis.addEventListener("touchmove", touchMove);
     globalThis.addEventListener("touchend", touchEnd);
 
-    globalThis.addEventListener('keydown', keydown);
-    globalThis.addEventListener('keyup', keyup);
+    globalThis.addEventListener("keydown", keydown);
+    globalThis.addEventListener("keyup", keyup);
 
     return () => {
       globalThis.removeEventListener("gesturestart", prevent);
@@ -308,8 +389,8 @@ export default function Controls(
       globalThis.removeEventListener("mouseup", endMove);
       globalThis.removeEventListener("touchmove", touchMove);
       globalThis.removeEventListener("touchend", touchEnd);
-      globalThis.removeEventListener('keydown', keydown);
-      globalThis.removeEventListener('keyup', keyup);
+      globalThis.removeEventListener("keydown", keydown);
+      globalThis.removeEventListener("keyup", keyup);
     };
   }, []);
 

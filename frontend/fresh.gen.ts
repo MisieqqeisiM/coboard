@@ -37,6 +37,7 @@ import * as $board_SizeSelector from "./islands/board/SizeSelector.tsx";
 import * as $board_StylusModeSelector from "./islands/board/StylusModeSelector.tsx";
 import * as $board_ToolIcon from "./islands/board/ToolIcon.tsx";
 import * as $board_ToolMenu from "./islands/board/ToolMenu.tsx";
+import * as $board_ToolSelector from "./islands/board/ToolSelector.tsx";
 import * as $board_Toolbar from "./islands/board/Toolbar.tsx";
 import * as $board_behaviors_Behavior from "./islands/board/behaviors/Behavior.ts";
 import * as $board_behaviors_DrawBehavior from "./islands/board/behaviors/DrawBehavior.ts";
@@ -47,6 +48,7 @@ import * as $board_behaviors_MoveBehavior from "./islands/board/behaviors/MoveBe
 import * as $board_behaviors_PolyLineBehaviour from "./islands/board/behaviors/PolyLineBehaviour.ts";
 import * as $board_behaviors_PolygonBehaviour from "./islands/board/behaviors/PolygonBehaviour.ts";
 import * as $board_behaviors_RectangleBehaviour from "./islands/board/behaviors/RectangleBehaviour.ts";
+import * as $board_behaviors_SelectBehavior from "./islands/board/behaviors/SelectBehavior.ts";
 import * as $board_behaviors_geometry_utils from "./islands/board/behaviors/geometry_utils.ts";
 import * as $board_webgl_utils_LineBuffer from "./islands/board/webgl-utils/LineBuffer.ts";
 import * as $board_webgl_utils_LineDrawer from "./islands/board/webgl-utils/LineDrawer.ts";
@@ -95,6 +97,7 @@ const manifest = {
     "./islands/board/StylusModeSelector.tsx": $board_StylusModeSelector,
     "./islands/board/ToolIcon.tsx": $board_ToolIcon,
     "./islands/board/ToolMenu.tsx": $board_ToolMenu,
+    "./islands/board/ToolSelector.tsx": $board_ToolSelector,
     "./islands/board/Toolbar.tsx": $board_Toolbar,
     "./islands/board/behaviors/Behavior.ts": $board_behaviors_Behavior,
     "./islands/board/behaviors/DrawBehavior.ts": $board_behaviors_DrawBehavior,
@@ -111,6 +114,8 @@ const manifest = {
       $board_behaviors_PolygonBehaviour,
     "./islands/board/behaviors/RectangleBehaviour.ts":
       $board_behaviors_RectangleBehaviour,
+    "./islands/board/behaviors/SelectBehavior.ts":
+      $board_behaviors_SelectBehavior,
     "./islands/board/behaviors/geometry_utils.ts":
       $board_behaviors_geometry_utils,
     "./islands/board/webgl-utils/LineBuffer.ts": $board_webgl_utils_LineBuffer,

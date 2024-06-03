@@ -2,6 +2,8 @@ import { Line } from "../liaison/liaison.ts";
 
 export interface DrawableCanvas {
   setTmpLine(line: Line | null): void;
+  setSelected(lines: Line[]): void;
+  getSelected(): Line[];
   redraw(): void;
 }
 
