@@ -93,11 +93,9 @@ export default function Controls({ controls }: CameraViewProps) {
 
       if (!touchpad || e.ctrlKey) {
         const amount = e.deltaY;
-        camera.value = camera.peek().zoom(
-          e.clientX,
-          e.clientY,
-          Math.pow(1.1, -Math.sign(amount)),
-        );
+        camera.value = camera
+          .peek()
+          .zoom(e.clientX, e.clientY, Math.pow(1.1, -Math.sign(amount)));
       } else {
         camera.value = camera.peek().move(e.deltaX, e.deltaY);
       }
@@ -144,7 +142,7 @@ export default function Controls({ controls }: CameraViewProps) {
       const touchX = (a.clientX + b.clientX) / 2;
       const touchY = (a.clientY + b.clientY) / 2;
       const touchDist = Math.sqrt(
-        Math.pow(a.clientX - b.clientX, 2) + Math.pow(a.clientY - b.clientY, 2),
+        Math.pow(a.clientX - b.clientX, 2) + Math.pow(a.clientY - b.clientY, 2)
       );
       return [touchX, touchY, touchDist];
     }
@@ -174,23 +172,18 @@ export default function Controls({ controls }: CameraViewProps) {
       e.preventDefault();
       if (!moving) return;
       if (stylusMode.peek() && e.touches.length == 1) {
-        camera.value = camera.peek().move(
-          e.touches[0].clientX - touchX,
-          e.touches[0].clientY - touchY,
-        );
+        camera.value = camera
+          .peek()
+          .move(e.touches[0].clientX - touchX, e.touches[0].clientY - touchY);
         touchX = e.touches[0].clientX;
         touchY = e.touches[0].clientY;
       }
       if (e.touches.length < 2) return;
       const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
-      camera.value = camera.peek().move(
-        x - touchX,
-        y - touchY,
-      ).zoom(
-        x,
-        y,
-        d / touchDist,
-      );
+      camera.value = camera
+        .peek()
+        .move(x - touchX, y - touchY)
+        .zoom(x, y, d / touchDist);
       touchX = x;
       touchY = y;
       touchDist = d;
@@ -226,10 +219,9 @@ export default function Controls({ controls }: CameraViewProps) {
         (settings.tool.peek() == Tool.POLYLINE ||
           settings.tool.peek() == Tool.POLYGON)
       ) {
-        const [x, y] = camera.peek().toBoardCoords(
-          event.clientX,
-          event.clientY,
-        );
+        const [x, y] = camera
+          .peek()
+          .toBoardCoords(event.clientX, event.clientY);
 
         behavior.toolMove({ x, y });
         return;
@@ -256,10 +248,9 @@ export default function Controls({ controls }: CameraViewProps) {
         return;
       }
       event.preventDefault();
-      const [x, y] = camera.peek().toBoardCoords(
-        event.touches[0].clientX,
-        event.touches[0].clientY,
-      );
+      const [x, y] = camera
+        .peek()
+        .toBoardCoords(event.touches[0].clientX, event.touches[0].clientY);
       if (toolDown) return;
       toolDown = true;
       behavior.toolStart({ x, y });
@@ -270,10 +261,9 @@ export default function Controls({ controls }: CameraViewProps) {
       if (event.touches.length != 1) return;
       if (!toolDown) return;
       event.preventDefault();
-      const [x, y] = camera.peek().toBoardCoords(
-        event.touches[0].clientX,
-        event.touches[0].clientY,
-      );
+      const [x, y] = camera
+        .peek()
+        .toBoardCoords(event.touches[0].clientX, event.touches[0].clientY);
       behavior.toolMove({ x, y });
     };
 
@@ -300,7 +290,7 @@ export default function Controls({ controls }: CameraViewProps) {
     globalThis.addEventListener("copy", (_) => {
       if (controls.getSelected().length == 0) return;
       navigator.clipboard.writeText(
-        `coboard:${JSON.stringify(controls.getSelected())}`,
+        `coboard:${JSON.stringify(controls.getSelected())}`
       );
     });
 
@@ -389,7 +379,7 @@ export default function Controls({ controls }: CameraViewProps) {
     globalThis.addEventListener("wheel", zoom, { passive: false });
     globalThis.addEventListener("mousemove", move);
     globalThis.addEventListener("mouseup", endMove);
-    globalThis.addEventListener("touchstart", touchStart);
+    ref.current!.addEventListener("touchstart", touchStart);
     globalThis.addEventListener("touchmove", touchMove);
     globalThis.addEventListener("touchend", touchEnd);
 
@@ -418,7 +408,6 @@ export default function Controls({ controls }: CameraViewProps) {
         position: "absolute",
       }}
       ref={ref}
-    >
-    </div>
+    ></div>
   );
 }
