@@ -13,12 +13,14 @@ export class SelectBehavior implements Behavior {
   setShift(_: boolean): void {}
 
   toolCancel(): void {
+    this.ctx.client.socket.beginAction();
     this.ctx.canvas.stopDrawing();
     for (const line of this.ctx.canvas.getSelected()) {
       this.ctx.client.socket.draw(line);
     }
     this.ctx.canvas.setSelected([]);
     this.ctx.canvas.redraw();
+    this.ctx.client.socket.endAction();
   }
 
   toolStart(point: Point): void {

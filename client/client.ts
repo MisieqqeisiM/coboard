@@ -77,7 +77,9 @@ class Emitter implements BoardActionVisitor {
 }
 
 export class SocketClient {
-  private actionStack: Undoable[] = [];
+  private actionStack: Undoable[][] = [];
+  private currentAction: Undoable[] = [];
+  private inAction: boolean = false;
   private emitter: Emitter;
   constructor(io: ClientSocket, private client: UIClient) {
     this.emitter = new Emitter(io);
@@ -100,9 +102,21 @@ export class SocketClient {
     io.on("onReset", (_) => client.cache.reset());
   }
 
+  public beginAction() {
+    this.inAction = true;
+  }
+
+  public endAction() {
+    this.inAction = false;
+    this.actionStack.push(this.currentAction);
+    this.currentAction = [];
+  }
+
   public undo() {
     const action = this.actionStack.pop();
-    action?.undo().accept(this.emitter);
+    if(!action) return;
+    for(const move of action.toReversed())
+      move?.undo().accept(this.emitter);
   }
 
   public move(x: number, y: number) {
@@ -113,7 +127,8 @@ export class SocketClient {
     const newLine = this.client.cache.addLocalLine(line);
     const action = new DrawAction(newLine);
     action.accept(this.emitter);
-    this.actionStack.push(action);
+    this.currentAction.push(action);
+    if(!this.inAction) this.endAction();
   }
 
   public remove(id: number) {
@@ -121,7 +136,8 @@ export class SocketClient {
     if (!line) return;
     const action = new RemoveAction(line);
     action.accept(this.emitter);
-    this.actionStack.push(action);
+    this.currentAction.push(action);
+    if(!this.inAction) this.endAction();
   }
 
   public reset() {
