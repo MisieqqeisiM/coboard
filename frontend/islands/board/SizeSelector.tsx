@@ -1,5 +1,5 @@
 import { useContext, useRef } from "../../../deps_client.ts";
-import { SettingsContext, Tool } from "../../../client/settings.ts";
+import { Mode, SettingsContext, Tool } from "../../../client/settings.ts";
 
 export default function SizeSelector() {
   const settings = useContext(SettingsContext);
@@ -38,10 +38,10 @@ export default function SizeSelector() {
           onInput={() => {
             const value = Number(slider.current?.value);
             switch (settings.tool.peek()) {
-              case Tool.PEN:
+              case Mode.DRAW:
                 settings.penSize.value = value;
                 break;
-              case Tool.ERASER:
+              case Mode.ERASE:
                 settings.eraserSize.value = value;
                 break;
             }
