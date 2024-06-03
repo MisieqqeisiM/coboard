@@ -1,8 +1,6 @@
-import { Timestamp } from "$mongo";
 import { Color } from "../../../../client/settings.ts";
 import { Line, Point } from "../../../../liaison/liaison.ts";
 import { pointInLine } from "../webgl-utils/line_drawing.ts";
-import { lineIntersectsRect } from "../webgl-utils/line_drawing.ts";
 import { Behavior, BehaviorContext } from "./Behavior.ts";
 import { getRectangle } from "./geometry_utils.ts";
 
@@ -15,10 +13,12 @@ export class SelectBehavior implements Behavior {
   setShift(_: boolean): void {}
 
   toolCancel(): void {
+    this.ctx.canvas.stopDrawing();
     for (const line of this.ctx.canvas.getSelected()) {
       this.ctx.client.socket.draw(line);
     }
     this.ctx.canvas.setSelected([]);
+    this.ctx.canvas.redraw();
   }
 
   toolStart(point: Point): void {

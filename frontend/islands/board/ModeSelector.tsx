@@ -1,7 +1,6 @@
 import { useContext, useEffect } from "../../../deps_client.ts";
 import IconCircle from "../app/IconCircle.tsx";
 import { Mode, SettingsContext } from "../../../client/settings.ts";
-import { Tool } from "../../../client/settings.ts";
 
 const modeIcons: Record<Mode, string> = {
   [Mode.DRAW]: "pencil-outline",

@@ -4,6 +4,7 @@ export interface DrawableCanvas {
   setTmpLine(line: Line | null): void;
   setSelected(lines: Line[]): void;
   getSelected(): Line[];
+  stopDrawing(): void;
   redraw(): void;
 }
 

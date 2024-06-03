@@ -20,6 +20,11 @@ export class SignalCanvas implements DrawableCanvas {
   tmpLine = new Signal<Line | null>();
   selected = new Signal<Line[]>([]);
   redrawSig = new Signal(false);
+  dontRedraw = false;
+
+  stopDrawing(): void {
+    this.dontRedraw = true;
+  }
 
   setTmpLine(line: Line | null): void {
     this.tmpLine.value = line;
@@ -33,6 +38,7 @@ export class SignalCanvas implements DrawableCanvas {
   }
 
   redraw(): void {
+    this.dontRedraw = false;
     this.redrawSig.value = !this.redrawSig.peek();
   }
 }
@@ -119,6 +125,7 @@ export default function Canvas(
     const lineDrawer = new LineDrawer(gl);
 
     function draw() {
+      if (controls.dontRedraw) return;
       gl.clear(gl.COLOR_BUFFER_BIT);
       resizeCanvasToDisplaySize(gl.canvas);
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);

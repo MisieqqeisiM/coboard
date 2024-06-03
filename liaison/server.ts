@@ -1,5 +1,5 @@
 import { MongoClient, Server, ServerSocket as Socket, sleep } from "../deps.ts";
-import { CONNECTION_TIMEOUT } from "../config.ts";
+import { CONNECTION_TIMEOUT, PING_INTERVAL, PING_TIMEOUT } from "../config.ts";
 import { Board } from "../server/board.ts";
 import { Server as ServerLogic } from "../server/server.ts";
 import { Account } from "./liaison.ts";
@@ -143,8 +143,8 @@ export type ServerSocket = Socket<
 
 export async function createServer(): Promise<ServerLogic> {
   const io: SocketServer = new Server({
-    pingTimeout: 5000,
-    pingInterval: 5000,
+    pingTimeout: PING_TIMEOUT,
+    pingInterval: PING_INTERVAL,
   });
 
   const mongoClient = new MongoClient(DATABASE_URL);

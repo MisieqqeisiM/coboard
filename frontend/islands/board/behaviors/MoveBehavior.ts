@@ -25,9 +25,11 @@ export class MoveBehavior implements Behavior {
         return;
       }
     }
+    this.ctx.canvas.stopDrawing();
     for (const line of this.ctx.canvas.getSelected()) {
       this.ctx.client.socket.draw(line);
     }
+    this.ctx.canvas.redraw();
     this.ctx.canvas.setSelected([]);
     this.movedLine = this.ctx.client.ui.cache.getLineAt(point);
     if (!this.movedLine) return;

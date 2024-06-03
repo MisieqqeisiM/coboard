@@ -9,3 +9,6 @@ export const TOKEN_LIFETIME = 30 * 24 * 60 * 60;
 
 // max time between http request and socket connection (ms)
 export const CONNECTION_TIMEOUT = 5000;
+
+export const PING_TIMEOUT = 10000;
+export const PING_INTERVAL = 3000;
