@@ -147,6 +147,7 @@ export class SocketClient {
       newSelection.set(line.id, line);
     }
     this.client.selection.value = newSelection;
+    this.client.canvas.removeLines(lines.map((line) => line.id));
   }
 
   public deleteSelection() {
