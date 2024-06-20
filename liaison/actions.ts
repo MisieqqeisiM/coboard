@@ -12,16 +12,8 @@ export interface BoardAction {
   accept(visitor: BoardActionVisitor): void;
 }
 
-export interface Undoable {
-  undo(): BoardAction;
-}
-
-export class UpdateAction implements BoardAction, Undoable {
+export class UpdateAction implements BoardAction {
   constructor(readonly remove: Line[], readonly create: Line[]) {}
-
-  undo(): BoardAction {
-    return new UpdateAction(this.create, this.remove);
-  }
 
   accept(visitor: BoardActionVisitor): void {
     visitor.update(this);
@@ -36,24 +28,16 @@ export class MoveAction implements BoardAction {
   }
 }
 
-export class DrawAction implements BoardAction, Undoable {
+export class DrawAction implements BoardAction {
   constructor(readonly line: Line) {}
-
-  undo(): BoardAction {
-    return new RemoveAction(this.line);
-  }
 
   accept(visitor: BoardActionVisitor): void {
     visitor.draw(this);
   }
 }
 
-export class RemoveAction implements BoardAction, Undoable {
+export class RemoveAction implements BoardAction {
   constructor(readonly line: Line) {}
-
-  undo(): BoardAction {
-    return new DrawAction(this.line);
-  }
 
   accept(visitor: BoardActionVisitor): void {
     visitor.remove(this);

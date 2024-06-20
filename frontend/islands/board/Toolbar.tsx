@@ -19,10 +19,18 @@ export default function Toolbar() {
     <>
       <ColorSelector />
       <SizeSelector />
-      <ModeSelector/>
+      <ModeSelector />
       <ToolMenu />
-      <StylusModeSelector />
+      <IconCircle
+        iconName="arrow-undo-outline"
+        onClick={() => client?.socket.undo()}
+      />
+      <IconCircle
+        iconName="arrow-redo-outline"
+        onClick={() => client?.socket.redo()}
+      />
       <OptionsMenu>
+        <StylusModeSelector />
         <ExportSelector />
         <ImportSelector />
         <ShareSelector shareToken={client?.ui.shareToken} />

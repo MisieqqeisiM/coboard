@@ -365,6 +365,14 @@ export default function Controls({ controls }: CameraViewProps) {
     globalThis.addEventListener("resize", (_) => {
       controls.redraw();
     });
+    globalThis.addEventListener("keydown", (e) => {
+      if (e.key === "z" && e.ctrlKey) {
+        client.socket.undo();
+      }
+      if (e.key === "Z" && e.ctrlKey) {
+        client.socket.redo();
+      }
+    });
 
     ref.current!.addEventListener("touchstart", touchStart2);
     globalThis.addEventListener("touchend", touchEnd2);

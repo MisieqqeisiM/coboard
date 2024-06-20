@@ -1,4 +1,3 @@
-import { updateCheck } from "$fresh/src/dev/update_check.ts";
 import { Signal, signal } from "../deps_client.ts";
 import {
   BoardActionVisitor,
@@ -6,7 +5,6 @@ import {
   MoveAction,
   RemoveAction,
   ResetAction,
-  Undoable,
   UpdateAction,
 } from "../liaison/actions.ts";
 import { ClientSocket, ClientState } from "../liaison/client.ts";
@@ -82,9 +80,14 @@ class Emitter implements BoardActionVisitor {
   }
 }
 
+interface Action {
+  added: Line[];
+  removed: Line[];
+}
+
 export class SocketClient {
-  private actions: Undoable[] = [];
-  private inAction: boolean = false;
+  private undoStack: Action[] = [];
+  private redoStack: Action[] = [];
   private emitter: Emitter;
   constructor(io: ClientSocket, private client: UIClient) {
     this.emitter = new Emitter(io);
@@ -112,14 +115,18 @@ export class SocketClient {
     io.on("onReset", (_) => client.cache.reset());
   }
 
-  public beginAction() {
-    this.inAction = true;
+  public undo() {
+    const action = this.undoStack.pop();
+    if (!action) return;
+    new UpdateAction(action.added, action.removed).accept(this.emitter);
+    this.redoStack.push({ added: action.removed, removed: action.added });
   }
 
-  public undo() {
-    const action = this.actions.pop();
+  public redo() {
+    const action = this.redoStack.pop();
     if (!action) return;
-    action.undo().accept(this.emitter);
+    new UpdateAction(action.added, action.removed).accept(this.emitter);
+    this.undoStack.push({ added: action.removed, removed: action.added });
   }
 
   public move(x: number, y: number) {
@@ -129,7 +136,8 @@ export class SocketClient {
   public draw(line: Line) {
     const newLine = this.client.cache.addLocalLine(line);
     const action = new DrawAction(newLine);
-    this.actions.push(action);
+    this.undoStack.push({ removed: [], added: [newLine] });
+    this.redoStack = [];
     action.accept(this.emitter);
   }
 
@@ -137,7 +145,8 @@ export class SocketClient {
     const lines = this.client.cache.removeLines([id]);
     if (lines.length == 0) return;
     const action = new RemoveAction(lines[0]);
-    this.actions.push(action);
+    this.undoStack.push({ removed: [lines[0]], added: [] });
+    this.redoStack = [];
     action.accept(this.emitter);
   }
 
@@ -173,7 +182,8 @@ export class SocketClient {
     const newLines = this.client.cache.addLocalLines(create);
     const action = new UpdateAction(removedLines, newLines);
     action.accept(this.emitter);
-    this.actions.push(action);
+    this.undoStack.push({ removed: removedLines, added: newLines });
+    this.redoStack = [];
     return newLines;
   }
 
