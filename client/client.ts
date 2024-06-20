@@ -28,15 +28,15 @@ export class SignalCanvas implements ObservableCanvas {
   public readonly onRemoveLines = new Signal<number[]>([]);
   public readonly onReset = new Signal<boolean>(false);
 
-  addLines(lines: Line[]): void {
+  public addLines(lines: Line[]): void {
     this.onAddLines.value = lines;
   }
 
-  removeLines(ids: number[]): void {
+  public removeLines(ids: number[]): void {
     this.onRemoveLines.value = ids;
   }
 
-  reset(): void {
+  public reset(): void {
     this.onReset.value = true;
   }
 }
@@ -168,6 +168,7 @@ export class SocketClient {
   }
 
   public update(remove: number[], create: Line[]): Line[] {
+    if (remove.length == 0 && create.length == 0) return [];
     const removedLines = this.client.cache.removeLines(remove);
     const newLines = this.client.cache.addLocalLines(create);
     const action = new UpdateAction(removedLines, newLines);

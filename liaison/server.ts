@@ -121,7 +121,10 @@ export class Client {
       });
       socket.on("update", async (a) => {
         const toRemove = a.remove.map((l) => this.globalId(l.id));
-        const newIds = this.board.update(this, toRemove, a.create);
+        const newIds = await this.board.update(this, toRemove, a.create);
+        for (let i = 0; i < newIds.length; i++) {
+          this.idMap.set(a.create[i].id, newIds[i]);
+        }
       });
       socket.on("reset", async (_) => await this.board.reset(this));
     }
