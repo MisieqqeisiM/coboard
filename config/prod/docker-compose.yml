@@ -24,8 +24,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 6M
-    memswap_limit: 100M
+          memory: 50M
+    memswap_limit: 300M
     image: nginx:1.25.5
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
