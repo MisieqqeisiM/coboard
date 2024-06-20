@@ -32,47 +32,62 @@ export default function ImportSelector({
     }
   };
 
-  const parseSVGContent = (content: string): Line[] => {
+ const parseSVGContent = (content: string): Line[] => {
+  try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(content, 'image/svg+xml');
+    
+    if (!doc) {
+      console.error('Failed to parse file');
+      return [];
+    }
+    
     const polylines = doc.querySelectorAll('polyline');
     const lines: Line[] = [];
     const middle = { x: 0, y: 0 };
     let n = 0;
 
- 
     polylines.forEach((polyline) => {
       const points = polyline.getAttribute('points')?.trim().split(' ');
-      const color = polyline.getAttribute('stroke') || Color.BLACK;
-      if (!color.match("#[0-9a-fA-F]{6}")) return;
+      let color = polyline.getAttribute('stroke') || Color.BLACK;
+      if (!color.match("#[0-9a-fA-F]{6}"))
+        //we are still going to try to draw the lines
+        color = Color.BLACK;
 
       const width = parseFloat(polyline.getAttribute('stroke-width') || '1');
 
       if (points) {
         const coordinates: Point[] = points.map((point) => {
           const [x, y] = point.split(',').map(parseFloat);
-          n++
-          middle.x+=x
-          middle.y+=y
+          n++;
+          middle.x += x;
+          middle.y += y;
           return { x, y };
         });
-        const id = 0 //???
+
+        const id = 0;//is it okay???
         lines.push(new Line(id, width, color, coordinates));
       }
-      else return;
     });
-    middle.x /= n;
-    middle.y /= n;
 
-    const [mx, my] = camera.peek().toBoardCoords(window.innerWidth/2, window.innerHeight/2);
-    const diff = {
-      x: mx - middle.x,
-      y: my - middle.y,
-    };
-    const newLines = lines.map((l) => Line.move(l, diff));
-    return newLines
-  };
+    if (n > 0) {
+      middle.x /= n;
+      middle.y /= n;
 
+      const [mx, my] = camera.peek().toBoardCoords(window.innerWidth / 2, window.innerHeight / 2);
+      const diff = { x: mx - middle.x, y: my - middle.y };
+
+      const newLines = lines.map((l) => Line.move(l, diff));
+      return newLines;
+    } else {
+      console.warn('No valid polylines found.');
+      return [];
+    }
+  } catch (error) {
+    console.error('Error parsing file:', error);
+    return [];
+  }
+};
   const clickIcon =()=> {
     fileInputRef.current?.click();
   }
