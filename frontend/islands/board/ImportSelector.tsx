@@ -13,6 +13,18 @@ export default function ImportSelector({
   const camera = useContext(CameraContext);
   const settings = useContext(SettingsContext);
 
+  const showErrorMessage = () => {
+    const toast = document.createElement('div');
+    toast.classList.add('toast');
+    toast.textContent = 'Failed to load the file';
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 2000);
+
+  }
+
   const handleFileInput = (event: Event) => {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0];
@@ -26,10 +38,13 @@ export default function ImportSelector({
           client.socket.drawToSelection(lines);
           settings.mode.value = Mode.MOVE;
         }
+        else showErrorMessage();
+
         input.value='';
       };
       reader.readAsText(file);
     }
+
   };
 
  const parseSVGContent = (content: string): Line[] => {

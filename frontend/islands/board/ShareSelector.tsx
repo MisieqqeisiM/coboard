@@ -9,6 +9,14 @@ export default function ShareSelector({
     navigator.clipboard.writeText(
       window.location.href + "&shareToken=" + (shareToken ? shareToken : "")
     );
+    const toast = document.createElement('div');
+    toast.classList.add('toast');
+    toast.textContent = 'Link copied to clipboard!';
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 2000);
   };
 
   return (
