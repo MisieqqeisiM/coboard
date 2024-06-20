@@ -8,6 +8,7 @@ import StylusModeSelector from "./StylusModeSelector.tsx";
 import SizeSelector from "./SizeSelector.tsx";
 import ShareSelector from "./ShareSelector.tsx";
 import ToolMenu from "./ToolMenu.tsx";
+import ExportSelector from "./ExportSelector.tsx";
 
 export default function Toolbar() {
   const client = useContext(ClientContext);
@@ -19,6 +20,7 @@ export default function Toolbar() {
       <ModeSelector/>
       <ToolMenu />
       <StylusModeSelector />
+      <ExportSelector uiClient={client?.ui}/>
       <ShareSelector shareToken={client?.ui.shareToken} />
     </>
   );
