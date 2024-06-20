@@ -167,6 +167,7 @@ export async function createServer(): Promise<ServerLogic> {
   const io: SocketServer = new Server({
     pingTimeout: PING_TIMEOUT,
     pingInterval: PING_INTERVAL,
+    maxHttpBufferSize: 1e7,
   });
 
   const mongoClient = new MongoClient(DATABASE_URL);
