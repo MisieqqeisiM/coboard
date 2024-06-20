@@ -28,14 +28,14 @@ export class OnMoveEvent implements BoardEvent {
 }
 
 export class OnDrawEvent implements BoardEvent {
-  constructor(readonly user: string, readonly line: Line) {}
+  constructor(readonly user: string, readonly lines: Line[]) {}
   accept(visitor: BoardEventVisitor) {
     visitor.onDraw(this);
   }
 }
 
 export class OnRemoveEvent implements BoardEvent {
-  constructor(readonly lineId: number) {}
+  constructor(readonly lineIds: number[]) {}
   accept(visitor: BoardEventVisitor) {
     visitor.onRemove(this);
   }

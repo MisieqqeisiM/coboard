@@ -17,8 +17,9 @@ interface CanvasProps {
 }
 
 export class SignalCanvas implements DrawableCanvas {
+  public delta: Point = 0;
   tmpLine = new Signal<Line | null>();
-  selected = new Signal<Line[]>([]);
+  selected = new Signal<Map<number, Line>>(new Map());
   redrawSig = new Signal(false);
   dontRedraw = false;
 
@@ -30,10 +31,14 @@ export class SignalCanvas implements DrawableCanvas {
     this.tmpLine.value = line;
   }
   setSelected(lines: Line[]): void {
-    this.selected.value = lines;
+    const newSelected = new Map<number, Line>();
+    for (const line of lines) {
+      newSelected.set(line.id, line);
+    }
+    this.selected.value = newSelected;
   }
 
-  getSelected(): Line[] {
+  getSelected(): Map<number, Line> {
     return this.selected.peek();
   }
 
@@ -142,15 +147,17 @@ export default function Canvas(
       lineBuffer.addLine(line);
     }
 
-    client.ui.canvas.onAddLine.subscribe((line) => {
-      if (!line) return;
-      lineBuffer.addLine(line);
+    client.ui.canvas.onAddLines.subscribe((lines) => {
+      for (const line of lines) {
+        lineBuffer.addLine(line);
+      }
       draw();
     });
 
-    client.ui.canvas.onRemoveLine.subscribe((id) => {
-      if (!id) return;
-      lineBuffer.removeLine(id);
+    client.ui.canvas.onRemoveLines.subscribe((ids) => {
+      for (const id of ids) {
+        lineBuffer.removeLine(id);
+      }
       draw();
     });
 
@@ -163,7 +170,7 @@ export default function Canvas(
     controls.tmpLine.subscribe((_) => draw());
     controls.selected.subscribe((lines) => {
       selectBuffer.clear();
-      for (const line of lines) {
+      for (const line of lines.values()) {
         selectBuffer.addLine(line);
       }
       draw();

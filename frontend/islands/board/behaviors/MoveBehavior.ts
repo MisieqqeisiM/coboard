@@ -19,7 +19,7 @@ export class MoveBehavior implements Behavior {
 
   toolStart(point: Point): void {
     this.lastPoint = point;
-    for (const line of this.ctx.canvas.getSelected()) {
+    for (const line of this.ctx.canvas.getSelected().values()) {
       if (pointInLine(point, line)) {
         this.moveSelection = true;
         return;
@@ -27,9 +27,8 @@ export class MoveBehavior implements Behavior {
     }
     this.ctx.canvas.stopDrawing();
     this.ctx.client.socket.beginAction();
-    for (const line of this.ctx.canvas.getSelected()) {
-      this.ctx.client.socket.draw(line);
-    }
+    this.ctx.client.socket.moveSelection(this.ctx.canvas.delta);
+    this.ctx.canvas.delta = { x: 0, y: 0 };
     this.ctx.client.socket.endAction();
     this.ctx.canvas.redraw();
     this.ctx.canvas.setSelected([]);
@@ -46,8 +45,14 @@ export class MoveBehavior implements Behavior {
     };
     this.lastPoint = point;
     if (this.moveSelection) {
+      this.ctx.canvas.delta = {
+        x: this.ctx.canvas.delta.x + diff.x,
+        y: this.ctx.canvas.delta.y + diff.y,
+      };
       this.ctx.canvas.setSelected(
-        this.ctx.canvas.getSelected().map((l) => Line.move(l, diff)),
+        Array.from(this.ctx.canvas.getSelected().values()).map((l) =>
+          Line.move(l, diff)
+        ),
       );
       return;
     }

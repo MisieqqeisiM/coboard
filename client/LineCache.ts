@@ -32,7 +32,7 @@ export class LineCache {
   }
 
   public getLinesIntersecting(line: Line): Line[] {
-    let result: Line[] = [];
+    const result: Line[] = [];
     for (const other of this.lines.values()) {
       if (
         linesIntersect(line.coordinates, other.coordinates, line.width)
@@ -53,26 +53,36 @@ export class LineCache {
     return result;
   }
 
-  public addLocalLine(line: Line): Line {
-    this.id -= 1;
-    this.localIds.push(this.id);
-    const newLine = Line.changeId(line, this.id);
-    this.lines.set(this.id, newLine);
-    this.canvas.addLine(newLine);
-    return newLine;
+  public addLocalLines(lines: Line[]): Line[] {
+    const newLines: Line[] = [];
+    for (const line of lines) {
+      this.id -= 1;
+      this.localIds.push(this.id);
+      const newLine = Line.changeId(line, this.id);
+      this.lines.set(this.id, newLine);
+      newLines.push(newLine);
+    }
+    this.canvas.addLines(newLines);
+    return newLines;
   }
 
-  public addRemoteLine(line: Line) {
-    this.lines.set(line.id, line);
-    this.canvas.addLine(line);
+  public addRemoteLines(lines: Line[]) {
+    for (const line of lines) {
+      this.lines.set(line.id, line);
+    }
+    this.canvas.addLines(lines);
   }
 
-  public removeLine(id: number): Line | null {
-    const line = this.lines.get(id);
-    if (!line) return null;
-    this.lines.delete(id);
-    this.canvas.removeLine(id);
-    return line;
+  public removeLines(ids: number[]): Line[] {
+    const result: Line[] = [];
+    for (const id of ids) {
+      const line = this.lines.get(id);
+      if (!line) continue;
+      this.lines.delete(id);
+      result.push(line);
+    }
+    this.canvas.removeLines(ids);
+    return result;
   }
 
   public reset() {
@@ -84,7 +94,7 @@ export class LineCache {
     const oldId = this.localIds.shift()!;
     const line = this.lines.get(oldId);
     if (!line) return;
-    this.removeLine(oldId);
+    this.removeLines([oldId]);
     // this.addRemoteLine(Line.changeId(line, id));
   }
 }

@@ -78,6 +78,7 @@ export class Client {
   private emitter?: Emitter;
   private cachedEvents: BoardEvent[] = [];
   private idMap: Map<number, number> = new Map();
+  private selectedLines: Set<number> = new Set();
 
   constructor(
     readonly account: Account,
@@ -89,6 +90,13 @@ export class Client {
     return this.emitter !== undefined;
   }
 
+  private globalId(id: number) {
+    while (this.idMap.get(id)) {
+      id = this.idMap.get(id)!;
+    }
+    return id;
+  }
+
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
     socket.on("move", (a) => this.board.move(this, a.x, a.y));
@@ -98,13 +106,40 @@ export class Client {
         this.idMap.set(a.line.id, id);
       });
       socket.on("remove", async (a) => {
-        let id = a.line.id;
-        while (this.idMap.get(id)) {
-          id = this.idMap.get(id)!;
-        }
-        await this.board.remove(this, id);
+        await this.board.remove(this, this.globalId(a.line.id));
       });
       socket.on("reset", async (_) => await this.board.reset(this));
+
+      socket.on("select", (a) => {
+        for (const id of a.ids) {
+          this.selectedLines.add(this.globalId(id));
+          this.board.select(this, this.globalId(id));
+        }
+      });
+
+      socket.on("deselect", (a) => {
+        for (const id of a.ids) {
+          this.selectedLines.delete(this.globalId(id));
+          this.board.deselect(this, this.globalId(id));
+        }
+      });
+
+      socket.on("moveSelection", async (a) => {
+        await this.board.moveLines(
+          this,
+          Array.from(this.selectedLines.values()),
+          a.vec,
+        );
+        this.selectedLines.clear();
+      });
+
+      socket.on("removeSelection", async (a) => {
+        await this.board.removeLines(
+          this,
+          Array.from(this.selectedLines.values()),
+        );
+        this.selectedLines.clear();
+      });
     }
     this.emitter = new Emitter(socket);
     for (const e of this.cachedEvents) {

@@ -142,7 +142,7 @@ export default function Controls({ controls }: CameraViewProps) {
       const touchX = (a.clientX + b.clientX) / 2;
       const touchY = (a.clientY + b.clientY) / 2;
       const touchDist = Math.sqrt(
-        Math.pow(a.clientX - b.clientX, 2) + Math.pow(a.clientY - b.clientY, 2)
+        Math.pow(a.clientX - b.clientX, 2) + Math.pow(a.clientY - b.clientY, 2),
       );
       return [touchX, touchY, touchDist];
     }
@@ -288,9 +288,11 @@ export default function Controls({ controls }: CameraViewProps) {
     };
 
     globalThis.addEventListener("copy", (_) => {
-      if (controls.getSelected().length == 0) return;
+      if (controls.getSelected().size == 0) return;
       navigator.clipboard.writeText(
-        `coboard:${JSON.stringify(controls.getSelected())}`
+        `coboard:${
+          JSON.stringify(Array.from(controls.getSelected().values()))
+        }`,
       );
     });
 
@@ -331,7 +333,7 @@ export default function Controls({ controls }: CameraViewProps) {
       middle.x /= n;
       middle.y /= n;
 
-      for (const line of controls.getSelected()) {
+      for (const line of controls.getSelected().values()) {
         client.socket.draw(line);
       }
 
@@ -350,6 +352,7 @@ export default function Controls({ controls }: CameraViewProps) {
           settings.mode.value = Mode.SELECT;
         }
       } else if (e.key === "Delete") {
+        client.socket.removeSelection();
         controls.setSelected([]);
       }
     });
@@ -408,6 +411,7 @@ export default function Controls({ controls }: CameraViewProps) {
         position: "absolute",
       }}
       ref={ref}
-    ></div>
+    >
+    </div>
   );
 }

@@ -14,10 +14,11 @@ export class SelectBehavior implements Behavior {
 
   toolCancel(): void {
     this.ctx.client.socket.beginAction();
+
     this.ctx.canvas.stopDrawing();
-    for (const line of this.ctx.canvas.getSelected()) {
-      this.ctx.client.socket.draw(line);
-    }
+    this.ctx.client.socket.deselect(
+      Array.from(this.ctx.canvas.getSelected().values()).map((l) => l.id),
+    );
     this.ctx.canvas.setSelected([]);
     this.ctx.canvas.redraw();
     this.ctx.client.socket.endAction();
@@ -33,29 +34,35 @@ export class SelectBehavior implements Behavior {
     this.moved = true;
     this.ctx.canvas.setTmpLine(this.getLine(point));
     const lines = this.ctx.client.ui.cache.getLinesInRect(this.corner, point);
-    for (const line of lines) this.ctx.client.socket.remove(line.id);
-    const selected = this.ctx.canvas.getSelected().concat(lines);
-    this.ctx.canvas.setSelected(selected);
+    this.ctx.client.socket.select(lines.map((l) => l.id));
+    for (const line of lines) {
+      this.ctx.canvas.getSelected().set(line.id, line);
+    }
+    this.ctx.canvas.setSelected(
+      Array.from(this.ctx.canvas.getSelected().values()),
+    );
   }
 
   toolEnd(): void {
     this.ctx.canvas.setTmpLine(null);
     if (!this.moved) {
-      for (const line of this.ctx.canvas.getSelected()) {
+      for (const line of this.ctx.canvas.getSelected().values()) {
         if (pointInLine(this.corner, line)) {
+          this.ctx.canvas.getSelected().delete(line.id);
           this.ctx.canvas.setSelected(
-            this.ctx.canvas.getSelected().filter((l) => l.id !== line.id),
+            Array.from(this.ctx.canvas.getSelected().values()),
           );
-          this.ctx.client.socket.draw(line);
+          this.ctx.client.socket.deselect([line.id]);
           return;
         }
       }
       const line = this.ctx.client.ui.cache.getLineAt(this.corner);
       if (line) {
-        this.ctx.canvas.setSelected(
-          this.ctx.canvas.getSelected().concat([line]),
-        );
-        this.ctx.client.socket.remove(line.id);
+        this.ctx.canvas.getSelected().set(line.id, line),
+          this.ctx.canvas.setSelected(
+            Array.from(this.ctx.canvas.getSelected().values()),
+          );
+        this.ctx.client.socket.select([line.id]);
       } else {
         this.toolCancel();
       }

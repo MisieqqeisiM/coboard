@@ -1,15 +1,16 @@
-import { Line } from "../liaison/liaison.ts";
+import { Line, Point } from "../liaison/liaison.ts";
 
 export interface DrawableCanvas {
+  delta: Point;
   setTmpLine(line: Line | null): void;
   setSelected(lines: Line[]): void;
-  getSelected(): Line[];
+  getSelected(): Map<number, Line>;
   stopDrawing(): void;
   redraw(): void;
 }
 
 export interface ObservableCanvas {
-  addLine(line: Line): void;
-  removeLine(id: number): void;
+  addLines(lines: Line[]): void;
+  removeLines(ids: number[]): void;
   reset(): void;
 }

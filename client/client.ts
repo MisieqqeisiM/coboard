@@ -1,14 +1,18 @@
 import { Signal, signal } from "../deps_client.ts";
 import {
   BoardActionVisitor,
+  DeselectAction,
   DrawAction,
   MoveAction,
+  MoveSelectionAction,
   RemoveAction,
+  RemoveSelectionAction,
   ResetAction,
+  SelectAction,
   Undoable,
 } from "../liaison/actions.ts";
 import { ClientSocket, ClientState } from "../liaison/client.ts";
-import { Account, BoardUser, Line } from "../liaison/liaison.ts";
+import { Account, BoardUser, Line, Point } from "../liaison/liaison.ts";
 import { LineCache } from "./LineCache.ts";
 import { ObservableCanvas } from "./canvas.ts";
 
@@ -22,18 +26,16 @@ export class Client {
 }
 
 export class SignalCanvas implements ObservableCanvas {
-  public readonly onAddLine = new Signal<Line | null>(null);
-  public readonly onRemoveLine = new Signal<number | null>(null);
+  public readonly onAddLines = new Signal<Line[]>([]);
+  public readonly onRemoveLines = new Signal<number[]>([]);
   public readonly onReset = new Signal<boolean>(false);
 
-  addLine(line: Line): void {
-    this.onAddLine.value = line;
+  addLines(lines: Line[]): void {
+    this.onAddLines.value = lines;
   }
-
-  removeLine(id: number): void {
-    this.onRemoveLine.value = id;
+  removeLines(ids: number[]): void {
+    this.onRemoveLines.value = ids;
   }
-
   reset(): void {
     this.onReset.value = true;
   }
@@ -59,6 +61,18 @@ export class UIClient {
 
 class Emitter implements BoardActionVisitor {
   constructor(private io: ClientSocket) {}
+  public select(action: SelectAction): void {
+    this.io.emit("select", action);
+  }
+  public deselect(action: DeselectAction): void {
+    this.io.emit("deselect", action);
+  }
+  public removeSelection(action: RemoveSelectionAction): void {
+    this.io.emit("removeSelection", action);
+  }
+  public moveSelection(action: MoveSelectionAction): void {
+    this.io.emit("moveSelection", action);
+  }
   public move(action: MoveAction): void {
     this.io.emit("move", action);
   }
@@ -96,8 +110,8 @@ export class SocketClient {
       client.users.value = newUsers;
     });
 
-    io.on("onDraw", (e) => client.cache.addRemoteLine(e.line));
-    io.on("onRemove", (e) => client.cache.removeLine(e.lineId));
+    io.on("onDraw", (e) => client.cache.addRemoteLines(e.lines));
+    io.on("onRemove", (e) => client.cache.removeLines(e.lineIds));
     io.on("confirmLine", (e) => client.cache.confirmLine(e.lineId));
     io.on("onReset", (_) => client.cache.reset());
   }
@@ -114,30 +128,50 @@ export class SocketClient {
 
   public undo() {
     const action = this.actionStack.pop();
-    if(!action) return;
-    for(const move of action.toReversed())
+    if (!action) return;
+    for (const move of action.toReversed()) {
       move?.undo().accept(this.emitter);
+    }
   }
 
   public move(x: number, y: number) {
     new MoveAction(x, y).accept(this.emitter);
   }
 
+  public moveSelection(vec: Point) {
+    new MoveSelectionAction(vec).accept(this.emitter);
+  }
+
+  public removeSelection() {
+    new RemoveSelectionAction().accept(this.emitter);
+  }
+
   public draw(line: Line) {
-    const newLine = this.client.cache.addLocalLine(line);
-    const action = new DrawAction(newLine);
+    console.log(line);
+    const newLine = this.client.cache.addLocalLines([line]);
+    const action = new DrawAction(newLine[0]);
     action.accept(this.emitter);
     this.currentAction.push(action);
-    if(!this.inAction) this.endAction();
+    if (!this.inAction) this.endAction();
+  }
+
+  public select(ids: number[]) {
+    const action = new SelectAction(ids);
+    action.accept(this.emitter);
+  }
+
+  public deselect(ids: number[]) {
+    const action = new DeselectAction(ids);
+    action.accept(this.emitter);
   }
 
   public remove(id: number) {
-    const line = this.client.cache.removeLine(id);
-    if (!line) return;
-    const action = new RemoveAction(line);
+    const lines = this.client.cache.removeLines([id]);
+    if (lines.length == 0) return;
+    const action = new RemoveAction(lines[0]);
     action.accept(this.emitter);
     this.currentAction.push(action);
-    if(!this.inAction) this.endAction();
+    if (!this.inAction) this.endAction();
   }
 
   public reset() {
