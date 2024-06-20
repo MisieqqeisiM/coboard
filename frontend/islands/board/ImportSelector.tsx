@@ -43,7 +43,6 @@ export default function ImportSelector({
  
     polylines.forEach((polyline) => {
       const points = polyline.getAttribute('points')?.trim().split(' ');
-      //TODO: color should be hex code
       const color = polyline.getAttribute('stroke') || Color.BLACK;
       if (!color.match("#[0-9a-fA-F]{6}")) return;
 
@@ -74,7 +73,7 @@ export default function ImportSelector({
     return newLines
   };
 
-  function clickIcon() {
+  const clickIcon =()=> {
     fileInputRef.current?.click();
   }
     return (

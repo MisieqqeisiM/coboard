@@ -15,7 +15,7 @@ export default function ExportSelector({
 
     return `<polyline points="${pointsString}" stroke="${line.color}" stroke-linecap="round" stroke-width="${line.width}" fill="none" />`;
   }
-  function makeSVG(lines: IterableIterator<Line>) : string {
+  const makeSVG = (lines: IterableIterator<Line>) : string => {
     const svgEnd = '</svg>';
     let svgContent = '';
     let minX = Number.POSITIVE_INFINITY;
@@ -43,7 +43,7 @@ export default function ExportSelector({
     return svgStart+svgContent+svgEnd;
   }
 
-  function downloadSVG(svgContent: string) {
+  const downloadSVG = (svgContent: string) =>{
     const blob = new Blob([svgContent], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
