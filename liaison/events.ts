@@ -7,6 +7,26 @@ export interface BoardEventVisitor {
   onDraw(event: OnDrawEvent): void;
   onRemove(event: OnRemoveEvent): void;
   onReset(event: OnResetEvent): void;
+  onUpdate(event: OnUpdateEvent): void;
+  confirmLines(event: ConfirmLinesEvent): void;
+}
+
+export class ConfirmLinesEvent implements BoardEvent {
+  constructor(readonly lineIds: number[]) {}
+  accept(visitor: BoardEventVisitor) {
+    visitor.confirmLines(this);
+  }
+}
+
+export class OnUpdateEvent implements BoardEvent {
+  constructor(
+    readonly user: string,
+    readonly remove: number[],
+    readonly create: Line[],
+  ) {}
+  accept(visitor: BoardEventVisitor) {
+    visitor.onUpdate(this);
+  }
 }
 
 export interface BoardEvent {

@@ -1,3 +1,4 @@
+import { updateCheck } from "$fresh/src/dev/update_check.ts";
 import { Signal, signal } from "../deps_client.ts";
 import {
   BoardActionVisitor,
@@ -6,6 +7,7 @@ import {
   RemoveAction,
   ResetAction,
   Undoable,
+  UpdateAction,
 } from "../liaison/actions.ts";
 import { ClientSocket, ClientState } from "../liaison/client.ts";
 import { Account, BoardUser, Line } from "../liaison/liaison.ts";
@@ -22,24 +24,25 @@ export class Client {
 }
 
 export class SignalCanvas implements ObservableCanvas {
-  public readonly onAddLine = new Signal<Line | null>(null);
-  public readonly onRemoveLine = new Signal<number | null>(null);
+  public readonly onAddLines = new Signal<Line[]>([]);
+  public readonly onRemoveLines = new Signal<number[]>([]);
   public readonly onReset = new Signal<boolean>(false);
 
-  addLine(line: Line): void {
-    this.onAddLine.value = line;
+  public addLines(lines: Line[]): void {
+    this.onAddLines.value = lines;
   }
 
-  removeLine(id: number): void {
-    this.onRemoveLine.value = id;
+  public removeLines(ids: number[]): void {
+    this.onRemoveLines.value = ids;
   }
 
-  reset(): void {
+  public reset(): void {
     this.onReset.value = true;
   }
 }
 
 export class UIClient {
+  readonly selection: Signal<Map<number, Line>> = signal(new Map());
   readonly users: Signal<Map<string, BoardUser>> = signal(new Map());
   readonly clear: Signal<boolean> = signal(false);
   readonly shareToken: string;
@@ -59,6 +62,9 @@ export class UIClient {
 
 class Emitter implements BoardActionVisitor {
   constructor(private io: ClientSocket) {}
+  public update(action: UpdateAction): void {
+    this.io.emit("update", action);
+  }
   public move(action: MoveAction): void {
     this.io.emit("move", action);
   }
@@ -77,8 +83,7 @@ class Emitter implements BoardActionVisitor {
 }
 
 export class SocketClient {
-  private actionStack: Undoable[][] = [];
-  private currentAction: Undoable[] = [];
+  private actions: Undoable[] = [];
   private inAction: boolean = false;
   private emitter: Emitter;
   constructor(io: ClientSocket, private client: UIClient) {
@@ -96,9 +101,14 @@ export class SocketClient {
       client.users.value = newUsers;
     });
 
-    io.on("onDraw", (e) => client.cache.addRemoteLine(e.line));
-    io.on("onRemove", (e) => client.cache.removeLine(e.lineId));
-    io.on("confirmLine", (e) => client.cache.confirmLine(e.lineId));
+    io.on("onDraw", (e) => client.cache.addRemoteLines([e.line]));
+    io.on("onRemove", (e) => client.cache.removeLines([e.lineId]));
+    io.on("onUpdate", (e) => {
+      client.cache.removeLines(e.remove);
+      client.cache.addRemoteLines(e.create);
+    });
+    io.on("confirmLine", (e) => client.cache.confirmLines([e.lineId]));
+    io.on("confirmLines", (e) => client.cache.confirmLines(e.lineIds));
     io.on("onReset", (_) => client.cache.reset());
   }
 
@@ -106,17 +116,10 @@ export class SocketClient {
     this.inAction = true;
   }
 
-  public endAction() {
-    this.inAction = false;
-    this.actionStack.push(this.currentAction);
-    this.currentAction = [];
-  }
-
   public undo() {
-    const action = this.actionStack.pop();
-    if(!action) return;
-    for(const move of action.toReversed())
-      move?.undo().accept(this.emitter);
+    const action = this.actions.pop();
+    if (!action) return;
+    action.undo().accept(this.emitter);
   }
 
   public move(x: number, y: number) {
@@ -126,18 +129,61 @@ export class SocketClient {
   public draw(line: Line) {
     const newLine = this.client.cache.addLocalLine(line);
     const action = new DrawAction(newLine);
+    this.actions.push(action);
     action.accept(this.emitter);
-    this.currentAction.push(action);
-    if(!this.inAction) this.endAction();
   }
 
   public remove(id: number) {
-    const line = this.client.cache.removeLine(id);
-    if (!line) return;
-    const action = new RemoveAction(line);
+    const lines = this.client.cache.removeLines([id]);
+    if (lines.length == 0) return;
+    const action = new RemoveAction(lines[0]);
+    this.actions.push(action);
     action.accept(this.emitter);
-    this.currentAction.push(action);
-    if(!this.inAction) this.endAction();
+  }
+
+  public select(lines: Line[]) {
+    const newSelection = new Map(this.client.selection.peek());
+    for (const line of lines) {
+      newSelection.set(line.id, line);
+    }
+    this.client.selection.value = newSelection;
+    this.client.canvas.removeLines(lines.map((line) => line.id));
+  }
+
+  public deleteSelection() {
+    this.update(Array.from(this.client.selection.peek().keys()), []);
+    this.client.selection.value = new Map();
+  }
+
+  public drawToSelection(lines: Line[]) {
+    const newLines: Line[] = [];
+    for (const line of lines) {
+      newLines.push(Line.changeId(line, this.client.cache.getUniqueId()));
+    }
+    this.select(newLines);
+  }
+
+  public deselectAll() {
+    this.deselect(Array.from(this.client.selection.peek().values()));
+  }
+
+  public update(remove: number[], create: Line[]): Line[] {
+    if (remove.length == 0 && create.length == 0) return [];
+    const removedLines = this.client.cache.removeLines(remove);
+    const newLines = this.client.cache.addLocalLines(create);
+    const action = new UpdateAction(removedLines, newLines);
+    action.accept(this.emitter);
+    this.actions.push(action);
+    return newLines;
+  }
+
+  public deselect(lines: Line[]) {
+    this.update(lines.map((line) => line.id), lines);
+    const newSelection = new Map(this.client.selection.peek());
+    for (const line of lines) {
+      newSelection.delete(line.id);
+    }
+    this.client.selection.value = newSelection;
   }
 
   public reset() {

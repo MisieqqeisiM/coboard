@@ -142,7 +142,7 @@ export default function Controls({ controls }: CameraViewProps) {
       const touchX = (a.clientX + b.clientX) / 2;
       const touchY = (a.clientY + b.clientY) / 2;
       const touchDist = Math.sqrt(
-        Math.pow(a.clientX - b.clientX, 2) + Math.pow(a.clientY - b.clientY, 2)
+        Math.pow(a.clientX - b.clientX, 2) + Math.pow(a.clientY - b.clientY, 2),
       );
       return [touchX, touchY, touchDist];
     }
@@ -288,9 +288,11 @@ export default function Controls({ controls }: CameraViewProps) {
     };
 
     globalThis.addEventListener("copy", (_) => {
-      if (controls.getSelected().length == 0) return;
+      if (client.ui.selection.peek().size == 0) return;
       navigator.clipboard.writeText(
-        `coboard:${JSON.stringify(controls.getSelected())}`
+        `coboard:${
+          JSON.stringify(Array.from(client.ui.selection.peek().values()))
+        }`,
       );
     });
 
@@ -331,16 +333,15 @@ export default function Controls({ controls }: CameraViewProps) {
       middle.x /= n;
       middle.y /= n;
 
-      for (const line of controls.getSelected()) {
-        client.socket.draw(line);
-      }
+      client.socket.deselectAll();
 
       const [mx, my] = camera.peek().toBoardCoords(mouseX, mouseY);
       const diff = {
         x: mx - middle.x,
         y: my - middle.y,
       };
-      controls.setSelected(lines.map((l) => Line.move(l, diff)));
+      const newLines = lines.map((l) => Line.move(l, diff));
+      client.socket.drawToSelection(newLines);
       settings.mode.value = Mode.MOVE;
     });
 
@@ -350,7 +351,7 @@ export default function Controls({ controls }: CameraViewProps) {
           settings.mode.value = Mode.SELECT;
         }
       } else if (e.key === "Delete") {
-        controls.setSelected([]);
+        client.socket.deleteSelection();
       }
     });
 
@@ -408,6 +409,7 @@ export default function Controls({ controls }: CameraViewProps) {
         position: "absolute",
       }}
       ref={ref}
-    ></div>
+    >
+    </div>
   );
 }

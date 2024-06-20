@@ -4,6 +4,7 @@ export interface BoardActionVisitor {
   move(action: MoveAction): void;
   draw(action: DrawAction): void;
   remove(action: RemoveAction): void;
+  update(action: UpdateAction): void;
   reset(action: ResetAction): void;
 }
 
@@ -13,6 +14,18 @@ export interface BoardAction {
 
 export interface Undoable {
   undo(): BoardAction;
+}
+
+export class UpdateAction implements BoardAction, Undoable {
+  constructor(readonly remove: Line[], readonly create: Line[]) {}
+
+  undo(): BoardAction {
+    return new UpdateAction(this.create, this.remove);
+  }
+
+  accept(visitor: BoardActionVisitor): void {
+    visitor.update(this);
+  }
 }
 
 export class MoveAction implements BoardAction {

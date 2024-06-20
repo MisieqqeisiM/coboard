@@ -19,23 +19,16 @@ export class MoveBehavior implements Behavior {
 
   toolStart(point: Point): void {
     this.lastPoint = point;
-    for (const line of this.ctx.canvas.getSelected()) {
+    for (const line of this.ctx.client.ui.selection.peek().values()) {
       if (pointInLine(point, line)) {
         this.moveSelection = true;
         return;
       }
     }
-    this.ctx.canvas.stopDrawing();
-    this.ctx.client.socket.beginAction();
-    for (const line of this.ctx.canvas.getSelected()) {
-      this.ctx.client.socket.draw(line);
-    }
-    this.ctx.client.socket.endAction();
-    this.ctx.canvas.redraw();
-    this.ctx.canvas.setSelected([]);
+    this.ctx.client.socket.deselectAll();
     this.movedLine = this.ctx.client.ui.cache.getLineAt(point);
     if (!this.movedLine) return;
-    this.ctx.client.socket.remove(this.movedLine.id);
+    this.ctx.client.ui.canvas.removeLines([this.movedLine.id]);
     this.ctx.canvas.setTmpLine(this.movedLine);
   }
 
@@ -46,9 +39,11 @@ export class MoveBehavior implements Behavior {
     };
     this.lastPoint = point;
     if (this.moveSelection) {
-      this.ctx.canvas.setSelected(
-        this.ctx.canvas.getSelected().map((l) => Line.move(l, diff)),
-      );
+      const newSelection: Map<number, Line> = new Map();
+      for (const line of this.ctx.client.ui.selection.peek().values()) {
+        newSelection.set(line.id, Line.move(line, diff));
+      }
+      this.ctx.client.ui.selection.value = newSelection;
       return;
     }
     if (!this.movedLine) return;
@@ -56,11 +51,12 @@ export class MoveBehavior implements Behavior {
     this.ctx.canvas.setTmpLine(this.movedLine);
   }
 
-  setShift(value: boolean): void {}
+  setShift(_value: boolean): void {}
+
   toolEnd(): void {
     this.moveSelection = false;
     if (!this.movedLine) return;
-    this.ctx.client.socket.draw(this.movedLine);
+    this.ctx.client.socket.update([this.movedLine.id], [this.movedLine]);
     this.movedLine = null;
     this.ctx.canvas.setTmpLine(null);
   }

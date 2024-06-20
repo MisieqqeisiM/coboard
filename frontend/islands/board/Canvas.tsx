@@ -18,7 +18,6 @@ interface CanvasProps {
 
 export class SignalCanvas implements DrawableCanvas {
   tmpLine = new Signal<Line | null>();
-  selected = new Signal<Line[]>([]);
   redrawSig = new Signal(false);
   dontRedraw = false;
 
@@ -28,13 +27,6 @@ export class SignalCanvas implements DrawableCanvas {
 
   setTmpLine(line: Line | null): void {
     this.tmpLine.value = line;
-  }
-  setSelected(lines: Line[]): void {
-    this.selected.value = lines;
-  }
-
-  getSelected(): Line[] {
-    return this.selected.peek();
   }
 
   redraw(): void {
@@ -142,15 +134,17 @@ export default function Canvas(
       lineBuffer.addLine(line);
     }
 
-    client.ui.canvas.onAddLine.subscribe((line) => {
-      if (!line) return;
-      lineBuffer.addLine(line);
+    client.ui.canvas.onAddLines.subscribe((lines) => {
+      for (const line of lines) {
+        lineBuffer.addLine(line);
+      }
       draw();
     });
 
-    client.ui.canvas.onRemoveLine.subscribe((id) => {
-      if (!id) return;
-      lineBuffer.removeLine(id);
+    client.ui.canvas.onRemoveLines.subscribe((ids) => {
+      for (const id of ids) {
+        lineBuffer.removeLine(id);
+      }
       draw();
     });
 
@@ -161,9 +155,9 @@ export default function Canvas(
     });
 
     controls.tmpLine.subscribe((_) => draw());
-    controls.selected.subscribe((lines) => {
+    client.ui.selection.subscribe((lines) => {
       selectBuffer.clear();
-      for (const line of lines) {
+      for (const line of lines.values()) {
         selectBuffer.addLine(line);
       }
       draw();

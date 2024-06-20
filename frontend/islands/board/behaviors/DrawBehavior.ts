@@ -4,10 +4,7 @@ import { Behavior, BehaviorContext } from "./Behavior.ts";
 export class DrawBehavior implements Behavior {
   private points: Point[] = [];
   constructor(private ctx: BehaviorContext) {
-    for (const line of this.ctx.canvas.getSelected()) {
-      this.ctx.client.socket.draw(line);
-    }
-    this.ctx.canvas.setSelected([]);
+    this.ctx.client.socket.deselectAll();
   }
 
   toolCancel(): void {
@@ -31,7 +28,7 @@ export class DrawBehavior implements Behavior {
     this.ctx.canvas.setTmpLine(null);
   }
 
-  setShift(value: boolean): void { }
+  setShift(value: boolean): void {}
   private getLine() {
     return new Line(
       0,

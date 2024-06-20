@@ -58,21 +58,44 @@ export class LineCache {
     this.localIds.push(this.id);
     const newLine = Line.changeId(line, this.id);
     this.lines.set(this.id, newLine);
-    this.canvas.addLine(newLine);
+    this.canvas.addLines([newLine]);
     return newLine;
   }
 
-  public addRemoteLine(line: Line) {
-    this.lines.set(line.id, line);
-    this.canvas.addLine(line);
+  public addLocalLines(lines: Line[]): Line[] {
+    const newLines: Line[] = [];
+    for (const line of lines) {
+      this.id -= 1;
+      this.localIds.push(this.id);
+      const newLine = Line.changeId(line, this.id);
+      this.lines.set(this.id, newLine);
+      newLines.push(newLine);
+    }
+    this.canvas.addLines(newLines);
+    return newLines;
   }
 
-  public removeLine(id: number): Line | null {
-    const line = this.lines.get(id);
-    if (!line) return null;
-    this.lines.delete(id);
-    this.canvas.removeLine(id);
-    return line;
+  public addRemoteLines(lines: Line[]) {
+    for (const line of lines) {
+      this.lines.set(line.id, line);
+    }
+    this.canvas.addLines(lines);
+  }
+
+  public removeLines(ids: number[]): Line[] {
+    const removedLines: Line[] = [];
+    for (const id of ids) {
+      const line = this.lines.get(id);
+      if (!line) continue;
+      this.lines.delete(id);
+      removedLines.push(line);
+    }
+    this.canvas.removeLines(ids);
+    return removedLines;
+  }
+
+  public getLine(id: number): Line | null {
+    return this.lines.get(id) ?? null;
   }
 
   public reset() {
@@ -80,11 +103,18 @@ export class LineCache {
     this.canvas.reset();
   }
 
-  public confirmLine(_id: number) {
-    const oldId = this.localIds.shift()!;
-    const line = this.lines.get(oldId);
-    if (!line) return;
-    this.removeLine(oldId);
-    // this.addRemoteLine(Line.changeId(line, id));
+  public getUniqueId(): number {
+    return --this.id;
+  }
+
+  public confirmLines(ids: number[]) {
+    const toRemove: number[] = [];
+    for (const _id of ids.toReversed()) {
+      const oldId = this.localIds.shift()!;
+      const line = this.lines.get(oldId);
+      if (!line) return;
+      toRemove.push(oldId);
+    }
+    this.removeLines(toRemove);
   }
 }
