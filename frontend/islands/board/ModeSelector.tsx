@@ -6,7 +6,6 @@ const modeIcons: Record<Mode, string> = {
   [Mode.DRAW]: "pencil-outline",
   [Mode.ERASE]: "eraser",
   [Mode.MOVE]: "hand-right-outline",
-  [Mode.SELECT]: "crop-outline",
 };
 
 export default function ModeSelector() {
@@ -28,10 +27,6 @@ export default function ModeSelector() {
         mode.value = Mode.MOVE;
         break;
       case Mode.MOVE:
-        size.value = penSize.value;
-        mode.value = Mode.DRAW;
-        break;
-      case Mode.SELECT:
         size.value = penSize.value;
         mode.value = Mode.DRAW;
         break;

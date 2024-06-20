@@ -18,7 +18,6 @@ import { EllipseBehavior } from "./behaviors/EllipseBehaviour.ts";
 import { RectangleBehavior } from "./behaviors/RectangleBehaviour.ts";
 import { PolylineBehaviour } from "./behaviors/PolyLineBehaviour.ts";
 import { PolygonBehavior } from "./behaviors/PolygonBehaviour.ts";
-import { SelectBehavior } from "./behaviors/SelectBehavior.ts";
 import { Line, Point } from "../../../liaison/liaison.ts";
 
 export const HideContext = createContext(signal(false));
@@ -76,9 +75,6 @@ export default function Controls({ controls }: CameraViewProps) {
           break;
         case Mode.MOVE:
           behavior = new MoveBehavior(behaviorContext);
-          break;
-        case Mode.SELECT:
-          behavior = new SelectBehavior(behaviorContext);
           break;
       }
     });
@@ -346,22 +342,11 @@ export default function Controls({ controls }: CameraViewProps) {
     });
 
     globalThis.addEventListener("keydown", (e) => {
-      if (e.key === "Shift") {
-        if (settings.mode.peek() === Mode.MOVE) {
-          settings.mode.value = Mode.SELECT;
-        }
-      } else if (e.key === "Delete") {
+      if (e.key === "Delete") {
         client.socket.deleteSelection();
       }
     });
 
-    globalThis.addEventListener("keyup", (e) => {
-      if (e.key === "Shift") {
-        if (settings.mode.peek() === Mode.SELECT) {
-          settings.mode.value = Mode.MOVE;
-        }
-      }
-    });
     globalThis.addEventListener("resize", (_) => {
       controls.redraw();
     });

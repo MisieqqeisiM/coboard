@@ -13,7 +13,6 @@ export enum Mode {
   DRAW,
   ERASE,
   MOVE,
-  SELECT,
 }
 
 export enum Color {

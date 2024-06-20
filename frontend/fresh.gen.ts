@@ -50,7 +50,6 @@ import * as $board_behaviors_MoveBehavior from "./islands/board/behaviors/MoveBe
 import * as $board_behaviors_PolyLineBehaviour from "./islands/board/behaviors/PolyLineBehaviour.ts";
 import * as $board_behaviors_PolygonBehaviour from "./islands/board/behaviors/PolygonBehaviour.ts";
 import * as $board_behaviors_RectangleBehaviour from "./islands/board/behaviors/RectangleBehaviour.ts";
-import * as $board_behaviors_SelectBehavior from "./islands/board/behaviors/SelectBehavior.ts";
 import * as $board_behaviors_geometry_utils from "./islands/board/behaviors/geometry_utils.ts";
 import * as $board_webgl_utils_LineBuffer from "./islands/board/webgl-utils/LineBuffer.ts";
 import * as $board_webgl_utils_LineDrawer from "./islands/board/webgl-utils/LineDrawer.ts";
@@ -118,8 +117,6 @@ const manifest = {
       $board_behaviors_PolygonBehaviour,
     "./islands/board/behaviors/RectangleBehaviour.ts":
       $board_behaviors_RectangleBehaviour,
-    "./islands/board/behaviors/SelectBehavior.ts":
-      $board_behaviors_SelectBehavior,
     "./islands/board/behaviors/geometry_utils.ts":
       $board_behaviors_geometry_utils,
     "./islands/board/webgl-utils/LineBuffer.ts": $board_webgl_utils_LineBuffer,
