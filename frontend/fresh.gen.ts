@@ -34,6 +34,7 @@ import * as $board_ExportSelector from "./islands/board/ExportSelector.tsx";
 import * as $board_ImportSelector from "./islands/board/ImportSelector.tsx";
 import * as $board_ModeSelector from "./islands/board/ModeSelector.tsx";
 import * as $board_MouseTracker from "./islands/board/MouseTracker.tsx";
+import * as $board_OptionsMenu from "./islands/board/OptionsMenu.tsx";
 import * as $board_ShareSelector from "./islands/board/ShareSelector.tsx";
 import * as $board_SizeSelector from "./islands/board/SizeSelector.tsx";
 import * as $board_StylusModeSelector from "./islands/board/StylusModeSelector.tsx";
@@ -95,6 +96,7 @@ const manifest = {
     "./islands/board/ImportSelector.tsx": $board_ImportSelector,
     "./islands/board/ModeSelector.tsx": $board_ModeSelector,
     "./islands/board/MouseTracker.tsx": $board_MouseTracker,
+    "./islands/board/OptionsMenu.tsx": $board_OptionsMenu,
     "./islands/board/ShareSelector.tsx": $board_ShareSelector,
     "./islands/board/SizeSelector.tsx": $board_SizeSelector,
     "./islands/board/StylusModeSelector.tsx": $board_StylusModeSelector,
