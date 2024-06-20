@@ -1,27 +1,29 @@
 import { Line, Point } from "../../../../liaison/liaison.ts";
-import { Behavior, BehaviorContext} from "./Behavior.ts";
+import { Behavior, BehaviorContext } from "./Behavior.ts";
 import { getCircle, getEllipse } from "./geometry_utils.ts";
 
 export class EllipseBehavior implements Behavior {
-  private startPoint: Point | null=null;
-  private endPoint: Point | null=null;
+  private startPoint: Point | null = null;
+  private endPoint: Point | null = null;
 
   private shift = false;
 
-  constructor(private ctx: BehaviorContext) {}
-   toolCancel(): void {
-    this.startPoint=null;
-    this.endPoint=null;
+  constructor(private ctx: BehaviorContext) {
+    this.ctx.client.socket.deselectAll();
+  }
+  toolCancel(): void {
+    this.startPoint = null;
+    this.endPoint = null;
     this.ctx.canvas.setTmpLine(null);
   }
 
   toolStart(point: Point): void {
-    this.startPoint=point;
+    this.startPoint = point;
     this.ctx.canvas.setTmpLine(this.getLine());
   }
 
   toolMove(point: Point): void {
-    this.endPoint=point;
+    this.endPoint = point;
     this.ctx.canvas.setTmpLine(this.getLine());
   }
 
@@ -30,8 +32,8 @@ export class EllipseBehavior implements Behavior {
     this.toolCancel();
   }
 
-  setShift(value: boolean): void { 
-    this.shift=value;
+  setShift(value: boolean): void {
+    this.shift = value;
   }
   private getLine() {
     return new Line(
@@ -39,8 +41,8 @@ export class EllipseBehavior implements Behavior {
       this.ctx.settings.size.peek(),
       this.ctx.settings.color.peek(),
       this.shift
-      ? getCircle(this.startPoint, this.endPoint)
-      : getEllipse(this.startPoint, this.endPoint),
+        ? getCircle(this.startPoint, this.endPoint)
+        : getEllipse(this.startPoint, this.endPoint),
     );
   }
 }

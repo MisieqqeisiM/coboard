@@ -13,14 +13,7 @@ export class SelectBehavior implements Behavior {
   setShift(_: boolean): void {}
 
   toolCancel(): void {
-    this.ctx.client.socket.beginAction();
-    this.ctx.canvas.stopDrawing();
-    for (const line of this.ctx.canvas.getSelected()) {
-      this.ctx.client.socket.draw(line);
-    }
-    this.ctx.canvas.setSelected([]);
-    this.ctx.canvas.redraw();
-    this.ctx.client.socket.endAction();
+    this.ctx.client.socket.deselectAll();
   }
 
   toolStart(point: Point): void {
@@ -33,29 +26,21 @@ export class SelectBehavior implements Behavior {
     this.moved = true;
     this.ctx.canvas.setTmpLine(this.getLine(point));
     const lines = this.ctx.client.ui.cache.getLinesInRect(this.corner, point);
-    for (const line of lines) this.ctx.client.socket.remove(line.id);
-    const selected = this.ctx.canvas.getSelected().concat(lines);
-    this.ctx.canvas.setSelected(selected);
+    this.ctx.client.socket.select(lines);
   }
 
   toolEnd(): void {
     this.ctx.canvas.setTmpLine(null);
     if (!this.moved) {
-      for (const line of this.ctx.canvas.getSelected()) {
+      for (const line of this.ctx.client.ui.selection.peek().values()) {
         if (pointInLine(this.corner, line)) {
-          this.ctx.canvas.setSelected(
-            this.ctx.canvas.getSelected().filter((l) => l.id !== line.id),
-          );
-          this.ctx.client.socket.draw(line);
+          this.ctx.client.socket.deselect([line]);
           return;
         }
       }
       const line = this.ctx.client.ui.cache.getLineAt(this.corner);
       if (line) {
-        this.ctx.canvas.setSelected(
-          this.ctx.canvas.getSelected().concat([line]),
-        );
-        this.ctx.client.socket.remove(line.id);
+        this.ctx.client.socket.select([line]);
       } else {
         this.toolCancel();
       }

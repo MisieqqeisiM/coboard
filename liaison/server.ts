@@ -7,14 +7,17 @@ import {
   BoardEvent,
   BoardEventVisitor,
   ConfirmLineEvent,
+  ConfirmLinesEvent,
   OnDrawEvent,
   OnMoveEvent,
   OnRemoveEvent,
   OnResetEvent,
+  OnUpdateEvent,
   UserListEvent,
 } from "../liaison/events.ts";
 import { DATABASE_URL, SOCKET_PORT } from "../config.ts";
 import { BoardActionVisitor } from "./actions.ts";
+import { lineIntersectsRect } from "../frontend/islands/board/webgl-utils/line_drawing.ts";
 
 export interface SocketData {
   client: Client;
@@ -49,6 +52,14 @@ export class ClientStore {
 
 class Emitter implements BoardEventVisitor {
   constructor(readonly socket: ServerSocket) {}
+
+  public confirmLines(event: ConfirmLinesEvent): void {
+    this.socket.emit("confirmLines", event);
+  }
+
+  public onUpdate(event: OnUpdateEvent): void {
+    this.socket.emit("onUpdate", event);
+  }
 
   public onDraw(event: OnDrawEvent) {
     this.socket.emit("onDraw", event);
@@ -89,6 +100,13 @@ export class Client {
     return this.emitter !== undefined;
   }
 
+  private globalId(id: number) {
+    while (this.idMap.get(id)) {
+      id = this.idMap.get(id)!;
+    }
+    return id;
+  }
+
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
     socket.on("move", (a) => this.board.move(this, a.x, a.y));
@@ -98,11 +116,12 @@ export class Client {
         this.idMap.set(a.line.id, id);
       });
       socket.on("remove", async (a) => {
-        let id = a.line.id;
-        while (this.idMap.get(id)) {
-          id = this.idMap.get(id)!;
-        }
+        const id = this.globalId(a.line.id);
         await this.board.remove(this, id);
+      });
+      socket.on("update", async (a) => {
+        const toRemove = a.remove.map((l) => this.globalId(l.id));
+        const newIds = this.board.update(this, toRemove, a.create);
       });
       socket.on("reset", async (_) => await this.board.reset(this));
     }
