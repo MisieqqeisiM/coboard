@@ -10,6 +10,7 @@ export class LineCache {
   localIds: number[] = [];
   id = 0;
   lines = new Map<number, Line>();
+  idMap = new Map<number, number>();
 
   public constructor(lines: Line[], private canvas: ObservableCanvas) {
     for (const line of lines) this.lines.set(line.id, line);
@@ -82,7 +83,28 @@ export class LineCache {
     this.canvas.addLines(lines);
   }
 
+  public globalId(id: number) {
+    while (this.idMap.has(id)) {
+      id = this.idMap.get(id)!;
+    }
+    return id;
+  }
+
   public removeLines(ids: number[]): Line[] {
+    const removedLines: Line[] = [];
+    const newIds = [];
+    for (const id of ids) {
+      const line = this.lines.get(this.globalId(id));
+      if (!line) continue;
+      this.lines.delete(this.globalId(id));
+      removedLines.push(line);
+      newIds.push(this.globalId(id));
+    }
+    this.canvas.removeLines(newIds);
+    return removedLines;
+  }
+
+  private removeLinesByLocalId(ids: number[]) {
     const removedLines: Line[] = [];
     for (const id of ids) {
       const line = this.lines.get(id);
@@ -109,12 +131,13 @@ export class LineCache {
 
   public confirmLines(ids: number[]) {
     const toRemove: number[] = [];
-    for (const _id of ids.toReversed()) {
+    for (const id of ids) {
       const oldId = this.localIds.shift()!;
       const line = this.lines.get(oldId);
       if (!line) return;
       toRemove.push(oldId);
+      this.idMap.set(oldId, id);
     }
-    this.removeLines(toRemove);
+    this.removeLinesByLocalId(toRemove);
   }
 }

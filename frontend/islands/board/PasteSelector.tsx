@@ -78,7 +78,8 @@ export default function PasteSelector() {
   return (
     <IconCircle
       iconName="clipboard-outline"
-      onClick={() => pasteTo(window.screen.width / 2, window.screen.height / 2)}
+      onClick={() =>
+        pasteTo(globalThis.innerWidth / 2, globalThis.innerHeight / 2)}
     />
   );
 }

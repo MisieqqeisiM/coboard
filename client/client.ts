@@ -115,11 +115,40 @@ export class SocketClient {
     io.on("onReset", (_) => client.cache.reset());
   }
 
+  private changeActionId(action: Action, oldId: number, newId: number): Action {
+    const added = action.added.map((line) => {
+      if (line.id !== oldId && this.client.cache.globalId(line.id) !== oldId) {
+        return line;
+      }
+      return Line.changeId(line, newId);
+    });
+    const removed = action.removed.map((line) => {
+      if (line.id !== oldId && this.client.cache.globalId(line.id) !== oldId) {
+        return line;
+      }
+      return Line.changeId(line, newId);
+    });
+    return { added, removed };
+  }
+
+  private changeStackId(oldId: number, newId: number) {
+    this.undoStack = this.undoStack.map((action) => {
+      return this.changeActionId(action, oldId, newId);
+    });
+    this.redoStack = this.redoStack.map((action) => {
+      return this.changeActionId(action, oldId, newId);
+    });
+  }
+
   public undo() {
     const action = this.undoStack.pop();
     if (!action) return;
-    new UpdateAction(action.added, action.removed).accept(this.emitter);
-    this.redoStack.push({ added: action.removed, removed: action.added });
+    const newLines = this.client.cache.addLocalLines(action.removed);
+    for (let i = 0; i < newLines.length; i++) {
+      this.changeStackId(action.removed[i].id, newLines[i].id);
+    }
+    new UpdateAction(action.added, newLines).accept(this.emitter);
+    this.redoStack.push({ added: newLines, removed: action.added });
   }
 
   public redo() {
