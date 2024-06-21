@@ -46,6 +46,7 @@ export class PolylineBehaviour implements Behavior {
       this.toolCancel();
     } else if (this.endPoint != null) {
       this.points.push(this.endPoint!);
+      this.ctx.canvas.setTmpLine(this.getLine());
     }
   }
 
