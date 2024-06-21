@@ -24,6 +24,7 @@ import { RectangleBehavior } from "./behaviors/RectangleBehaviour.ts";
 import { PolylineBehaviour } from "./behaviors/PolyLineBehaviour.ts";
 import { PolygonBehavior } from "./behaviors/PolygonBehaviour.ts";
 import { Line, Point } from "../../../liaison/liaison.ts";
+import { paste } from "./PasteSelector.tsx";
 
 export const HideContext = createContext(signal(false));
 
@@ -213,9 +214,12 @@ export default function Controls({ controls }: CameraViewProps) {
       e.stopPropagation();
     };
 
+    let cameraButtonReleaseTime = 0;
+
     const mouseDown = (event: MouseEvent) => {
       hideMenus();
       if (client?.ui.viewerOnly) return;
+      event.preventDefault();
       if (event.button == eraseButton) {
         prevMode = settings.mode.peek();
         settings.mode.value = Mode.ERASE;
@@ -250,6 +254,7 @@ export default function Controls({ controls }: CameraViewProps) {
 
     const mouseUp = (event: MouseEvent) => {
       if (client?.ui.viewerOnly) return;
+      cameraButtonReleaseTime = Date.now();
       if (!toolDown) return;
       toolDown = false;
       behavior.toolEnd();
@@ -311,62 +316,10 @@ export default function Controls({ controls }: CameraViewProps) {
       }
     };
 
-    globalThis.addEventListener("copy", (_) => {
-      if (client.ui.selection.peek().size == 0) return;
-      navigator.clipboard.writeText(
-        `coboard:${
-          JSON.stringify(Array.from(client.ui.selection.peek().values()))
-        }`,
-      );
-    });
-
-    globalThis.addEventListener("paste", (e) => {
-      if (!e.clipboardData || !e.clipboardData.types) return;
-      const text = e.clipboardData.getData("Text");
-      if (!text.startsWith("coboard:")) return;
-      const data = JSON.parse(text.slice(8));
-      if (!Array.isArray(data)) return;
-      const lines: Line[] = [];
-      const middle = { x: 0, y: 0 };
-      let n = 0;
-
-      for (const obj of data) {
-        const id = obj["id"];
-        const width = obj["width"];
-        const color = obj["color"];
-        const coordinates = obj["coordinates"];
-        if (typeof id !== "number") return;
-        if (typeof width !== "number") return;
-        if (typeof color !== "string") return;
-        if (!color.match("#[0-9a-fA-F]{6}")) return;
-        if (!Array.isArray(coordinates)) return;
-        const newCoords: Point[] = [];
-        for (const point of coordinates) {
-          const x = point["x"];
-          const y = point["y"];
-          if (typeof x != "number") return;
-          if (typeof y != "number") return;
-          newCoords.push({ x, y });
-          n++;
-          middle.x += x;
-          middle.y += y;
-        }
-        lines.push(new Line(id, width, color, newCoords));
-      }
-
-      middle.x /= n;
-      middle.y /= n;
-
-      client.socket.deselectAll();
-
-      const [mx, my] = camera.peek().toBoardCoords(mouseX, mouseY);
-      const diff = {
-        x: mx - middle.x,
-        y: my - middle.y,
-      };
-      const newLines = lines.map((l) => Line.move(l, diff));
-      client.socket.drawToSelection(newLines);
-      settings.mode.value = Mode.MOVE;
+    globalThis.addEventListener("paste", () => {
+      console.log(cameraButtonReleaseTime);
+      if (Date.now() - cameraButtonReleaseTime < 100) return;
+      paste(mouseX, mouseY, client, camera.peek(), settings);
     });
 
     globalThis.addEventListener("keydown", (e) => {

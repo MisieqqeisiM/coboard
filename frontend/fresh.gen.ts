@@ -29,6 +29,7 @@ import * as $board_CameraView from "./islands/board/CameraView.tsx";
 import * as $board_Canvas from "./islands/board/Canvas.tsx";
 import * as $board_ColorSelector from "./islands/board/ColorSelector.tsx";
 import * as $board_Controls from "./islands/board/Controls.tsx";
+import * as $board_CopySelector from "./islands/board/CopySelector.tsx";
 import * as $board_CursorBox from "./islands/board/CursorBox.tsx";
 import * as $board_Enter from "./islands/board/Enter.tsx";
 import * as $board_ExportSelector from "./islands/board/ExportSelector.tsx";
@@ -36,6 +37,7 @@ import * as $board_ImportSelector from "./islands/board/ImportSelector.tsx";
 import * as $board_ModeSelector from "./islands/board/ModeSelector.tsx";
 import * as $board_MouseTracker from "./islands/board/MouseTracker.tsx";
 import * as $board_OptionsMenu from "./islands/board/OptionsMenu.tsx";
+import * as $board_PasteSelector from "./islands/board/PasteSelector.tsx";
 import * as $board_ShareSelector from "./islands/board/ShareSelector.tsx";
 import * as $board_SizeSelector from "./islands/board/SizeSelector.tsx";
 import * as $board_StylusModeSelector from "./islands/board/StylusModeSelector.tsx";
@@ -91,6 +93,7 @@ const manifest = {
     "./islands/board/Canvas.tsx": $board_Canvas,
     "./islands/board/ColorSelector.tsx": $board_ColorSelector,
     "./islands/board/Controls.tsx": $board_Controls,
+    "./islands/board/CopySelector.tsx": $board_CopySelector,
     "./islands/board/CursorBox.tsx": $board_CursorBox,
     "./islands/board/Enter.tsx": $board_Enter,
     "./islands/board/ExportSelector.tsx": $board_ExportSelector,
@@ -98,6 +101,7 @@ const manifest = {
     "./islands/board/ModeSelector.tsx": $board_ModeSelector,
     "./islands/board/MouseTracker.tsx": $board_MouseTracker,
     "./islands/board/OptionsMenu.tsx": $board_OptionsMenu,
+    "./islands/board/PasteSelector.tsx": $board_PasteSelector,
     "./islands/board/ShareSelector.tsx": $board_ShareSelector,
     "./islands/board/SizeSelector.tsx": $board_SizeSelector,
     "./islands/board/StylusModeSelector.tsx": $board_StylusModeSelector,
