@@ -16,6 +16,7 @@ import PasteSelector from "./PasteSelector.tsx";
 
 export default function Toolbar() {
   const client = useContext(ClientContext);
+  if (!client) return <></>;
 
   const editorTools = (
     <>
@@ -41,31 +42,43 @@ export default function Toolbar() {
       </OptionsMenu>
     </>
   );
+
+  const accountMenu = (
+    <AccountMenu>
+      <IconCircle
+        iconName="grid-outline"
+        onClick={() => {
+          globalThis.location.href = "/";
+        }}
+      />
+      <IconCircle
+        iconName="exit-outline"
+        onClick={() => {
+          globalThis.location.href = "/api/logout";
+        }}
+      />
+      <IconCircle
+        iconName="pencil-outline"
+        onClick={() => {
+          globalThis.location.href =
+            `/set_name?redirectTo=${window.location.pathname}`;
+        }}
+      />
+    </AccountMenu>
+  );
+
+  if (client.ui.viewerOnly) {
+    return (
+      <div style={{ position: "absolute", left: 10, top: 10 }}>
+        {accountMenu}
+      </div>
+    );
+  }
   return (
     <div class="toolbar">
       <div class="toolbar-content">
-        <AccountMenu>
-          <IconCircle
-            iconName="grid-outline"
-            onClick={() => {
-              globalThis.location.href = "/";
-            }}
-          />
-          <IconCircle
-            iconName="exit-outline"
-            onClick={() => {
-              globalThis.location.href = "/api/logout";
-            }}
-          />
-          <IconCircle
-            iconName="pencil-outline"
-            onClick={() => {
-              globalThis.location.href =
-                `/set_name?redirectTo=${window.location.pathname}`;
-            }}
-          />
-        </AccountMenu>
-        {client?.ui.viewerOnly ? null : editorTools}
+        {accountMenu}
+        {editorTools}
       </div>
     </div>
   );
