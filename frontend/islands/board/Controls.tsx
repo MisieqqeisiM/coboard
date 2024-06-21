@@ -6,7 +6,12 @@ import {
   useRef,
 } from "../../../deps_client.ts";
 import { CameraContext } from "../../../client/camera.ts";
-import { Mode, SettingsContext, Tool } from "../../../client/settings.ts";
+import {
+  Mode,
+  OnEnterContext,
+  SettingsContext,
+  Tool,
+} from "../../../client/settings.ts";
 import { ClientContext } from "../app/WithClient.tsx";
 import { Behavior, BehaviorContext } from "./behaviors/Behavior.ts";
 import { DrawableCanvas } from "../../../client/canvas.ts";
@@ -36,10 +41,16 @@ export default function Controls({ controls }: CameraViewProps) {
   const client = useContext(ClientContext);
   const settings = useContext(SettingsContext);
   const camera = useContext(CameraContext);
+  const onEnter = useContext(OnEnterContext);
   const hide = useContext(HideContext);
   if (!client) return <></>;
 
-  const behaviorContext = new BehaviorContext(settings, controls, client!);
+  const behaviorContext = new BehaviorContext(
+    settings,
+    controls,
+    client!,
+    onEnter,
+  );
   let shift = false;
 
   useEffect(() => {
@@ -287,6 +298,9 @@ export default function Controls({ controls }: CameraViewProps) {
       if (e.shiftKey) {
         shift = true;
         behavior.setShift(shift);
+      }
+      if (e.key === "Enter" || e.key === "Escape") {
+        onEnter.peek()?.call(null);
       }
     };
 

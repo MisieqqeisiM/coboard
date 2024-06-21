@@ -7,11 +7,13 @@ export class PolygonBehavior implements Behavior {
   private shift = false;
   constructor(private ctx: BehaviorContext) {
     this.ctx.client.socket.deselectAll();
+    this.ctx.onEnter.value = null;
   }
   toolCancel(): void {
     this.points = [];
     this.endPoint = null;
     this.ctx.canvas.setTmpLine(null);
+    this.ctx.onEnter.value = null;
   }
 
   toolStart(point: Point): void {
@@ -19,6 +21,7 @@ export class PolygonBehavior implements Behavior {
       this.points = [point];
       this.endPoint = point;
       this.ctx.canvas.setTmpLine(this.getLine());
+      this.ctx.onEnter.value = () => this.accept();
     }
   }
 
@@ -27,6 +30,13 @@ export class PolygonBehavior implements Behavior {
       this.endPoint = point;
       this.ctx.canvas.setTmpLine(this.getLine());
     }
+  }
+
+  accept() {
+    this.points.push(this.points[0]);
+    this.endPoint = null;
+    this.ctx.client.socket.draw(this.getLine());
+    this.toolCancel();
   }
 
   toolEnd(): void {

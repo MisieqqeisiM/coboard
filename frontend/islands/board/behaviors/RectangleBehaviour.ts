@@ -8,6 +8,7 @@ export class RectangleBehavior implements Behavior {
   private endPoint: Point | null = null;
   constructor(private ctx: BehaviorContext) {
     this.ctx.client.socket.deselectAll();
+    this.ctx.onEnter.value = null;
   }
 
   toolCancel(): void {

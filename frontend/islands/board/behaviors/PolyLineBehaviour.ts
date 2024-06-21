@@ -7,11 +7,20 @@ export class PolylineBehaviour implements Behavior {
   private shift = false;
   constructor(private ctx: BehaviorContext) {
     this.ctx.client.socket.deselectAll();
+    this.ctx.onEnter.value = null;
   }
+
+  accept() {
+    this.endPoint = null;
+    this.ctx.client.socket.draw(this.getLine());
+    this.toolCancel();
+  }
+
   toolCancel(): void {
     this.points = [];
     this.endPoint = null;
     this.ctx.canvas.setTmpLine(null);
+    this.ctx.onEnter.value = null;
   }
 
   toolStart(point: Point): void {
@@ -19,6 +28,7 @@ export class PolylineBehaviour implements Behavior {
       this.points = [point];
       this.endPoint = point;
       this.ctx.canvas.setTmpLine(this.getLine());
+      this.ctx.onEnter.value = () => this.accept();
     }
   }
 

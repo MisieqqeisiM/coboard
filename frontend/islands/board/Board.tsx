@@ -11,6 +11,7 @@ import ThemeSelector from "../app/ThemeSelector.tsx";
 import { SettingsContext } from "../../../client/settings.ts";
 import Controls from "./Controls.tsx";
 import CameraView from "./CameraView.tsx";
+import Enter from "./Enter.tsx";
 
 export default function Board() {
   const width = 2048;
@@ -44,6 +45,7 @@ export default function Board() {
       <div style={{ position: "absolute", zIndex: 101, right: 10, top: 10 }}>
         <ThemeSelector />
       </div>
+      <Enter />
     </>
   );
 }

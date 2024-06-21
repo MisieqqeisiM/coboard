@@ -1,6 +1,7 @@
 import { DrawableCanvas } from "../../../../client/canvas.ts";
 import { Client } from "../../../../client/client.ts";
 import { Settings } from "../../../../client/settings.ts";
+import { Signal } from "../../../../deps_client.ts";
 import { Point } from "../../../../liaison/liaison.ts";
 
 export interface Behavior {
@@ -15,5 +16,6 @@ export class BehaviorContext {
     readonly settings: Settings,
     readonly canvas: DrawableCanvas,
     readonly client: Client,
+    readonly onEnter: Signal<(() => void) | null>,
   ) {}
 }

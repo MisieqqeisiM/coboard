@@ -53,3 +53,7 @@ export const SettingsContext = createContext<Settings>({
   eraserSize: signal(20),
   stylusMode: signal(false),
 });
+
+export const OnEnterContext = createContext<Signal<(() => void) | null>>(
+  signal(null),
+);

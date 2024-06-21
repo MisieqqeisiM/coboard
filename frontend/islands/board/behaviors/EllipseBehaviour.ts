@@ -10,6 +10,7 @@ export class EllipseBehavior implements Behavior {
 
   constructor(private ctx: BehaviorContext) {
     this.ctx.client.socket.deselectAll();
+    this.ctx.onEnter.value = null;
   }
   toolCancel(): void {
     this.startPoint = null;

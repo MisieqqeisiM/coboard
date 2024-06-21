@@ -14,6 +14,7 @@ export class MoveBehavior implements Behavior {
 
   constructor(private ctx: BehaviorContext) {
     this.ctx.canvas.setTmpLine(null);
+    this.ctx.onEnter.value = null;
   }
 
   toolCancel(): void {

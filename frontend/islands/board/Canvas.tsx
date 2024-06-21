@@ -167,11 +167,6 @@ export default function Canvas(
     theme.subscribe((_) => draw());
     camera.subscribe((_) => draw());
 
-    globalThis.addEventListener("keydown", (e) => {
-      if (e.key === "z" && e.ctrlKey) {
-        client.socket.undo();
-      }
-    });
     return () => {
       gl.deleteProgram(program);
     };
