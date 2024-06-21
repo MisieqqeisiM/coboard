@@ -24,8 +24,22 @@ export class MoveBehavior implements Behavior {
     this.ctx.client.socket.deselectAll();
   }
 
+  getUnselectedLineAt(point: Point) {
+    for (const line of this.ctx.client.ui.cache.getLines()) {
+      if (
+        pointInLine(point, line) &&
+        !this.ctx.client.ui.selection.peek().has(line.id)
+      ) {
+        return line;
+      }
+    }
+    return null;
+  }
+
   toolStart(point: Point): void {
     this.lastPoint = point;
+    this.corner = point;
+    this.moved = false;
     if (this.shift) {
       this.moveSelection = false;
       this.movedLine = null;
@@ -41,15 +55,10 @@ export class MoveBehavior implements Behavior {
         return;
       }
     }
-    this.ctx.client.socket.deselectAll();
-    this.movedLine = this.ctx.client.ui.cache.getLineAt(point);
-    if (this.movedLine) {
-      this.ctx.client.ui.canvas.removeLines([this.movedLine.id]);
-      this.ctx.canvas.setTmpLine(this.movedLine);
-    } else {
-      this.corner = point;
-      this.moved = false;
-      this.ctx.canvas.setTmpLine(null);
+    this.movedLine = this.getUnselectedLineAt(point);
+    this.ctx.canvas.setTmpLine(null);
+    if (!this.movedLine) {
+      this.ctx.client.socket.deselectAll();
     }
   }
 
@@ -69,6 +78,8 @@ export class MoveBehavior implements Behavior {
       return;
     } else if (this.movedLine) {
       this.movedLine = Line.move(this.movedLine, diff);
+      this.ctx.client.ui.canvas.removeLines([this.movedLine.id]);
+      this.ctx.client.socket.deselectAll();
       this.ctx.canvas.setTmpLine(this.movedLine);
     } else {
       this.ctx.canvas.setTmpLine(this.getLine(point));
@@ -82,13 +93,14 @@ export class MoveBehavior implements Behavior {
   }
 
   private selectionClick() {
+    console.log("click");
     for (const line of this.ctx.client.ui.selection.peek().values()) {
       if (pointInLine(this.corner, line)) {
         this.ctx.client.socket.deselect([line]);
         return;
       }
     }
-    const line = this.ctx.client.ui.cache.getLineAt(this.corner);
+    const line = this.getUnselectedLineAt(this.corner);
     if (line) {
       this.ctx.client.socket.select([line]);
     } else {
@@ -98,8 +110,12 @@ export class MoveBehavior implements Behavior {
 
   toolEnd(): void {
     this.moveSelection = false;
-    if (!this.moved) this.selectionClick();
     this.ctx.canvas.setTmpLine(null);
+    if (!this.moved) {
+      this.selectionClick();
+      this.movedLine = null;
+      return;
+    }
     if (this.movedLine) {
       this.ctx.client.socket.update([this.movedLine.id], [this.movedLine]);
       this.movedLine = null;
