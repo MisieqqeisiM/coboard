@@ -26,6 +26,10 @@ interface CameraViewProps {
   controls: DrawableCanvas;
 }
 
+const drawButton = 0;
+const eraseButton = 2;
+const cameraButton = 4;
+
 export default function Controls({ controls }: CameraViewProps) {
   const stylusMode = useContext(SettingsContext).stylusMode;
   const ref = useRef<HTMLDivElement>(null);
@@ -112,7 +116,7 @@ export default function Controls({ controls }: CameraViewProps) {
     const move = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
-      if (e.buttons & 2) {
+      if (e.buttons & cameraButton) {
         moving = false;
         if (!mouseMoving) {
           mouseMoving = true;
@@ -201,12 +205,18 @@ export default function Controls({ controls }: CameraViewProps) {
     const mouseDown = (event: MouseEvent) => {
       hideMenus();
       if (client?.ui.viewerOnly) return;
-      if (event.button != 0) return;
+      if (event.button == eraseButton) {
+        prevMode = settings.mode.peek();
+        settings.mode.value = Mode.ERASE;
+      }
+      if (event.button != drawButton && event.button != eraseButton) return;
       if (toolDown) return;
       toolDown = true;
       const [x, y] = camera.peek().toBoardCoords(event.clientX, event.clientY);
       behavior.toolStart({ x, y });
     };
+
+    let prevMode: Mode | null = null;
 
     const mouseMove = (event: MouseEvent) => {
       if (client?.ui.viewerOnly) return;
@@ -232,6 +242,10 @@ export default function Controls({ controls }: CameraViewProps) {
       if (!toolDown) return;
       toolDown = false;
       behavior.toolEnd();
+      if (prevMode !== null) {
+        settings.mode.value = prevMode;
+        prevMode = null;
+      }
     };
 
     const touchStart2 = (event: TouchEvent) => {
