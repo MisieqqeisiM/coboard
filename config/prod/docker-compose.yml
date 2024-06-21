@@ -5,7 +5,6 @@ services:
       resources:
         limits:
           memory: 500M
-    memswap_limit: 3G
     restart: always
     build:
       context: ../..
@@ -15,7 +14,6 @@ services:
       resources:
         limits:
           memory: 500M
-    memswap_limit: 2G
     image: mongo:7.0.10-rc0
     command: --wiredTigerCacheSizeGB 0.25
     volumes:
@@ -25,7 +23,6 @@ services:
       resources:
         limits:
           memory: 50M
-    memswap_limit: 300M
     image: nginx:1.25.5
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
