@@ -17,5 +17,6 @@ export class BehaviorContext {
     readonly canvas: DrawableCanvas,
     readonly client: Client,
     readonly onEnter: Signal<(() => void) | null>,
+    readonly enterText: Signal<string>,
   ) {}
 }

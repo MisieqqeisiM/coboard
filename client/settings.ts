@@ -57,3 +57,4 @@ export const SettingsContext = createContext<Settings>({
 export const OnEnterContext = createContext<Signal<(() => void) | null>>(
   signal(null),
 );
+export const EnterTextContext = createContext<Signal<string>>(signal("Enter"));

@@ -22,6 +22,7 @@ export class PolygonBehavior implements Behavior {
       this.points = [point];
       this.ctx.canvas.setTmpLine(this.getLine());
       this.ctx.onEnter.value = () => this.accept();
+      this.ctx.enterText.value = "Enter";
     }
   }
 

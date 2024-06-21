@@ -7,6 +7,7 @@ import {
 } from "../../../deps_client.ts";
 import { CameraContext } from "../../../client/camera.ts";
 import {
+  EnterTextContext,
   Mode,
   OnEnterContext,
   SettingsContext,
@@ -43,6 +44,7 @@ export default function Controls({ controls }: CameraViewProps) {
   const settings = useContext(SettingsContext);
   const camera = useContext(CameraContext);
   const onEnter = useContext(OnEnterContext);
+  const enterText = useContext(EnterTextContext);
   const hide = useContext(HideContext);
   if (!client) return <></>;
 
@@ -51,6 +53,7 @@ export default function Controls({ controls }: CameraViewProps) {
     controls,
     client!,
     onEnter,
+    enterText,
   );
   let shift = false;
 

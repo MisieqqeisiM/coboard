@@ -15,6 +15,11 @@ export class MoveBehavior implements Behavior {
   constructor(private ctx: BehaviorContext) {
     this.ctx.canvas.setTmpLine(null);
     this.ctx.onEnter.value = null;
+    this.ctx.onEnter.value = () => this.delete();
+    this.ctx.enterText.value = "Delete";
+  }
+  delete() {
+    this.ctx.client.socket.deleteSelection();
   }
 
   toolCancel(): void {

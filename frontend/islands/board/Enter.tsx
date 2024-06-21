@@ -1,7 +1,8 @@
-import { OnEnterContext } from "../../../client/settings.ts";
+import { EnterTextContext, OnEnterContext } from "../../../client/settings.ts";
 import { useContext } from "../../../deps_client.ts";
 export default function Enter() {
   const onEnter = useContext(OnEnterContext);
+  const enterText = useContext(EnterTextContext);
   if (onEnter.value === null) {
     return <></>;
   }
@@ -15,7 +16,7 @@ export default function Enter() {
       class="button-primary"
       onClick={onEnter.value}
     >
-      Enter
+      {enterText.value}
     </button>
   );
 }
