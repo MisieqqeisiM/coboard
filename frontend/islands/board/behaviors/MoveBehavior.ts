@@ -98,7 +98,6 @@ export class MoveBehavior implements Behavior {
   }
 
   private selectionClick() {
-    console.log("click");
     for (const line of this.ctx.client.ui.selection.peek().values()) {
       if (pointInLine(this.corner, line)) {
         this.ctx.client.socket.deselect([line]);

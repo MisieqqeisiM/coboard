@@ -320,7 +320,6 @@ export default function Controls({ controls }: CameraViewProps) {
     };
 
     globalThis.addEventListener("paste", () => {
-      console.log(cameraButtonReleaseTime);
       if (Date.now() - cameraButtonReleaseTime < 100) return;
       paste(mouseX, mouseY, client, camera.peek(), settings);
     });
