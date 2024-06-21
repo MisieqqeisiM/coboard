@@ -17,9 +17,9 @@ export class PolygonBehavior implements Behavior {
   }
 
   toolStart(point: Point): void {
+    this.endPoint = point;
     if (this.points.length == 0) {
       this.points = [point];
-      this.endPoint = point;
       this.ctx.canvas.setTmpLine(this.getLine());
       this.ctx.onEnter.value = () => this.accept();
     }
