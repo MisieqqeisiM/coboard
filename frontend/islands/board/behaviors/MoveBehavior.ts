@@ -11,6 +11,7 @@ export class MoveBehavior implements Behavior {
   private moved: boolean = false;
   private corner: Point = { x: 0, y: 0 };
   private shift = false;
+  private selectionEdited = false;
 
   constructor(private ctx: BehaviorContext) {
     this.ctx.canvas.setTmpLine(null);
@@ -27,6 +28,7 @@ export class MoveBehavior implements Behavior {
     this.moveSelection = false;
     this.ctx.canvas.setTmpLine(null);
     this.ctx.client.socket.deselectAll();
+    this.selectionEdited = false;
   }
 
   getUnselectedLineAt(point: Point) {
@@ -79,6 +81,7 @@ export class MoveBehavior implements Behavior {
       for (const line of this.ctx.client.ui.selection.peek().values()) {
         newSelection.set(line.id, Line.move(line, diff));
       }
+      this.selectionEdited = true;
       this.ctx.client.ui.selection.value = newSelection;
       return;
     } else if (this.movedLine) {

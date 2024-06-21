@@ -143,6 +143,7 @@ export class SocketClient {
   public undo() {
     const action = this.undoStack.pop();
     if (!action) return;
+    this.client.cache.removeLines(action.added.map((l) => l.id));
     const newLines = this.client.cache.addLocalLines(action.removed);
     for (let i = 0; i < newLines.length; i++) {
       this.changeStackId(action.removed[i].id, newLines[i].id);
@@ -154,8 +155,13 @@ export class SocketClient {
   public redo() {
     const action = this.redoStack.pop();
     if (!action) return;
-    new UpdateAction(action.added, action.removed).accept(this.emitter);
-    this.undoStack.push({ added: action.removed, removed: action.added });
+    this.client.cache.removeLines(action.added.map((l) => l.id));
+    const newLines = this.client.cache.addLocalLines(action.removed);
+    for (let i = 0; i < newLines.length; i++) {
+      this.changeStackId(action.removed[i].id, newLines[i].id);
+    }
+    new UpdateAction(action.added, newLines).accept(this.emitter);
+    this.undoStack.push({ added: newLines, removed: action.added });
   }
 
   public move(x: number, y: number) {
