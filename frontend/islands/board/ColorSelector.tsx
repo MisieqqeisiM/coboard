@@ -1,7 +1,8 @@
-import { useContext, useRef } from "../../../deps_client.ts";
+import { useContext, useEffect, useRef } from "../../../deps_client.ts";
 import { Color } from "../../../client/settings.ts";
 import { SettingsContext } from "../../../client/settings.ts";
 import { ThemeContext } from "../app/Themed.tsx";
+import { HideContext } from "./Controls.tsx";
 
 function ColorBar({
   visibleColor,
@@ -63,6 +64,43 @@ export default function ColorSelector() {
     selector.current?.classList.add("active");
   };
 
+  useEffect(() => {
+    globalThis.addEventListener("keypress", (e) => {
+      switch (e.key) {
+        case "1":
+          color.value = Color.BLACK;
+          break;
+        case "2":
+          color.value = Color.DARK_BLUE;
+          break;
+        case "3":
+          color.value = Color.BLUE;
+          break;
+        case "4":
+          color.value = Color.CYAN;
+          break;
+        case "5":
+          color.value = Color.GREEN;
+          break;
+        case "6":
+          color.value = Color.YELLOW;
+          break;
+        case "7":
+          color.value = Color.ORANGE;
+          break;
+        case "8":
+          color.value = Color.RED;
+          break;
+        case "9":
+          color.value = Color.MAGENTA;
+          break;
+        case "0":
+          color.value = Color.VIOLET;
+          break;
+      }
+    });
+  }, []);
+
   const up = () => {
     if (Date.now() > downTime + 300) {
       selector.current?.classList.remove("active");
@@ -70,6 +108,15 @@ export default function ColorSelector() {
       selector.current?.classList.remove("active");
     }
   };
+
+  const hide = useContext(HideContext);
+
+  useEffect(() => {
+    hide.subscribe((_) => {
+      selector.current?.classList.remove("active");
+    });
+  }, []);
+
   return (
     <div class="color-selector" ref={selector}>
       <div class="color-box">

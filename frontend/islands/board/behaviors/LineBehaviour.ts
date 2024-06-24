@@ -1,39 +1,33 @@
-import { Color } from "../../../../client/settings.ts";
 import { Line, Point } from "../../../../liaison/liaison.ts";
 import { Behavior, BehaviorContext } from "./Behavior.ts";
+import { getLine } from "./geometry_utils.ts";
 
-export class EraseBehavior implements Behavior {
-  private points: Point[] = [];
+export class LineBehavior implements Behavior {
+  private startPoint: Point | null = null;
+  private endPoint: Point | null = null;
   constructor(private ctx: BehaviorContext) {
     this.ctx.client.socket.deselectAll();
     this.ctx.onEnter.value = null;
   }
-
   toolCancel(): void {
-    this.points = [];
+    this.startPoint = null;
+    this.endPoint = null;
     this.ctx.canvas.setTmpLine(null);
   }
 
   toolStart(point: Point): void {
-    this.points = [point];
+    this.startPoint = point;
     this.ctx.canvas.setTmpLine(this.getLine());
   }
 
   toolMove(point: Point): void {
-    const prev = this.points.at(-1)!;
-    this.points.push(point);
-    const lines = this.ctx.client.ui.cache.getLinesIntersecting(
-      new Line(0, this.ctx.settings.size.peek(), Color.BLACK, [prev, point]),
-    );
-    for (const line of lines) {
-      this.ctx.client.socket.remove(line.id);
-    }
+    this.endPoint = point;
     this.ctx.canvas.setTmpLine(this.getLine());
   }
 
   toolEnd(): void {
-    this.points = [];
-    this.ctx.canvas.setTmpLine(null);
+    this.ctx.client.socket.draw(this.getLine());
+    this.toolCancel();
   }
 
   setShift(value: boolean): void {}
@@ -41,8 +35,8 @@ export class EraseBehavior implements Behavior {
     return new Line(
       0,
       this.ctx.settings.size.peek(),
-      Color.BLACK,
-      this.points,
+      this.ctx.settings.color.peek(),
+      getLine(this.startPoint, this.endPoint),
     );
   }
 }

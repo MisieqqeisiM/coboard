@@ -3,14 +3,17 @@ import { BoardUser, Line } from "../liaison/liaison.ts";
 import { ClientStore } from "../liaison/server.ts";
 import {
   ConfirmLineEvent,
+  ConfirmLinesEvent,
   OnDrawEvent,
   OnMoveEvent,
   OnRemoveEvent,
   OnResetEvent,
+  OnUpdateEvent,
   UserListEvent,
 } from "../liaison/events.ts";
 import { ClientState } from "../liaison/client.ts";
 import { MongoClient } from "../deps.ts";
+import { isDefined } from "$djwt/util.ts";
 
 export interface BoardDB {
   id: string;
@@ -40,7 +43,9 @@ export class Board {
   public async init() {
     const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
     const board = await boards.findOne({ id: this.id });
-    this.lineId = board?.lines.at(-1)?.id ?? 0;
+    for (const line of board!.lines) {
+      this.lineId = Math.max(this.lineId, line.id);
+    }
   }
 
   public getUser(id: string) {
@@ -92,6 +97,43 @@ export class Board {
     user.x = x;
     user.y = y;
     this.clients.emit(new OnMoveEvent(client.account.id, x, y));
+  }
+
+  public async update(
+    client: Client,
+    remove: number[],
+    create: Line[],
+  ): Promise<number[]> {
+    const confirmedLines: Line[] = [];
+    for (const line of create) {
+      confirmedLines.push(Line.changeId(line, ++this.lineId));
+    }
+
+    //TODO: should be atomic or a transaction
+    const boards = this.mongoClient.db("main").collection<BoardDB>("boards");
+    await boards.updateOne(
+      { id: this.id },
+      {
+        $pull: { lines: { id: { $in: remove } } },
+      },
+    );
+    await boards.updateOne(
+      { id: this.id },
+      {
+        $push: { lines: { $each: confirmedLines } },
+      },
+    );
+    const newIds = confirmedLines.map((line) => line.id);
+
+    this.clients.emit(
+      new OnUpdateEvent(client.account.id, remove, confirmedLines),
+    );
+
+    client.emit(
+      new ConfirmLinesEvent(newIds),
+    );
+
+    return newIds;
   }
 
   public async draw(client: Client, line: Line): Promise<number> {

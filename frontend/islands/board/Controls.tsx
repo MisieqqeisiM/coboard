@@ -1,47 +1,98 @@
 import {
-  ComponentChildren,
-  Signal,
+  createContext,
+  signal,
   useContext,
   useEffect,
   useRef,
 } from "../../../deps_client.ts";
-import { Camera } from "../../../client/camera.ts";
-import { SettingsContext, Tool } from "../../../client/settings.ts";
+import { CameraContext } from "../../../client/camera.ts";
+import {
+  EnterTextContext,
+  Mode,
+  OnEnterContext,
+  SettingsContext,
+  Tool,
+} from "../../../client/settings.ts";
 import { ClientContext } from "../app/WithClient.tsx";
 import { Behavior, BehaviorContext } from "./behaviors/Behavior.ts";
 import { DrawableCanvas } from "../../../client/canvas.ts";
 import { EraseBehavior } from "./behaviors/EraseBehavior.ts";
 import { MoveBehavior } from "./behaviors/MoveBehavior.ts";
 import { DrawBehavior } from "./behaviors/DrawBehavior.ts";
+import { LineBehavior } from "./behaviors/LineBehaviour.ts";
+import { EllipseBehavior } from "./behaviors/EllipseBehaviour.ts";
+import { RectangleBehavior } from "./behaviors/RectangleBehaviour.ts";
+import { PolylineBehaviour } from "./behaviors/PolyLineBehaviour.ts";
+import { PolygonBehavior } from "./behaviors/PolygonBehaviour.ts";
+import { Line, Point } from "../../../liaison/liaison.ts";
+import { paste } from "./PasteSelector.tsx";
+
+export const HideContext = createContext(signal(false));
 
 interface CameraViewProps {
-  camera: Signal<Camera>;
   controls: DrawableCanvas;
 }
 
-export default function Controls(
-  { camera, controls }: CameraViewProps,
-) {
+const drawButton = 0;
+const eraseButton = 2;
+const cameraButton = 4;
+
+export default function Controls({ controls }: CameraViewProps) {
   const stylusMode = useContext(SettingsContext).stylusMode;
   const ref = useRef<HTMLDivElement>(null);
   const client = useContext(ClientContext);
   const settings = useContext(SettingsContext);
+  const camera = useContext(CameraContext);
+  const onEnter = useContext(OnEnterContext);
+  const enterText = useContext(EnterTextContext);
+  const hide = useContext(HideContext);
   if (!client) return <></>;
 
-  const behaviorContext = new BehaviorContext(settings, controls, client!);
+  const behaviorContext = new BehaviorContext(
+    settings,
+    controls,
+    client!,
+    onEnter,
+    enterText,
+  );
+  let shift = false;
 
   useEffect(() => {
     let behavior: Behavior = new DrawBehavior(behaviorContext);
-
-    settings.tool.subscribe((tool) => {
+    const getDrawBehaviour = (tool: Tool): Behavior => {
       switch (tool) {
         case Tool.PEN:
-          behavior = new DrawBehavior(behaviorContext);
+          return new DrawBehavior(behaviorContext);
+        case Tool.LINE:
+          return new LineBehavior(behaviorContext);
+        case Tool.ELLIPSE:
+          return new EllipseBehavior(behaviorContext);
+        case Tool.RECTANGLE:
+          return new RectangleBehavior(behaviorContext);
+        case Tool.POLYGON:
+          return new PolygonBehavior(behaviorContext);
+        case Tool.POLYLINE:
+          return new PolylineBehaviour(behaviorContext);
+      }
+    };
+
+    settings.tool.subscribe((tool) => {
+      if (settings.mode.peek() == Mode.DRAW) {
+        behavior = getDrawBehaviour(tool);
+        behavior.setShift(shift);
+      }
+    });
+
+    settings.mode.subscribe((mode) => {
+      switch (mode) {
+        case Mode.DRAW:
+          behavior = getDrawBehaviour(settings.tool.value);
+          behavior.setShift(shift);
           break;
-        case Tool.ERASER:
+        case Mode.ERASE:
           behavior = new EraseBehavior(behaviorContext);
           break;
-        case Tool.MOVE:
+        case Mode.MOVE:
           behavior = new MoveBehavior(behaviorContext);
           break;
       }
@@ -57,11 +108,9 @@ export default function Controls(
 
       if (!touchpad || e.ctrlKey) {
         const amount = e.deltaY;
-        camera.value = camera.peek().zoom(
-          e.clientX,
-          e.clientY,
-          Math.pow(1.1, -Math.sign(amount)),
-        );
+        camera.value = camera
+          .peek()
+          .zoom(e.clientX, e.clientY, Math.pow(1.1, -Math.sign(amount)));
       } else {
         camera.value = camera.peek().move(e.deltaX, e.deltaY);
       }
@@ -76,8 +125,13 @@ export default function Controls(
     let mouseMoving = false;
     let toolDown = false;
 
+    let mouseX = 0;
+    let mouseY = 0;
+
     const move = (e: MouseEvent) => {
-      if (e.buttons & 2) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (e.buttons & cameraButton) {
         moving = false;
         if (!mouseMoving) {
           mouseMoving = true;
@@ -108,7 +162,12 @@ export default function Controls(
       return [touchX, touchY, touchDist];
     }
 
+    const hideMenus = () => {
+      hide.value = !hide.peek();
+    };
+
     const touchStart = (e: TouchEvent) => {
+      hideMenus();
       e.preventDefault();
       if (mouseMoving) return;
       moving = true;
@@ -128,23 +187,18 @@ export default function Controls(
       e.preventDefault();
       if (!moving) return;
       if (stylusMode.peek() && e.touches.length == 1) {
-        camera.value = camera.peek().move(
-          e.touches[0].clientX - touchX,
-          e.touches[0].clientY - touchY,
-        );
+        camera.value = camera
+          .peek()
+          .move(e.touches[0].clientX - touchX, e.touches[0].clientY - touchY);
         touchX = e.touches[0].clientX;
         touchY = e.touches[0].clientY;
       }
       if (e.touches.length < 2) return;
       const [x, y, d] = getTouchData(e.touches[0], e.touches[1]);
-      camera.value = camera.peek().move(
-        x - touchX,
-        y - touchY,
-      ).zoom(
-        x,
-        y,
-        d / touchDist,
-      );
+      camera.value = camera
+        .peek()
+        .move(x - touchX, y - touchY)
+        .zoom(x, y, d / touchDist);
       touchX = x;
       touchY = y;
       touchDist = d;
@@ -163,17 +217,39 @@ export default function Controls(
       e.stopPropagation();
     };
 
+    let cameraButtonReleaseTime = 0;
+
     const mouseDown = (event: MouseEvent) => {
+      hideMenus();
       if (client?.ui.viewerOnly) return;
-      if (event.button != 0) return;
+      event.preventDefault();
+      if (event.button == eraseButton) {
+        prevMode = settings.mode.peek();
+        settings.mode.value = Mode.ERASE;
+      }
+      if (event.button != drawButton && event.button != eraseButton) return;
       if (toolDown) return;
       toolDown = true;
       const [x, y] = camera.peek().toBoardCoords(event.clientX, event.clientY);
       behavior.toolStart({ x, y });
     };
 
+    let prevMode: Mode | null = null;
+
     const mouseMove = (event: MouseEvent) => {
       if (client?.ui.viewerOnly) return;
+      if (
+        settings.mode.peek() == Mode.DRAW &&
+        (settings.tool.peek() == Tool.POLYLINE ||
+          settings.tool.peek() == Tool.POLYGON)
+      ) {
+        const [x, y] = camera
+          .peek()
+          .toBoardCoords(event.clientX, event.clientY);
+
+        behavior.toolMove({ x, y });
+        return;
+      }
       if (!toolDown) return;
       const [x, y] = camera.peek().toBoardCoords(event.clientX, event.clientY);
       behavior.toolMove({ x, y });
@@ -181,9 +257,14 @@ export default function Controls(
 
     const mouseUp = (event: MouseEvent) => {
       if (client?.ui.viewerOnly) return;
+      cameraButtonReleaseTime = Date.now();
       if (!toolDown) return;
       toolDown = false;
       behavior.toolEnd();
+      if (prevMode !== null) {
+        settings.mode.value = prevMode;
+        prevMode = null;
+      }
     };
 
     const touchStart2 = (event: TouchEvent) => {
@@ -196,10 +277,9 @@ export default function Controls(
         return;
       }
       event.preventDefault();
-      const [x, y] = camera.peek().toBoardCoords(
-        event.touches[0].clientX,
-        event.touches[0].clientY,
-      );
+      const [x, y] = camera
+        .peek()
+        .toBoardCoords(event.touches[0].clientX, event.touches[0].clientY);
       if (toolDown) return;
       toolDown = true;
       behavior.toolStart({ x, y });
@@ -210,10 +290,9 @@ export default function Controls(
       if (event.touches.length != 1) return;
       if (!toolDown) return;
       event.preventDefault();
-      const [x, y] = camera.peek().toBoardCoords(
-        event.touches[0].clientX,
-        event.touches[0].clientY,
-      );
+      const [x, y] = camera
+        .peek()
+        .toBoardCoords(event.touches[0].clientX, event.touches[0].clientY);
       behavior.toolMove({ x, y });
     };
 
@@ -223,6 +302,45 @@ export default function Controls(
       toolDown = false;
       behavior.toolEnd();
     };
+    const keydown = (e: KeyboardEvent) => {
+      if (e.shiftKey) {
+        shift = true;
+        behavior.setShift(shift);
+      }
+      if (e.key === "Enter" || e.key === "Escape") {
+        onEnter.peek()?.call(null);
+      }
+    };
+
+    const keyup = (e: KeyboardEvent) => {
+      if (!e.shiftKey) {
+        shift = false;
+        behavior.setShift(shift);
+      }
+    };
+
+    globalThis.addEventListener("paste", () => {
+      if (Date.now() - cameraButtonReleaseTime < 100) return;
+      paste(mouseX, mouseY, client, camera.peek(), settings);
+    });
+
+    globalThis.addEventListener("keydown", (e) => {
+      if (e.key === "Delete") {
+        client.socket.deleteSelection();
+      }
+    });
+
+    globalThis.addEventListener("resize", (_) => {
+      controls.redraw();
+    });
+    globalThis.addEventListener("keydown", (e) => {
+      if (e.key === "z" && e.ctrlKey) {
+        client.socket.undo();
+      }
+      if (e.key === "Z" && e.ctrlKey) {
+        client.socket.redo();
+      }
+    });
 
     ref.current!.addEventListener("touchstart", touchStart2);
     globalThis.addEventListener("touchend", touchEnd2);
@@ -238,9 +356,12 @@ export default function Controls(
     globalThis.addEventListener("wheel", zoom, { passive: false });
     globalThis.addEventListener("mousemove", move);
     globalThis.addEventListener("mouseup", endMove);
-    globalThis.addEventListener("touchstart", touchStart);
+    ref.current!.addEventListener("touchstart", touchStart);
     globalThis.addEventListener("touchmove", touchMove);
     globalThis.addEventListener("touchend", touchEnd);
+
+    globalThis.addEventListener("keydown", keydown);
+    globalThis.addEventListener("keyup", keyup);
 
     return () => {
       globalThis.removeEventListener("gesturestart", prevent);
@@ -250,6 +371,8 @@ export default function Controls(
       globalThis.removeEventListener("mouseup", endMove);
       globalThis.removeEventListener("touchmove", touchMove);
       globalThis.removeEventListener("touchend", touchEnd);
+      globalThis.removeEventListener("keydown", keydown);
+      globalThis.removeEventListener("keyup", keyup);
     };
   }, []);
 

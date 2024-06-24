@@ -1,5 +1,5 @@
 import { MongoClient, Server, ServerSocket as Socket, sleep } from "../deps.ts";
-import { CONNECTION_TIMEOUT } from "../config.ts";
+import { CONNECTION_TIMEOUT, PING_INTERVAL, PING_TIMEOUT } from "../config.ts";
 import { Board } from "../server/board.ts";
 import { Server as ServerLogic } from "../server/server.ts";
 import { Account } from "./liaison.ts";
@@ -7,14 +7,17 @@ import {
   BoardEvent,
   BoardEventVisitor,
   ConfirmLineEvent,
+  ConfirmLinesEvent,
   OnDrawEvent,
   OnMoveEvent,
   OnRemoveEvent,
   OnResetEvent,
+  OnUpdateEvent,
   UserListEvent,
 } from "../liaison/events.ts";
 import { DATABASE_URL, SOCKET_PORT } from "../config.ts";
 import { BoardActionVisitor } from "./actions.ts";
+import { lineIntersectsRect } from "../frontend/islands/board/webgl-utils/line_drawing.ts";
 
 export interface SocketData {
   client: Client;
@@ -49,6 +52,14 @@ export class ClientStore {
 
 class Emitter implements BoardEventVisitor {
   constructor(readonly socket: ServerSocket) {}
+
+  public confirmLines(event: ConfirmLinesEvent): void {
+    this.socket.emit("confirmLines", event);
+  }
+
+  public onUpdate(event: OnUpdateEvent): void {
+    this.socket.emit("onUpdate", event);
+  }
 
   public onDraw(event: OnDrawEvent) {
     this.socket.emit("onDraw", event);
@@ -89,6 +100,13 @@ export class Client {
     return this.emitter !== undefined;
   }
 
+  private globalId(id: number) {
+    while (this.idMap.get(id)) {
+      id = this.idMap.get(id)!;
+    }
+    return id;
+  }
+
   public setSocket(socket: ServerSocket) {
     socket.on("disconnect", () => this.board.disconnect(this));
     socket.on("move", (a) => this.board.move(this, a.x, a.y));
@@ -98,11 +116,15 @@ export class Client {
         this.idMap.set(a.line.id, id);
       });
       socket.on("remove", async (a) => {
-        let id = a.line.id;
-        while (this.idMap.get(id)) {
-          id = this.idMap.get(id)!;
-        }
+        const id = this.globalId(a.line.id);
         await this.board.remove(this, id);
+      });
+      socket.on("update", async (a) => {
+        const toRemove = a.remove.map((l) => this.globalId(l.id));
+        const newIds = await this.board.update(this, toRemove, a.create);
+        for (let i = 0; i < newIds.length; i++) {
+          this.idMap.set(a.create[i].id, newIds[i]);
+        }
       });
       socket.on("reset", async (_) => await this.board.reset(this));
     }
@@ -143,8 +165,9 @@ export type ServerSocket = Socket<
 
 export async function createServer(): Promise<ServerLogic> {
   const io: SocketServer = new Server({
-    pingTimeout: 5000,
-    pingInterval: 5000,
+    pingTimeout: PING_TIMEOUT,
+    pingInterval: PING_INTERVAL,
+    maxHttpBufferSize: 1e7,
   });
 
   const mongoClient = new MongoClient(DATABASE_URL);

@@ -1,3 +1,4 @@
+import { SettingsContext, Tool } from "../../../client/settings.ts";
 import {
   ComponentChildren,
   useContext,
@@ -7,8 +8,9 @@ import {
 } from "../../../deps_client.ts";
 import IconCircle from "../app/IconCircle.tsx";
 import { HideContext } from "./Controls.tsx";
+import ToolIcon, { toolIcons } from "./ToolIcon.tsx";
 
-export default function AccountMenu(
+export default function OptionsMenu(
   { children }: { children: ComponentChildren },
 ) {
   const slide = useRef<HTMLDivElement>(null);
@@ -36,7 +38,7 @@ export default function AccountMenu(
         {children}
         <div class="cover" style={{ zIndex: 1001 }}>
           <IconCircle
-            iconName="person-outline"
+            iconName="ellipsis-vertical-outline"
             onClick={toggle}
             color={color}
           />
@@ -45,3 +47,4 @@ export default function AccountMenu(
     </div>
   );
 }
+

@@ -1,8 +1,17 @@
 import { createContext, Signal, signal } from "../deps_client.ts";
 
+//TODO: some of them are not like the others
 export enum Tool {
   PEN,
-  ERASER,
+  LINE,
+  POLYLINE,
+  RECTANGLE,
+  POLYGON,
+  ELLIPSE,
+}
+export enum Mode {
+  DRAW,
+  ERASE,
   MOVE,
 }
 
@@ -28,6 +37,7 @@ export enum EraserColor {
 export interface Settings {
   color: Signal<Color>;
   tool: Signal<Tool>;
+  mode: Signal<Mode>;
   size: Signal<number>;
   penSize: Signal<number>;
   eraserSize: Signal<number>;
@@ -37,8 +47,14 @@ export interface Settings {
 export const SettingsContext = createContext<Settings>({
   color: signal(Color.BLACK),
   tool: signal(Tool.PEN),
+  mode: signal(Mode.DRAW),
   size: signal(20),
   penSize: signal(20),
   eraserSize: signal(20),
   stylusMode: signal(false),
 });
+
+export const OnEnterContext = createContext<Signal<(() => void) | null>>(
+  signal(null),
+);
+export const EnterTextContext = createContext<Signal<string>>(signal("Enter"));

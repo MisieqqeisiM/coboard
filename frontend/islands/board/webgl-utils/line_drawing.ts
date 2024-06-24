@@ -1,3 +1,4 @@
+import { MaxKey } from "$mongo";
 import { Camera } from "../../../../client/camera.ts";
 import { EraserColor } from "../../../../client/settings.ts";
 import { Signal } from "../../../../deps_client.ts";
@@ -109,6 +110,7 @@ export const setUniforms = (
   program: WebGLProgram,
   camera: Signal<Camera>,
   theme: boolean,
+  selected: boolean,
 ) => {
   const resolutionUniformLocation = gl.getUniformLocation(
     program,
@@ -120,6 +122,7 @@ export const setUniforms = (
     "u_translation",
   );
   const themeUniformLocation = gl.getUniformLocation(program, "u_theme");
+  const selectedUniformLocation = gl.getUniformLocation(program, "u_selected");
 
   if (
     resolutionUniformLocation === null || scaleUniformLocation == null ||
@@ -139,6 +142,7 @@ export const setUniforms = (
     camera.peek().dy,
   ]);
   gl.uniform1i(themeUniformLocation, theme ? 1 : 0);
+  gl.uniform1i(selectedUniformLocation, selected ? 1 : 0);
 };
 export function hexToRgb(hex: string): number[] | null {
   hex = hex.replace(/^#/, "");
@@ -263,3 +267,58 @@ export const linesIntersect = (
 ): boolean => {
   return segmentsIntersect(l1, l2, width);
 };
+
+export function pointInLine(p: Point, line: Line) {
+  return squaredDistanceToLine(p, line.coordinates) < line.width * line.width;
+}
+
+function pointInRect(p: Point, r1: Point, r2: Point, width: number) {
+  if (p.x > Math.max(r1.x, r2.x) + width) return false;
+  if (p.y > Math.max(r1.y, r2.y) + width) return false;
+  if (p.x < Math.min(r1.x, r2.x) - width) return false;
+  if (p.y < Math.min(r1.y, r2.y) - width) return false;
+  return true;
+}
+
+function segmentIntersectsRect(
+  l1: Point,
+  l2: Point,
+  r1: Point,
+  r2: Point,
+  width: number,
+) {
+  if (pointInRect(l1, r1, r2, width)) return true;
+  if (pointInRect(l2, r1, r2, width)) return true;
+  const edges = [
+    [{ x: r1.x, y: r1.y }, { x: r2.x, y: r1.y }],
+    [{ x: r1.x, y: r1.y }, { x: r1.x, y: r2.y }],
+    [{ x: r2.x, y: r2.y }, { x: r2.x, y: r1.y }],
+    [{ x: r2.x, y: r2.y }, { x: r1.x, y: r2.y }],
+  ];
+  for (const [a, b] of edges) {
+    if (doIntersect(l1, l2, a, b, width)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function lineIntersectsRect(line: Line, r1: Point, r2: Point) {
+  if (line.coordinates.length == 1) {
+    return pointInRect(line.coordinates[0], r1, r2, line.width);
+  }
+  for (let i = 1; i < line.coordinates.length; i++) {
+    if (
+      segmentIntersectsRect(
+        line.coordinates[i - 1],
+        line.coordinates[i],
+        r1,
+        r2,
+        line.width,
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
